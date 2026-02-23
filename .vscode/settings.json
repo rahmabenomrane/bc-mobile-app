@@ -1,0 +1,9 @@
+{
+    "alIdRangeManager.idRanges": [
+        {
+            "name": "MyRange",
+            "from": 50100,
+            "to": 50999
+        }
+    ]
+}

@@ -1,0 +1,56 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "My PC",
+            "request": "launch",
+            "type": "al",
+            "environmentType": "OnPrem",
+            "server": "http://localhost:8080/BC260",
+            "serverInstance": "BC260",
+            "authentication": "Windows",
+            "startupObjectId": 22,
+            "startupObjectType": "Page",
+            "breakOnError": "All",
+            "launchBrowser": true,
+            "enableLongRunningSqlStatements": true,
+            "enableSqlInformationDebugger": true,
+            "tenant": "default",
+            "usePublicURLFromServer": true,
+            "port": 7049
+        },
+        {
+            "name": "AL: Generated Download Symbols request",
+            "request": "launch",
+            "type": "al",
+            "server": "http://Rahmoucha",
+            "serverInstance": "BC260",
+            "authentication": "Windows",
+            "port": 7049
+        },
+        {
+            "name": "AL: Generated Snapshot request",
+            "request": "snapshotInitialize",
+            "type": "al",
+            "server": "http://Rahmoucha",
+            "serverInstance": "BC260",
+            "authentication": "Windows",
+            "port": 7049,
+            "sessionId": 927,
+            "breakOnNext": "WebClient",
+            "executionContext": "DebugAndProfile"
+        },
+        {
+            "name": "AL: Generated Attach request",
+            "request": "attach",
+            "type": "al",
+            "server": "http://Rahmoucha",
+            "serverInstance": "BC260",
+            "authentication": "Windows",
+            "port": 7049,
+            "sessionId": 927,
+            "breakOnNext": "WebClient",
+            "breakOnError": "ExcludeTry"
+        }
+    ]
+}

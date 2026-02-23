@@ -1,0 +1,55 @@
+{
+  "id": "671af55f-b71f-4ba4-b037-b5d03e0b455b",
+  "name": "ForTest",
+  "publisher": "Default Publisher",
+  "version": "1.0.0.0",
+  "brief": "",
+  "description": "",
+  "privacyStatement": "",
+  "EULA": "",
+  "help": "",
+  "url": "",
+  "logo": "",
+  "dependencies": [
+    {
+      "id": "8e9a5542-d8d3-4a98-8aac-3bda9441038b",
+      "name": "Cycle compta",
+      "publisher": "RC",
+      "version": "1.0.0.0"
+    },
+    {
+      "id": "6c53635c-da7a-4f40-9e39-835a48789f98",
+      "name": "ELVA DMS BC26",
+      "publisher": "ELVA",
+      "version": "1.0.0.0"
+    },
+    {
+      "id": "0bfb933e-6382-4eca-9db5-bdda953de82b",
+      "name": "ELVA STD BC26",
+      "publisher": "Deltasoft International",
+      "version": "1.0.0.0"
+    },
+    {
+      "id": "ae78302b-c7a8-4ad2-a803-c8253ce35bfa",
+      "name": "STA",
+      "publisher": "Deltasoft International",
+      "version": "1.0.0.0"
+    }
+  ],
+  "screenshots": [],
+  "platform": "1.0.0.0",
+  "application": "26.0.30643.33317",
+  "idRanges": [
+    {
+      "from": 50100,
+      "to": 50149
+    }
+  ],
+  "resourceExposurePolicy": {
+    "allowDebugging": true,
+    "allowDownloadingSource": true,
+    "includeSourceInSymbolFile": true
+  },
+  "runtime": "15.0",
+  "features": ["NoImplicitWith"]
+}
