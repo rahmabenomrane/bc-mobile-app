@@ -5,259 +5,151 @@ table 50110 StaVehicle
 
     fields
     {
-        // === IDENTIFIANTS ===
-        field(1; "Vehicle No."; Code[20])      
+        field(1; "NumVehicle"; Code[20])
         {
-            Caption = 'Vehicle No.';
+            Caption = 'Vehicle Number';
+            NotBlank = true;
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            var
+                tcDMS001: label 'You can not delete value of %1 field .';
+            begin
+                if (Rec."NumVehicle" = '') and (xRec."NumVehicle" <> '') then
+                    Error(tcDMS001, FieldCaption("NumVehicle"));
+
+                if (Rec."NumVehicle" = '') and (xRec."NumVehicle" = '') then
+                    exit;
+            end;
         }
 
-        field(8; VIN; Code[20])
-        {
-            Caption = 'VIN';
-            DataClassification = CustomerContent;
-        }
-
-        field(70; "Registration No."; Code[20])
-        {
-            Caption = 'Registration No.';
-            DataClassification = CustomerContent;
-        }
-
-        // === CARACTÉRISTIQUES ===
-        field(10; "Make Code"; Code[20])
+        field(2; "Make Code"; Code[20])
         {
             Caption = 'Make Code';
+            TableRelation = Make;
             DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                if "Make Code" <> xRec."Make Code" then
+                    Validate("Model Code", '');
+            end;
         }
 
-        field(20; "Model Code"; Code[20])
+        field(3; "Model Code"; Code[20])
         {
             Caption = 'Model Code';
+            TableRelation = Model.Code where("Make Code" = field("Make Code"));
+            DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+                if "Model Code" <> xRec."Model Code" then
+                    Validate("Motorisation", '');
+            end;
+        }
+
+        field(4; "Motorisation"; Code[20])
+        {
+            Caption = 'Motorisation';
+            DataClassification = CustomerContent;
+
+            trigger OnValidate()
+            begin
+
+                if xRec."Motorisation" <> '' then
+                    if "Motorisation" <> xRec."Motorisation" then
+                        TestNoOpenEntriesExist(FieldCaption("Motorisation"));
+            end;
+        }
+        field(5; NumCustomer; Code[20])
+        {
+            Caption = 'Customer Number';
+            TableRelation = StaCustomer."NumCustomer";
             DataClassification = CustomerContent;
         }
 
-        field(25; "Model Version No."; Code[20])
-        {
-            Caption = 'Model Version No.';
-            DataClassification = CustomerContent;
-        }
 
-        field(30; "Model Commercial Name"; Text[50])
-        {
-            Caption = 'Model Commercial Name';
-            DataClassification = CustomerContent;
-        }
-
-        field(50; "Production Year"; Code[4])
-        {
-            Caption = 'Production Year';
-            DataClassification = CustomerContent;
-        }
-
-        
-
-        field(1200; "Interior Code"; Code[10])
-        {
-            Caption = 'Interior Code';
-            DataClassification = CustomerContent;
-        }
-
-        // === STATUTS ===
-        field(150; "Status Code"; Code[20])
-        {
-            Caption = 'Status Code';
-            TableRelation = "Vehicle Status".Code;
-            DataClassification = CustomerContent;
-        }
-
-        field(154; "Status Group Code"; Code[20])
-        {
-            Caption = 'Vehicle Status Group Code';
-            TableRelation = "Vehicle Status Group".Code;
-            DataClassification = CustomerContent;
-        }
-
-        field(270; Blocked; Boolean)
-        {
-            Caption = 'Blocked';
-            DataClassification = CustomerContent;
-        }
-
-        field(730; Reserved; Boolean)
-        {
-            Caption = 'Reserved';
-            DataClassification = CustomerContent;
-        }
-
-        field(670; Inventory; Decimal)
-        {
-            Caption = 'Inventory';
-            DataClassification = CustomerContent;
-            InitValue = 1;
-        }
-
-        // === DATES ===
-        field(290; "Creation Date"; Date)
-        {
-            Caption = 'Creation Date';
-            DataClassification = CustomerContent;
-        }
-        
-        field(280; "Last Date Modified"; Date)
-        {
-            Caption = 'Last Date Modified';
-            DataClassification = CustomerContent;
-            Editable = false;
-        }
-        
-        field(340; "Sales Date"; Date)
-        {
-            Caption = 'Sales Date';
-            DataClassification = CustomerContent;
-        }
-        
-        field(3000; "First Registration Date"; Date)
-        {
-            Caption = 'First Registration Date';
-            DataClassification = CustomerContent;
-        }
-        
-        field(3500; "Next Vehicle Inspection Date"; Date)
-        {
-            Caption = 'Next Vehicle Inspection Date';
-            DataClassification = CustomerContent;
-        }
-        
-        // === RELATION AVEC CLIENT (du diagramme UML) ===
-        field(3600; "Customer No."; Code[20])
-        {
-            Caption = 'Customer No.';
-            TableRelation = Customer."No.";
-            DataClassification = CustomerContent;
-            ValidateTableRelation = true;
-        }
-        
-        field(3650; "Customer Name"; Text[100])
-        {
-            Caption = 'Customer Name';
-            DataClassification = CustomerContent;
-               }
-        
-        field(3710; "Customer Vehicle ID"; Code[20])
-        {
-            Caption = 'Customer Vehicle ID';
-            DataClassification = CustomerContent;
-        }
-        
-        field(25006830; "Bill-To Customer No."; Code[20])
-        {
-            Caption = 'Bill-To Customer No.';
-            TableRelation = Customer."No.";
-            DataClassification = CustomerContent;
-        }
-        
-        field(25006840; "Bill-To Customer Name"; Text[100])
-        {
-            Caption = 'Bill-To Customer Name';
-            DataClassification = CustomerContent;
-           }
-        
-        // === AUTRES RELATIONS TECHNIQUES ===
-        field(3400; "Fixed Asset No."; Code[20])
-        {
-            Caption = 'Fixed Asset No.';
-            TableRelation = "Fixed Asset"."No.";
-            DataClassification = CustomerContent;
-        }
-        
-        field(3730; "Rent Asset No."; Code[20])
-        {
-            Caption = 'Rent Asset No.';
-            DataClassification = CustomerContent;
-        }
-        
-        field(3200; "Serv. Ledger Entry Exist"; Boolean)
-        {
-            Caption = 'Serv. Ledger Entry Exist';
-            DataClassification = CustomerContent;
-            Editable = false;
-        }
-        
-        // === CHAMPS TECHNIQUES ===
-        field(770; "Tracking Code"; Code[10])
-        {
-            Caption = 'Tracking Code';
-            DataClassification = CustomerContent;
-        }
-        
-        field(780; "Tracking Description"; Text[30])
-        {
-            Caption = 'Vehicle Tracking Description';
-            DataClassification = CustomerContent;
-            }
-        
-        field(790; "Parent Component"; Code[20])
-        {
-            Caption = 'Parent Component';
-            DataClassification = CustomerContent;
-        }
-        
-        field(800; Components; Boolean)
-        {
-            Caption = 'Components';
-            DataClassification = CustomerContent;
-        }
-        
-        field(25006379; "Default Vehicle Acc. Cycle No."; Code[20])
-        {
-            Caption = 'Default Vehicle Acc. Cycle No.';
-            DataClassification = CustomerContent;
-        }
-      
     }
-    
+
     keys
     {
-        // Clé primaire avec vehicleNo (renommé)
-        key(PK; "Vehicle No.")
+        key(Key1; "NumVehicle")
         {
             Clustered = true;
         }
-        
-       
+        key(Key2; "Make Code", "Model Code")
+        {
+        }
     }
-    
+
     fieldgroups
     {
-        
+        fieldgroup(DropDown; "NumVehicle", "Make Code", "Model Code", "Motorisation", "NumCustomer")
+        {
+        }
     }
-    
-    // === VARIABLES ===
-    var
 
-    
-    // === TRIGGERS ===
     trigger OnInsert()
     begin
-        // Initialisation à la création
-        if "Creation Date" = 0D then
-            "Creation Date" := Today();
-            
-        if Inventory = 0 then
-            Inventory := 1;
-            
-       
+        if "NumVehicle" = '' then begin
+            AssignSerialNo();
+        end;
+
+
     end;
-    
+
     trigger OnModify()
     begin
-        
+
     end;
-    
+
     trigger OnDelete()
     begin
-    
+
     end;
-    
+
+    var
+        InventorySetup: Record "Inventory Setup";
+        HideMsg: boolean;
+        Text019: label 'You cannot change %1 because there are one or more open ledger entries for this item.';
+
+    procedure AssignSerialNo()
+    var
+        cuNoSeries: Codeunit "No. Series";
+        codNewSerialNo: Code[20];
+        codSerialNos: Code[20];
+        tcDMS001: label '%1 is set already.';
+    begin
+        if "NumVehicle" <> '' then
+            Error(tcDMS001, FieldCaption("NumVehicle"));
+
+        InventorySetup.Get();
+        InventorySetup.TestField("Vehicle Serial No. Nos.");
+        codSerialNos := InventorySetup."Vehicle Serial No. Nos.";
+        codNewSerialNo := cuNoSeries.GetNextNo(codSerialNos, WorkDate());
+
+        Validate("NumVehicle", codNewSerialNo);
+    end;
+
+    procedure TestNoOpenEntriesExist(CurrentFieldName: Text[100])
+    var
+        ItemLedgEntry: Record "Item Ledger Entry";
+    begin
+
+        ItemLedgEntry.SetRange("Serial No.", "NumVehicle");
+        ItemLedgEntry.SetRange(Open, true);
+        if not ItemLedgEntry.IsEmpty then
+            Error(Text019, CurrentFieldName);
+    end;
+
+    Procedure fHideMsg(pHideMsg: Boolean)
+    begin
+        HideMsg := pHideMsg;
+    end;
+
+    Procedure fgetHideMsg(): Boolean
+    begin
+        EXIT(HideMsg);
+    end;
 }

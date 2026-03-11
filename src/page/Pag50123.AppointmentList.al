@@ -1,11 +1,9 @@
-page 50111 StaVehicleList
+page 50123 AppointmentList
 {
     PageType = List;
     ApplicationArea = All;
     UsageCategory = Administration;
-    SourceTable = StaVehicle;
-
-    CardPageId = StaVehicleCard;
+    SourceTable = "DLT Appointment";
 
     layout
     {
@@ -13,14 +11,13 @@ page 50111 StaVehicleList
         {
             repeater(Group)
             {
-                field(Name; Rec."NumVehicle")
+                field(NRDV; Rec."Appointment No.")
                 {
-                    ApplicationArea = All;
-
+                    Caption = 'N° rendez-vous';
                 }
-                field("Make Code"; Rec."Make Code")
+                field(NomClient; Rec."Sell-to Customer No.")
                 {
-                    ApplicationArea = All;
+                    Caption = 'Nom Client';
                 }
             }
         }

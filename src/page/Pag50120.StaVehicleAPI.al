@@ -21,26 +21,11 @@ page 50120 StaVehicleAPI
                     Caption = 'Id';
                 }
 
-                field(vehicleNo; Rec."Vehicle No.") { }
-                field(vin; Rec.VIN) { }
-                field(registrationNo; Rec."Registration No.") { }
-
+                field(vehicleNo; Rec."NumCustomer") { }
                 field(makeCode; Rec."Make Code") { }
                 field(modelCode; Rec."Model Code") { }
-
-                field(productionYear; Rec."Production Year") { }
-
-                field(statusCode; Rec."Status Code") { }
-
-                field(customerNo; Rec."Customer No.") { }
-
-                field(blocked; Rec.Blocked) { }
-                field(reserved; Rec.Reserved) { }
-
-                field(inventory; Rec.Inventory) { }
-
-                field(creationDate; Rec."Creation Date") { }
-                field(lastDateModified; Rec."Last Date Modified") { }
+                field(motorisation; Rec."Motorisation") {}
+                    
             }
         }
     }
