@@ -34,6 +34,24 @@
       "name": "STA",
       "publisher": "Deltasoft International",
       "version": "1.0.0.0"
+    },
+    {
+      "id": "840d69c1-a2ae-4b41-bfb1-4b23af2cf237",
+      "name": "StandardTunisien",
+      "publisher": "DeltaSoft International",
+      "version": "1.0.0.0"
+    },
+    {
+      "id": "3099ffc7-4cf7-4df6-9b96-7e4bc2bb587c",
+      "name": "Subscription Billing",
+      "publisher": "Microsoft",
+      "version": "26.0.30643.33317"
+    },
+    {
+      "id": "70912191-3c4c-49fc-a1de-bc6ea1ac9da6",
+      "name": "Intrastat Core",
+      "publisher": "Microsoft",
+      "version": "26.0.30643.33317"
     }
   ],
   "screenshots": [],

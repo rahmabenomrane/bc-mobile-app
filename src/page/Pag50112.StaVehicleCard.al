@@ -11,7 +11,12 @@ page 50112 StaVehicleCard
         {
             group("General information")
             {
-                field(Name; Rec."Vehicle No.")
+                field(Name; Rec."NumVehicle")
+                {
+                    ApplicationArea = All;
+
+                }
+                field("Make Code"; Rec."Make Code")
                 {
                     ApplicationArea = All;
 
