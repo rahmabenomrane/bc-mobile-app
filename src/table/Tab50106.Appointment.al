@@ -19,9 +19,14 @@ table 50106 Appointment
         field(4; "Service Code"; Code[20])
         {
             Caption = 'Service Code';
-            TableRelation = Service.Code;
+            TableRelation = ServiceAgence.ServiceCode;
         }
 
+        field(9; "Service Description"; Text[100])
+        {
+            Caption = 'Service Description';
+            TableRelation = ServiceAgence.Description;
+        }
         field(5; "Date"; Date)
         {
             Caption = 'Date';

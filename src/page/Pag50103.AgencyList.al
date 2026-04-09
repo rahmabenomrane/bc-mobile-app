@@ -2,6 +2,7 @@ page 50103 AgencyList
 {
     PageType = List;
     SourceTable = Agency;
+    CardPageId = "Agency Card";
 
     layout
     {

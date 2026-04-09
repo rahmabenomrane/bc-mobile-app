@@ -60,7 +60,7 @@
   "idRanges": [
     {
       "from": 50100,
-      "to": 50149
+      "to": 50190
     }
   ],
   "resourceExposurePolicy": {
@@ -69,5 +69,7 @@
     "includeSourceInSymbolFile": true
   },
   "runtime": "15.0",
-  "features": ["NoImplicitWith"]
+  "features": ["NoImplicitWith", "TranslationFile"],
+
+  "supportedLocales": ["en-US", "fr-FR"]
 }
