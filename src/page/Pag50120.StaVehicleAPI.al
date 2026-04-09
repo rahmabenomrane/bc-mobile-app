@@ -1,13 +1,13 @@
 page 50120 StaVehicleAPI
 {
     PageType = API;
-    APIPublisher = 'sta';
-    APIGroup = 'mobile';
+    APIPublisher = 'STA';
+    APIGroup = 'Mobile';
     APIVersion = 'v1.0';
     EntityName = 'vehicle';
     EntitySetName = 'vehicles';
     SourceTable = StaVehicle;
-    DelayedInsert = true; //créer un enregistrement même si tous les champs obligatoires ne sont pas remplis immédiatemen
+    DelayedInsert = true;
 
     layout
     {
@@ -15,17 +15,17 @@ page 50120 StaVehicleAPI
         {
             repeater(Group)
             {
-              
+
                 field(id; Rec.SystemId)
                 {
                     Caption = 'Id';
                 }
 
-                field(vehicleNo; Rec."NumCustomer") { }
+                field(NumCustomer; Rec."NumCustomer") { }
                 field(makeCode; Rec."Make Code") { }
                 field(modelCode; Rec."Model Code") { }
-                field(motorisation; Rec."Motorisation") {}
-                    
+                field(motorisation; Rec."Motorisation") { }
+
             }
         }
     }

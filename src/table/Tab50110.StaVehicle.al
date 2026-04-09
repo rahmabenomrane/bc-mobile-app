@@ -45,31 +45,26 @@ table 50110 StaVehicle
             trigger OnValidate()
             begin
                 if "Model Code" <> xRec."Model Code" then
-                    Validate("Motorisation", '');
+                    Validate("Motorisation", 0);
             end;
         }
 
-        field(4; "Motorisation"; Code[20])
+        field(4; "Motorisation"; enum MotorisationType)
         {
             Caption = 'Motorisation';
             DataClassification = CustomerContent;
-
-            trigger OnValidate()
-            begin
-
-                if xRec."Motorisation" <> '' then
-                    if "Motorisation" <> xRec."Motorisation" then
-                        TestNoOpenEntriesExist(FieldCaption("Motorisation"));
-            end;
         }
-        field(5; NumCustomer; Code[20])
+        field(5; "NumCustomer"; Code[20])
         {
             Caption = 'Customer Number';
             TableRelation = StaCustomer."NumCustomer";
             DataClassification = CustomerContent;
         }
-
-
+        field(6; "Registration number"; Text[20])
+        {
+            Caption = 'Registration number';
+            DataClassification = CustomerContent;
+        }
     }
 
     keys

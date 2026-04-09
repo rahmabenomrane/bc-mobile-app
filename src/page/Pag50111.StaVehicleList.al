@@ -2,8 +2,9 @@ page 50111 StaVehicleList
 {
     PageType = List;
     ApplicationArea = All;
-    UsageCategory = Administration;
+    UsageCategory = Lists;
     SourceTable = StaVehicle;
+    Caption = 'Vehicles';
 
     CardPageId = StaVehicleCard;
 
@@ -11,36 +12,92 @@ page 50111 StaVehicleList
     {
         area(Content)
         {
-            repeater(Group)
+
+            repeater(Vehicles)
             {
-                field(Name; Rec."NumVehicle")
+
+                field("Numero véhicule"; Rec."NumVehicle")
                 {
                     ApplicationArea = All;
-
+                    ToolTip = 'Specifies the vehicle number.';
                 }
+
                 field("Make Code"; Rec."Make Code")
                 {
                     ApplicationArea = All;
+                    Caption = 'Make Code', Locked = true;
+                    ToolTip = 'Specifies the make of the vehicle.';
+                }
+
+                field("Model Code"; Rec."Model Code")
+                {
+                    ApplicationArea = All;
+                    Caption = 'Model Code', Locked = true;
+                }
+
+                field("Motorisation"; Rec."Motorisation")
+                {
+                    ApplicationArea = All;
+                    Caption = 'Motorisation', Locked = true;
+                }
+
+                field("Customer No."; Rec."NumCustomer")
+                {
+                    ApplicationArea = All;
+                    Caption = 'Customer No.', Locked = true;
+                }
+                field("Name"; CustomerName)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Customer Name';
                 }
             }
         }
     }
 
+
     actions
     {
-        area(Processing)
+        area(Navigation)
         {
-            action(ActionName)
+            action(OpenCard)
             {
+                Caption = 'Open Card';
+                Image = EditLines;
 
                 trigger OnAction()
                 begin
+                    Page.Run(Page::StaVehicleCard, Rec);
+                end;
+            }
+        }
 
+        area(Processing)
+        {
+            action(DeleteVehicle)
+            {
+                Caption = 'Delete';
+                Image = Delete;
+
+                trigger OnAction()
+                begin
+                    Rec.Delete(true);
                 end;
             }
         }
     }
-
     var
-        myInt: Integer;
+        CustomerName: Text[100];
+        CustomerRec: Record StaCustomer;
+
+    trigger OnAfterGetCurrRecord()
+    begin
+        if CustomerRec.Get(Rec."NumCustomer") then begin
+            CustomerName := CustomerRec.FirstName + ' ' + CustomerRec.LastName;
+        end
+        else begin
+            CustomerName := 'vide';
+        end;
+    end;
+
 }
