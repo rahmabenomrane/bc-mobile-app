@@ -238,6 +238,11 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Table StaCustomer - Field NumCustomer - Property Caption</note>
         </trans-unit>
+        <trans-unit id="Table 1032839230 - Field 2575460289 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Password</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table StaCustomer - Field Password - Property Caption</note>
+        </trans-unit>
         <trans-unit id="Table 1032839230 - Field 646935216 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Phone</source>
           <note from="Developer" annotates="general" priority="2"></note>
