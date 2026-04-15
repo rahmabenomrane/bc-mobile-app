@@ -14,17 +14,17 @@ table 50105 StaCustomer
             DataClassification = CustomerContent;
 
         }
-        field(4; LastName; Text[50])
+        field(3; LastName; Text[50])
         {
             DataClassification = CustomerContent;
 
         }
-         field(3; "Password"; Text[50])
+         field(4; "Password"; Text[50])
         {
             DataClassification = ToBeClassified;
 
         }
-        field(3; Address; Text[50])
+        field(9; Address; Text[50])
         {
             DataClassification = CustomerContent;
 

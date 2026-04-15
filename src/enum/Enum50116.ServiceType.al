@@ -32,18 +32,5 @@ enum 50116 ServiceType
         Caption = 'Carrosserie';
     }
 
-    value(6; Pneumatique)
-    {
-        Caption = 'Pneumatique';
-    }
-
-    value(7; Climatisation)
-    {
-        Caption = 'Climatisation';
-    }
-
-    value(8; Electrique)
-    {
-        Caption = 'Électrique';
-    }
+  
 }

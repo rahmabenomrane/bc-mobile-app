@@ -19,7 +19,7 @@ page 50107 "Appointment Card"
                 {
                     ApplicationArea = All;
                     Importance = Promoted;
-                    Editable = false;
+                    //Editable = false;
                 }
 
                 field("Status"; Rec."Status")
