@@ -6,7 +6,7 @@ page 50122 ServicesAPI
     APIVersion = 'v1.0';
     EntityName = 'Service';
     EntitySetName = 'Services';
-    SourceTable = ServiceAgence;
+    SourceTable = Service;
     DelayedInsert = true;
 
     layout

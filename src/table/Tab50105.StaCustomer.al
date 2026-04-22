@@ -19,11 +19,7 @@ table 50105 StaCustomer
             DataClassification = CustomerContent;
 
         }
-         field(4; "Password"; Text[50])
-        {
-            DataClassification = ToBeClassified;
 
-        }
         field(9; Address; Text[50])
         {
             DataClassification = CustomerContent;
@@ -33,6 +29,10 @@ table 50105 StaCustomer
         {
             DataClassification = CustomerContent;
 
+        }
+        field(50000; PasswordHash; Text[100])
+        {
+            DataClassification = CustomerContent;
         }
         field(6; Email; Text[50])
         {
@@ -72,7 +72,8 @@ table 50105 StaCustomer
 
     trigger OnInsert()
     begin
-
+        if NumCustomer = '' then
+            NumCustomer := 'CUST' + Format(CreateGuid());
     end;
 
     trigger OnModify()
