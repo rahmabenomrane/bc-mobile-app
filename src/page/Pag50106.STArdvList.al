@@ -117,7 +117,7 @@ page 50106 "STA rdv List"
     var
         ClientRec: Record StaCustomer;
         AgencyRec: Record Agency;
-        ServiceRec: Record ServiceAgence;
+        ServiceRec: Record Service;
         VehicleRec: Record StaVehicle;
         AgencyName: Text[100];
         ServiceName: Text[100];

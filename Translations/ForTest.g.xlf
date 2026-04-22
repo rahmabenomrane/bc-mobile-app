@@ -143,30 +143,55 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Table CustomerClaim - Field vehicleNo - Property Caption</note>
         </trans-unit>
-        <trans-unit id="Table 1540444066 - Field 3461834954 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+        <trans-unit id="Table 2187938695 - Field 3461834954 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Description</source>
           <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Table ServiceAgence - Field Description - Property Caption</note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table Service - Field Description - Property Caption</note>
         </trans-unit>
-        <trans-unit id="Table 1540444066 - Field 63260977 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+        <trans-unit id="Table 2187938695 - Field 63260977 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>libelle</source>
           <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Table ServiceAgence - Field libelle - Property Caption</note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table Service - Field libelle - Property Caption</note>
         </trans-unit>
-        <trans-unit id="Table 1540444066 - Field 4201098034 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+        <trans-unit id="Table 2187938695 - Field 4201098034 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>PrixBase</source>
           <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Table ServiceAgence - Field PrixBase - Property Caption</note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table Service - Field PrixBase - Property Caption</note>
         </trans-unit>
-        <trans-unit id="Table 1540444066 - Field 4230426132 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+        <trans-unit id="Table 2187938695 - Field 4230426132 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>ServiceCode</source>
           <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Table ServiceAgence - Field ServiceCode - Property Caption</note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table Service - Field ServiceCode - Property Caption</note>
         </trans-unit>
-        <trans-unit id="Table 1540444066 - Field 1228573511 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+        <trans-unit id="Table 2187938695 - Field 1228573511 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Type Service</source>
           <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Table ServiceAgence - Field Type Service - Property Caption</note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table Service - Field Type Service - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1540444066 - Field 1433041118 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Agency Code</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table ServiceAgence - Field Agency Code - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1540444066 - Field 1557638375 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Disponible</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table ServiceAgence - Field Disponible - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1540444066 - Field 2143167781 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Duree</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table ServiceAgence - Field Duree - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1540444066 - Field 1604900437 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Prix</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table ServiceAgence - Field Prix - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1540444066 - Field 2205837876 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Service Code</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table ServiceAgence - Field Service Code - Property Caption</note>
         </trans-unit>
         <trans-unit id="Table 1431326281 - Field 4255740090 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Agent No.</source>
@@ -367,6 +392,31 @@
           <source>Phone Number</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page AgencyApi - Control PhoneNo - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 801040022 - Control 641603406 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Agency Code</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page AgencyServiceAPI - Control agencyCode - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 801040022 - Control 3919019207 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Available</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page AgencyServiceAPI - Control disponible - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 801040022 - Control 617227077 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Duration</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page AgencyServiceAPI - Control duree - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 801040022 - Control 1418253621 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Price</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page AgencyServiceAPI - Control prix - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 801040022 - Control 1218218228 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Service Code</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page AgencyServiceAPI - Control serviceCode - Property Caption</note>
         </trans-unit>
         <trans-unit id="Page 2203549659 - Control 375018858 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Agent Context</source>
@@ -663,31 +713,6 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page StaVehicleList - Action DeleteVehicle - Property Caption</note>
         </trans-unit>
-        <trans-unit id="PageExtension 2041230858 - Action 527617690 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve" al-object-target="Page 3678828311">
-          <source>STA Management</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">PageExtension RoleCenterVehicleExt - Action STA - Property Caption</note>
-        </trans-unit>
-        <trans-unit id="PageExtension 2041230858 - Action 1185152260 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve" al-object-target="Page 3678828311">
-          <source>Agences</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">PageExtension RoleCenterVehicleExt - Action Agences - Property Caption</note>
-        </trans-unit>
-        <trans-unit id="PageExtension 2041230858 - Action 3766300416 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve" al-object-target="Page 3678828311">
-          <source>Rendez-vous</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">PageExtension RoleCenterVehicleExt - Action Appointments - Property Caption</note>
-        </trans-unit>
-        <trans-unit id="PageExtension 2041230858 - Action 3854201566 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve" al-object-target="Page 3678828311">
-          <source>Clients</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">PageExtension RoleCenterVehicleExt - Action Clients - Property Caption</note>
-        </trans-unit>
-        <trans-unit id="PageExtension 2041230858 - Action 1593837442 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve" al-object-target="Page 3678828311">
-          <source>Véhicules</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">PageExtension RoleCenterVehicleExt - Action Vehicules - Property Caption</note>
-        </trans-unit>
         <trans-unit id="Enum 754458713 - EnumValue 1965869807 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>External</source>
           <note from="Developer" annotates="general" priority="2"></note>
@@ -768,30 +793,15 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Enum ServiceType - EnumValue Carrosserie - Property Caption</note>
         </trans-unit>
-        <trans-unit id="Enum 3963139423 - EnumValue 769451299 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Climatisation</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Enum ServiceType - EnumValue Climatisation - Property Caption</note>
-        </trans-unit>
         <trans-unit id="Enum 3963139423 - EnumValue 1856301905 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Diagnostic</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Enum ServiceType - EnumValue Diagnostic - Property Caption</note>
         </trans-unit>
-        <trans-unit id="Enum 3963139423 - EnumValue 3468637547 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Électrique</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Enum ServiceType - EnumValue Electrique - Property Caption</note>
-        </trans-unit>
         <trans-unit id="Enum 3963139423 - EnumValue 350249191 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Maintenance</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Enum ServiceType - EnumValue Maintenance - Property Caption</note>
-        </trans-unit>
-        <trans-unit id="Enum 3963139423 - EnumValue 1032138018 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Pneumatique</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Enum ServiceType - EnumValue Pneumatique - Property Caption</note>
         </trans-unit>
         <trans-unit id="Enum 3963139423 - EnumValue 2491449355 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Réparation</source>

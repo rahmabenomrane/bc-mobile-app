@@ -1,4 +1,4 @@
-table 50107 ServiceAgence
+table 50107 Service
 {
     DataClassification = ToBeClassified;
 
