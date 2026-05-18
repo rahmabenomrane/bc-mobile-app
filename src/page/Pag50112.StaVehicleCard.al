@@ -52,6 +52,10 @@ page 50112 StaVehicleCard
                 {
                     ApplicationArea = All;
                 }
+                field("Kilométrage"; Rec."Mileage")
+                {
+                    ApplicationArea = All;
+                }
             }
         }
 
@@ -85,18 +89,5 @@ page 50112 StaVehicleCard
             }
         }
     }
-    // var
-    //     CustomerName: Text[100];
-    //     CustomerRec: Record StaCustomer;
-
-    // trigger OnAfterGetCurrRecord()
-    // begin
-    //     if CustomerRec.Get(Rec."NumCustomer") then begin
-    //         CustomerName := CustomerRec.FirstName + ' ' + CustomerRec.LastName;
-    //     end
-    //     else begin
-    //         CustomerName := '';
-    //     end;
-
-    // end;
+   
 }

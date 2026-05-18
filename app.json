@@ -70,6 +70,5 @@
   },
   "runtime": "15.0",
   "features": ["NoImplicitWith", "TranslationFile"],
-
   "supportedLocales": ["en-US", "fr-FR"]
 }

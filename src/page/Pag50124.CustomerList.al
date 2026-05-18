@@ -11,14 +11,11 @@ page 50124 CustomerList
         {
             repeater(Group)
             {
-                field(FirstName; Rec.FirstName)
+                field(FirstName; Rec.Name)
                 {
                     ApplicationArea = All;
                 }
-                field(LastName; Rec.LastName)
-                {
-                    ApplicationArea = All;
-                }
+               
                 field(Address; Rec.Address)
                 {
                     ApplicationArea = All;

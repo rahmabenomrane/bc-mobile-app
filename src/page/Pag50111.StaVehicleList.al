@@ -46,6 +46,11 @@ page 50111 StaVehicleList
                     ApplicationArea = All;
                     Caption = 'Customer No.', Locked = true;
                 }
+                field("Mileage"; Rec."Mileage")
+                {
+                    ApplicationArea = All;
+                    Caption = 'Mileage';
+                }
                 field("Name"; CustomerName)
                 {
                     ApplicationArea = All;
@@ -93,7 +98,7 @@ page 50111 StaVehicleList
     trigger OnAfterGetCurrRecord()
     begin
         if CustomerRec.Get(Rec."NumCustomer") then begin
-            CustomerName := CustomerRec.FirstName + ' ' + CustomerRec.LastName;
+            CustomerName := CustomerRec.Name;
         end
         else begin
             CustomerName := 'vide';

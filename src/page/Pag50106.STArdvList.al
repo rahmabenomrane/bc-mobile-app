@@ -105,7 +105,7 @@ page 50106 "STA rdv List"
 
         if VehicleRec.Get(Rec.NumVehicle) then begin
             if ClientRec.Get(VehicleRec."NumCustomer") then begin
-                ClientName := ClientRec.FirstName + ' ' + ClientRec.LastName;
+                ClientName := ClientRec.Name;
 
             end
             else begin
