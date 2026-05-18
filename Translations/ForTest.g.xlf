@@ -193,6 +193,46 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Table ServiceAgence - Field Service Code - Property Caption</note>
         </trans-unit>
+        <trans-unit id="Table 4209641088 - Field 986080663 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Created At</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table STA Customer Session - Field CreatedAt - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 4209641088 - Field 2619142763 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Customer Id</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table STA Customer Session - Field CustomerId - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 4209641088 - Field 4287182921 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Customer Number</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table STA Customer Session - Field CustomerNumber - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 4209641088 - Field 3315839207 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Expires At</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table STA Customer Session - Field ExpiresAt - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 4209641088 - Field 3276803522 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Is Active</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table STA Customer Session - Field IsActive - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 4209641088 - Field 2575460289 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Password</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table STA Customer Session - Field Password - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 4209641088 - Field 646935216 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Phone</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table STA Customer Session - Field Phone - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 4209641088 - Field 4146460525 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Token</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table STA Customer Session - Field Token - Property Caption</note>
+        </trans-unit>
         <trans-unit id="Table 1431326281 - Field 4255740090 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Agent No.</source>
           <note from="Developer" annotates="general" priority="2"></note>
@@ -243,30 +283,30 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Table StaCustomer - Field Email - Property Caption</note>
         </trans-unit>
-        <trans-unit id="Table 1032839230 - Field 3973653471 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>FirstName</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Table StaCustomer - Field FirstName - Property Caption</note>
-        </trans-unit>
         <trans-unit id="Table 1032839230 - Field 320775665 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Image</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Table StaCustomer - Field Image - Property Caption</note>
         </trans-unit>
-        <trans-unit id="Table 1032839230 - Field 4082585823 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>LastName</source>
+        <trans-unit id="Table 1032839230 - Field 2961552353 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Name</source>
           <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Table StaCustomer - Field LastName - Property Caption</note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table StaCustomer - Field Name - Property Caption</note>
         </trans-unit>
         <trans-unit id="Table 1032839230 - Field 2201940262 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>NumCustomer</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Table StaCustomer - Field NumCustomer - Property Caption</note>
         </trans-unit>
-        <trans-unit id="Table 1032839230 - Field 2575460289 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Password</source>
+        <trans-unit id="Table 1032839230 - Field 2503600679 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>PasswordHash</source>
           <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Table StaCustomer - Field Password - Property Caption</note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table StaCustomer - Field PasswordHash - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 1032839230 - Field 2111993759 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Password Salt</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table StaCustomer - Field PasswordSalt - Property Caption</note>
         </trans-unit>
         <trans-unit id="Table 1032839230 - Field 646935216 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Phone</source>
@@ -292,6 +332,11 @@
           <source>Make Code</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Table StaVehicle - Field Make Code - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 4075920298 - Field 736648186 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Mileage</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table StaVehicle - Field Mileage - Property Caption</note>
         </trans-unit>
         <trans-unit id="Table 4075920298 - Field 930798646 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Model Code</source>
@@ -588,6 +633,41 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page ServicesAPI - Control Type - Property Caption</note>
         </trans-unit>
+        <trans-unit id="Page 2859573738 - Control 2619142763 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>customerId</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page STA Auth API - Control CustomerId - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2859573738 - Control 3226897001 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>CustomerNumber</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page STA Auth API - Control customerNumber - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2859573738 - Control 881009991 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>expiresAt</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page STA Auth API - Control expiresAt - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2859573738 - Control 4192966370 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>isActive</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page STA Auth API - Control isActive - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2859573738 - Control 2526185377 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>password</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page STA Auth API - Control password - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2859573738 - Control 2524668112 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>phone</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page STA Auth API - Control phone - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2859573738 - Control 1178205325 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>token</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page STA Auth API - Control token - Property Caption</note>
+        </trans-unit>
         <trans-unit id="Page 2136995768 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Rendez-vous</source>
           <note from="Developer" annotates="general" priority="2"></note>
@@ -618,11 +698,6 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page StaCustomerAPI - Control email - Property Caption</note>
         </trans-unit>
-        <trans-unit id="Page 3368149822 - Control 2856562879 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>First Name</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Page StaCustomerAPI - Control firstName - Property Caption</note>
-        </trans-unit>
         <trans-unit id="Page 3368149822 - Control 2686962215 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Id</source>
           <note from="Developer" annotates="general" priority="2"></note>
@@ -642,6 +717,11 @@
           <source>Customer Number</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page StaCustomerAPI - Control numCustomer - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 3368149822 - Control 2526185377 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Password</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page StaCustomerAPI - Control password - Property Caption</note>
         </trans-unit>
         <trans-unit id="Page 3368149822 - Control 2524668112 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Phone</source>
@@ -693,6 +773,11 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page StaVehicleList - Control Make Code - Property ToolTip</note>
         </trans-unit>
+        <trans-unit id="Page 409839088 - Control 736648186 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Mileage</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page StaVehicleList - Control Mileage - Property Caption</note>
+        </trans-unit>
         <trans-unit id="Page 409839088 - Control 2961552353 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Customer Name</source>
           <note from="Developer" annotates="general" priority="2"></note>
@@ -712,6 +797,26 @@
           <source>Delete</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page StaVehicleList - Action DeleteVehicle - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="PageExtension 2041230858 - Action 527617690 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve" al-object-target="Page 3678828311">
+          <source>STA Management</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">PageExtension RoleCenterVehicleExt - Action STA - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="PageExtension 2041230858 - Action 1185152260 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve" al-object-target="Page 3678828311">
+          <source>Agences</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">PageExtension RoleCenterVehicleExt - Action Agences - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="PageExtension 2041230858 - Action 3766300416 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve" al-object-target="Page 3678828311">
+          <source>Rendez-vous</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">PageExtension RoleCenterVehicleExt - Action Appointments - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="PageExtension 2041230858 - Action 1593837442 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve" al-object-target="Page 3678828311">
+          <source>Véhicules</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">PageExtension RoleCenterVehicleExt - Action Vehicules - Property Caption</note>
         </trans-unit>
         <trans-unit id="Enum 754458713 - EnumValue 1965869807 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>External</source>

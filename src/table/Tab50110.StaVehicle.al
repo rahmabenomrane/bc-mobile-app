@@ -65,6 +65,19 @@ table 50110 StaVehicle
             Caption = 'Registration number';
             DataClassification = CustomerContent;
         }
+        field(7; "Mileage"; Integer)
+        {
+            Caption = 'Mileage';
+            DataClassification = CustomerContent;
+            MinValue = 0;
+
+            trigger OnValidate()
+            begin
+                if "Mileage" < 0 then
+                    Error('Le kilométrage ne peut pas être négatif.');
+            end;
+        
+        }
     }
 
     keys

@@ -143,7 +143,7 @@ page 50107 "Appointment Card"
         //CLIENT
         if VehicleRec.Get(Rec.NumVehicle) then begin
             if ClientRec.Get(VehicleRec.NumCustomer) then begin
-                ClientName := ClientRec.FirstName + ' ' + ClientRec.LastName;
+                ClientName := ClientRec.Name;
                 ClientPhone := ClientRec.Phone;
             end
             else begin

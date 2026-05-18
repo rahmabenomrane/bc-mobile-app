@@ -7,7 +7,7 @@ page 50115 StaCustomerAPI
     EntityName = 'customer';
     EntitySetName = 'customers';
     SourceTable = StaCustomer;
-    ODataKeyFields = SystemId;
+    ODataKeyFields = NumCustomer;
     DelayedInsert = true;
 
     layout
@@ -28,14 +28,13 @@ page 50115 StaCustomerAPI
                     Caption = 'Customer Number';
                 }
 
-                field(firstName; Rec.FirstName)
-                {
-                    Caption = 'First Name';
-                }
-
-                field(lastName; Rec.LastName)
+                field(lastName; Rec.Name)
                 {
                     Caption = 'Last Name';
+                }
+                field(password; PlainPassword)
+                {
+                    Caption = 'Password';
                 }
 
                 field(address; Rec.Address)
@@ -62,6 +61,45 @@ page 50115 StaCustomerAPI
                     Caption = 'Civility';
                 }
             }
+
         }
     }
+    var
+        PlainPassword: Text;
+
+    trigger OnInsertRecord(BelowxRec: Boolean): Boolean
+    var
+        AuthMgt: Codeunit "STA Auth Management";
+        Salt: Text;
+        NewCustomer: Record StaCustomer;
+        ExistingCustomer: Record StaCustomer;
+    begin
+        // 1. Vérifier si phone déjà utilisé
+        ExistingCustomer.Reset();
+        ExistingCustomer.SetRange(Phone, Rec.Phone);
+        if ExistingCustomer.FindFirst() then
+            Error('Ce numéro de téléphone est déjà utilisé.');
+
+        // 2. Générer NumCustomer unique
+        NewCustomer.Init();
+        NewCustomer.NumCustomer := 'CUST' + CopyStr(DelChr(Format(CreateGuid()), '=', '{}-'), 1, 16);
+
+        // 3. Hash password
+        Salt := AuthMgt.GenerateSalt();
+        NewCustomer.PasswordSalt := Salt;
+        NewCustomer.PasswordHash := AuthMgt.HashPassword(PlainPassword, Salt);
+
+        // 4. Copier les champs
+        NewCustomer.Name := Rec.Name;
+        NewCustomer.Phone := Rec.Phone;
+        NewCustomer.Email := Rec.Email;
+        NewCustomer.Address := Rec.Address;
+        NewCustomer.civility := Rec.civility;
+
+        // 5. Insérer manuellement
+        NewCustomer.Insert(true);
+
+        // ✅ false = BC n'insère pas Rec une 2ème fois
+        exit(false);
+    end;
 }

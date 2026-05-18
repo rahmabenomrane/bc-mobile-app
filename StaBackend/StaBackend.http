@@ -1,0 +1,6 @@
+@StaBackend_HostAddress = http://localhost:5032
+
+GET {{StaBackend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

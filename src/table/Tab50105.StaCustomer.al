@@ -9,12 +9,8 @@ table 50105 StaCustomer
             DataClassification = CustomerContent;
 
         }
-        field(2; FirstName; Text[50])
-        {
-            DataClassification = CustomerContent;
-
-        }
-        field(3; LastName; Text[50])
+       
+        field(3; Name; Text[50])
         {
             DataClassification = CustomerContent;
 
@@ -50,6 +46,11 @@ table 50105 StaCustomer
             OptionCaption = 'Monsieur,Madame';
             OptionMembers = Monsieur,Madame;
         }
+        field(10; PasswordSalt; Text[50])
+        {
+            Caption = 'Password Salt';
+            DataClassification = SystemMetadata;
+        }
     }
 
     keys
@@ -58,11 +59,19 @@ table 50105 StaCustomer
         {
             Clustered = true;
         }
+        key(Key2; Email)
+        {
+            Unique = true;
+        }
+        key(Key3; Phone)
+        {
+            Unique = true;
+        }
     }
 
     fieldgroups
     {
-        fieldgroup(DropDown; NumCustomer, FirstName, LastName, Phone)
+        fieldgroup(DropDown; NumCustomer, Name, Phone)
         {
         }
     }
@@ -72,8 +81,14 @@ table 50105 StaCustomer
 
     trigger OnInsert()
     begin
+        // ✅ Générer seulement si vide
         if NumCustomer = '' then
-            NumCustomer := 'CUST' + Format(CreateGuid());
+            NumCustomer := 'CUST' + CopyStr(DelChr(Format(CreateGuid()), '=', '{}-'), 1, 16);
+
+        // ✅ Générer salt si vide
+        if PasswordSalt = '' then begin
+            PasswordSalt := Format(CreateGuid());
+        end;
     end;
 
     trigger OnModify()
