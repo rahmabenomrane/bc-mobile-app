@@ -4,119 +4,121 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthService {
-  static const String baseUrl =
-      "http://10.0.2.2:5032/api/auth";
-  static final _storage = FlutterSecureStorage();
+  static const String baseUrl = "http://10.0.2.2:5032";
+  static final FlutterSecureStorage storage = const FlutterSecureStorage();
 
-  // ─────────────────────────────────────────────────────────────────────────
-  // 🔐 LOGIN — retourne le Map complet et persiste le customerNumber
-  // ─────────────────────────────────────────────────────────────────────────
+  // Login
+  static Future<Map<String, dynamic>> login(String phone, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/api/Auth/login"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "phone": phone,
+          "password": password,
+        }),
+      );
 
-  static Future<Map<String, dynamic>> login(
-      String phone,
-      String password,
-      ) async {
+      print("=== LOGIN RESPONSE ===");
+      print("Status: ${response.statusCode}");
+      print("Body: ${response.body}");
 
-    final url = Uri.parse("$baseUrl/login");
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
 
-    final response = await http.post(
-      url,
-      headers: {
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
-      body: jsonEncode({
-        "phone": phone,
-        "password": password,
-      }),
-    );
+        // Récupérer le token
+        String? token = data['token'] ?? data['Token'] ?? data['accessToken'];
+        String? customerNumber = data['customerNumber'] ?? data['CustomerNumber'];
 
-    print("URL : $url");
-    print("LOGIN STATUS : ${response.statusCode}");
-    print("LOGIN BODY   : ${response.body}");
+        print("Token extrait: ${token != null ? 'OUI' : 'NON'}");
+        print("CustomerNumber extrait: ${customerNumber ?? 'NON'}");
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception("Erreur login");
-    }
-  }
-  // ─────────────────────────────────────────────────────────────────────────
-  // 📝 REGISTER
-  // ─────────────────────────────────────────────────────────────────────────
-  static Future<Map<String, dynamic>> register(
-      String name, String phone, String email, String password,
-      {String address = "", String civility = "Monsieur"}) async {
-    final url = Uri.parse("$baseUrl/customers");
+        // STOCKER LE TOKEN
+        if (token != null) {
+          await storage.write(key: "token", value: token);
+          print("✅ Token stocké avec succès");
 
-    final response = await http.post(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "name":     name,
-        "phone":    phone,
-        "email":    email,
-        "password": password,
-        "address":  address,
-        "civility": civility,
-      }),
-    );
+          // Vérifier immédiatement
+          final savedToken = await storage.read(key: "token");
+          print("Vérification token stocké: ${savedToken != null ? 'OK' : 'FAILED'}");
+        } else {
+          print("❌ Aucun token trouvé dans la réponse !");
+          print("   Clés disponibles: ${data.keys}");
+        }
 
-    print("REGISTER STATUS : ${response.statusCode}");
-    print("REGISTER BODY   : ${response.body}");
+        // STOCKER LE CUSTOMER NUMBER
+        if (customerNumber != null) {
+          await storage.write(key: "customerNumber", value: customerNumber);
+          print("✅ CustomerNumber stocké: $customerNumber");
+        }
 
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return jsonDecode(response.body) as Map<String, dynamic>;
-    } else {
-      throw Exception("Erreur register: ${response.body}");
-    }
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // 🔑 Getters pour les données persistées (utile au redémarrage de l'app)
-  // ─────────────────────────────────────────────────────────────────────────
-  static Future<String> getSavedCustomerNumber() async {
-    return await _storage.read(key: "customerNumber") ?? "";
-  }
-
-  static Future<String> getSavedToken() async {
-    return await _storage.read(key: "token") ?? "";
-  }
-
-  static Future<void> logout() async {
-    await _storage.deleteAll();
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
-  // 🔍 Extraction du customerNumber depuis le JSON de réponse
-  //
-  // Business Central retourne souvent les champs en PascalCase.
-  // Lance l'app, lis "LOGIN BODY" dans la console Flutter,
-  // et vérifie que le bon champ est en tête de liste ci-dessous.
-  // ─────────────────────────────────────────────────────────────────────────
-  static String _extractCustomerNumber(Map<String, dynamic> data) {
-    final candidates = [
-      "CustomerNo",       // BC standard (le plus probable)
-      "customerNo",
-      "CustomerNumber",
-      "customerNumber",
-      "customer_number",
-      "CustomerCode",
-      "customerCode",
-      "No",
-      "no",
-      "numClient",
-      "sub",
-    ];
-
-    for (final key in candidates) {
-      if (data.containsKey(key) && data[key] != null && data[key].toString().isNotEmpty) {
-        return data[key].toString();
+        return data;
+      } else {
+        throw Exception("Échec de connexion: ${response.statusCode}");
       }
+    } catch (e) {
+      print("❌ Erreur login: $e");
+      throw Exception("Erreur de connexion: $e");
     }
+  }
 
-    // Aucun champ trouvé → affiche toutes les clés dispo pour debug
-    print("⚠️  customerNumber introuvable. Clés disponibles : ${data.keys.toList()}");
-    return "";
+  // Register
+  static Future<void> register(
+      String fullName,
+      String phone,
+      String email,
+      String password, {
+        String? address,
+        String? civility,
+      }) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/api/Auth/register"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "phone": phone,
+          "password": password,
+          "email": email,
+          "firstName": fullName.split(' ').first,
+          "lastName": fullName.split(' ').last,
+          "address": address ?? "",
+          "civility": civility ?? "Monsieur",
+        }),
+      );
+
+      print("=== REGISTER RESPONSE ===");
+      print("Status: ${response.statusCode}");
+      print("Body: ${response.body}");
+
+      if (response.statusCode != 201 && response.statusCode != 200) {
+        throw Exception("Échec de l'inscription: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("❌ Erreur register: $e");
+      throw Exception("Erreur d'inscription: $e");
+    }
+  }
+
+  // Get saved token
+  static Future<String?> getSavedToken() async {
+    return await storage.read(key: "token");
+  }
+
+  // Get saved customer number
+  static Future<String?> getSavedCustomerNumber() async {
+    return await storage.read(key: "customerNumber");
+  }
+
+  // Logout
+  static Future<void> logout() async {
+    await storage.delete(key: "token");
+    await storage.delete(key: "customerNumber");
+    print("✅ Utilisateur déconnecté, tokens supprimés");
+  }
+
+  // Check if user is logged in
+  static Future<bool> isLoggedIn() async {
+    final token = await getSavedToken();
+    return token != null && token.isNotEmpty;
   }
 }

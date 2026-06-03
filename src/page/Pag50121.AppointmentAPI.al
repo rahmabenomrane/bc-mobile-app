@@ -30,9 +30,14 @@ page 50121 AppointmentAPI
                     Caption = 'Date';
 
                 }
-                field("Time"; Rec."Time")
+                field("StartTime"; Rec."StartTime")
                 {
-                    Caption = 'Time';
+                    Caption = 'StartTime';
+
+                }
+                field("EndTime"; Rec."EndTime")
+                {
+                    Caption = 'EndTime';
 
                 }
                 field("Status"; Rec."Status")

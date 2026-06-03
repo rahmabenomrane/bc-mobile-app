@@ -49,6 +49,8 @@ page 50108 AgencyApi
                 {
                     Caption = 'Office Hours';
                 }
+                field(latitude; Rec.Latitude) { Caption = 'latitude'; }
+                field(longitude; Rec.Longitude) { Caption = 'longitude'; }
             }
         }
     }

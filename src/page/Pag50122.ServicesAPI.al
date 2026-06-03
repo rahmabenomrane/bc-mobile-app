@@ -30,11 +30,6 @@ page 50122 ServicesAPI
                     Caption = 'Libelle';
 
                 }
-                field(Prix; Rec.PrixBase)
-                {
-                    Caption = 'Prix';
-
-                }
                 field(Type; Rec."Type Service")
                 {
                     Caption = 'Type';

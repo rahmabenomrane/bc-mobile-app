@@ -40,6 +40,7 @@ page 50107 "Appointment Card"
                 field("Agency Name"; AgencyName)
                 {
                     ApplicationArea = All;
+                    TableRelation = Agency.Name;
                     // Editable = false;
                 }
 
@@ -57,6 +58,11 @@ page 50107 "Appointment Card"
                 field("vehicle registration Number"; Rec."NumVehicle")
                 {
                     ApplicationArea = All;
+
+                    trigger OnValidate()
+                    begin
+                        LoadVehicleInformations();
+                    end;
                 }
                 field("Brand"; MakeCode)
                 {
@@ -87,7 +93,11 @@ page 50107 "Appointment Card"
                     ApplicationArea = All;
                 }
 
-                field("Time"; Rec."Time")
+                field("StartTime"; Rec."StartTime")
+                {
+                    ApplicationArea = All;
+                }
+                field("EndTime"; Rec."EndTime")
                 {
                     ApplicationArea = All;
                 }
@@ -100,18 +110,19 @@ page 50107 "Appointment Card"
     {
         area(Processing)
         {
-            action(Complete)
-            {
-                Caption = 'Complete';
-                Image = Approve;
-                ApplicationArea = All;
+            // action(Complete)
+            // {
+            //     Caption = 'Complete';
+            //     Image = Approve;
+            //     ApplicationArea = All;
 
-                trigger OnAction()
-                begin
-                    Rec.Status := Rec.Status::Completed;
-                    Rec.Modify();
-                end;
-            }
+            //     trigger OnAction()
+            //     begin
+            //         Rec.Status := Rec.Status::confirmed;
+            //         Rec.Modify();
+            //     end;
+            // }
+
 
             action(Cancel)
             {
@@ -121,7 +132,7 @@ page 50107 "Appointment Card"
 
                 trigger OnAction()
                 begin
-                    Rec.Status := Rec.Status::Canceled;
+                    Rec.Status := Rec.Status::Pending;
                     Rec.Modify();
                 end;
             }
@@ -140,25 +151,32 @@ page 50107 "Appointment Card"
             AgencyName := '';
             AgencyAddress := '';
         end;
-        //CLIENT
+
+        LoadVehicleInformations();
+    end;
+
+    local procedure LoadVehicleInformations()
+    begin
+        // VEHICLE
         if VehicleRec.Get(Rec.NumVehicle) then begin
+
+            MakeCode := VehicleRec."Make Code";
+            ModelCode := VehicleRec."Model Code";
+
+            // CLIENT
             if ClientRec.Get(VehicleRec.NumCustomer) then begin
                 ClientName := ClientRec.Name;
                 ClientPhone := ClientRec.Phone;
-            end
-            else begin
+            end else begin
                 ClientName := '';
                 ClientPhone := '';
             end;
-        end;
-        //VEHICLE
-        if VehicleRec.Get(Rec.NumVehicle) then begin
-            MakeCode := VehicleRec."Make Code";
-            ModelCode := VehicleRec."Model Code";
-        end
-        else begin
+
+        end else begin
             MakeCode := '';
             ModelCode := '';
+            ClientName := '';
+            ClientPhone := '';
         end;
     end;
 

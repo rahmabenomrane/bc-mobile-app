@@ -2,35 +2,25 @@ enum 50116 ServiceType
 {
     Extensible = true;
 
-    value(0; Maintenance)
-    {
-        Caption = 'Maintenance';
-    }
-
-    value(1; Reparation)
-    {
-        Caption = 'Réparation';
-    }
-
-    value(2; Diagnostic)
-    {
-        Caption = 'Diagnostic';
-    }
-
-    value(3; Vidange)
+    value(0; Vidange)
     {
         Caption = 'Vidange';
     }
 
-    value(4; Revision)
+    value(1; "Diagnostic électronique")
     {
-        Caption = 'Révision';
+        Caption = 'Diagnostic électronique';
     }
 
-    value(5; Carrosserie)
+    value(2; Pneumatiques)
     {
-        Caption = 'Carrosserie';
+        Caption = 'Pneumatiques';
     }
 
-  
+    value(4; Climatisation)
+    {
+        Caption = 'Climatisation';
+    }
+
+
 }

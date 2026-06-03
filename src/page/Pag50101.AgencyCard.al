@@ -27,6 +27,7 @@ page 50101 "Agency Card"
                 }
             }
 
+
             group(Contact)
             {
                 Caption = 'Contact Details';
@@ -60,6 +61,13 @@ page 50101 "Agency Card"
                 {
                     ApplicationArea = All;
                 }
+            }
+            part(Ponts; "CarLift SubPage")
+            {
+                ApplicationArea = All;
+                Caption = 'Ponts';
+
+                SubPageLink = "Agency Code" = field(Code);
             }
         }
     }

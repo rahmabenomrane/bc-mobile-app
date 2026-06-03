@@ -37,7 +37,7 @@ class _MainScreenState extends State<MainScreen> {
       RdvsList(),
       Container(),
       Container(),
-      MapScreen(),
+      // MapScreen(),
     ];
 
     return Scaffold(

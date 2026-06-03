@@ -248,22 +248,36 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   Future<void> _login() async {
     setState(() => _isLoading = true);
     try {
-      // AuthService.login() extrait et persiste le customerNumber
       final data = await AuthService.login(
         phoneController.text.trim(),
         passwordController.text,
       );
 
-      // Récupère le customerNumber qui vient d'être persisté
+      // Vérifier que le token est bien stocké
+      final storedToken = await AuthService.getSavedToken();
+      print("=== APRÈS LOGIN ===");
+      print("Token stocké: ${storedToken != null ? 'OUI' : 'NON'}");
+      if (storedToken != null) {
+        print("Token (début): ${storedToken.substring(0, 50)}...");
+      }
+
+      if (storedToken == null) {
+        throw Exception("Le token n'a pas été stocké correctement");
+      }
+
       final customerNumber = await AuthService.getSavedCustomerNumber();
-      print("Navigation avec customerNumber : $customerNumber");
+      print("CustomerNumber stocké: $customerNumber");
+
+      if (customerNumber == null) {
+        throw Exception("Le customerNumber n'a pas été stocké correctement");
+      }
 
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
           builder: (_) => MainScreen(
-            token:          (data["token"] ?? data["Token"] ?? "").toString(),
-            customerNumber: customerNumber, // ← extrait de la réponse API
+            token: storedToken,
+            customerNumber: customerNumber,
           ),
         ),
       );
@@ -273,7 +287,6 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
       if (mounted) setState(() => _isLoading = false);
     }
   }
-
   // ── REGISTER ─────────────────────────────────────────────────────────────
   Future<void> _register() async {
     setState(() => _isLoading = true);

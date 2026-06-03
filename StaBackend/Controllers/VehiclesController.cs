@@ -19,7 +19,12 @@ namespace StaBackend.Controllers
             _bcService = bcService;
             _logger = logger;
         }
-
+        [AllowAnonymous]
+        [HttpGet("test")]
+        public IActionResult Test()
+        {
+            return Ok(new { message = "API fonctionne", status = "OK" });
+        }
 
         [Authorize]
         [HttpGet]

@@ -3,6 +3,8 @@ import 'package:appointments_application/screen/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../Service/appointment_service.dart';
+
 // Mock data model
 class RdvModel {
   final String agence;
@@ -33,14 +35,16 @@ class RdvsList extends StatefulWidget {
 
 class _RdvsListState extends State<RdvsList> {
 
-  // ── Mock Data ──────────────────────────────────────
-  final List<RdvModel> rdvs = [
-    RdvModel(agence: "Agence Lac1",   service: "Diagnostic",     date: "19/04/2026", heure: "10h00", duree: "60 min",  status: "confirmé"),
-    RdvModel(agence: "Agence Menzah", service: "Vidange",         date: "25/04/2026", heure: "09h30", duree: "45 min",  status: "en attente"),
-    RdvModel(agence: "Agence Lac1",   service: "Climatisation",   date: "02/05/2026", heure: "14h00", duree: "90 min",  status: "confirmé"),
-    RdvModel(agence: "Agence Ariana", service: "Changement Pneus",date: "10/05/2026", heure: "11h00", duree: "30 min",  status: "terminé"),
-    RdvModel(agence: "Agence Menzah", service: "Carrosserie",     date: "15/05/2026", heure: "15h30", duree: "120 min", status: "en attente"),
-  ];
+
+  @override
+  void initState() {
+    super.initState();
+    loadAppointments();
+  }
+  List<dynamic> rdvs = [];
+  bool loading = true;
+
+  final AppointmentService appointmentService = AppointmentService();
 
   // Couleur selon statut
   Color _statusColor(String status) {
@@ -64,8 +68,8 @@ class _RdvsListState extends State<RdvsList> {
 
   @override
   Widget build(BuildContext context) {
-    final next = rdvs.first; // prochain RDV = premier de la liste
-
+    final next = rdvs.isNotEmpty ? rdvs.first : null;
+    print("Nombre de RDV : ${rdvs.length}");
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -108,7 +112,7 @@ class _RdvsListState extends State<RdvsList> {
                   Text("Prochain Rendez-vous",
                       style: TextStyle(fontSize: 16, color: Palette.secondPageTitleColor)),
                   const SizedBox(height: 4),
-                  Text(next.agence,
+                  Text(next?.agence ?? "Aucun rendez-vous",
                       style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Palette.secondPageTitleColor)),
                   const SizedBox(height: 10),
 
@@ -131,7 +135,7 @@ class _RdvsListState extends State<RdvsList> {
                           children: [
                             Icon(Icons.calendar_today, size: 14, color: Palette.secondPageIconColor),
                             const SizedBox(width: 5),
-                            Text("${next.date}  ${next.heure}",
+                            Text("${next?.date}  ${next?.heure}",
                                 style: TextStyle(fontSize: 11, color: Palette.secondPageIconColor)),
                           ],
                         ),
@@ -153,7 +157,7 @@ class _RdvsListState extends State<RdvsList> {
                           children: [
                             Icon(Icons.handyman_rounded, size: 16, color: Palette.secondPageIconColor),
                             const SizedBox(width: 6),
-                            Text(next.service,
+                            Text(next?.serviceCode?.toString() ?? "",
                                 style: TextStyle(fontSize: 13, color: Palette.secondPageIconColor)),
                           ],
                         ),
@@ -243,13 +247,13 @@ class _RdvsListState extends State<RdvsList> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(rdv.service,
+                                      Text(rdv["serviceCode"],
                                           style: TextStyle(
                                               fontSize: 15,
                                               fontWeight: FontWeight.w600,
                                               color: Palette.circuitsColor)),
                                       const SizedBox(height: 4),
-                                      Text(rdv.agence,
+                                      Text(rdv["agencyCode"],
                                           style: TextStyle(
                                               fontSize: 13,
                                               color: Palette.setsColor)),
@@ -258,14 +262,19 @@ class _RdvsListState extends State<RdvsList> {
                                         children: [
                                           Icon(Icons.calendar_today, size: 12, color: Palette.loopColor),
                                           const SizedBox(width: 4),
-                                          Text("${rdv.date} · ${rdv.heure}",
+                                          Text("${rdv["date"]} · ${rdv.heure}",
                                               style: TextStyle(fontSize: 12, color: Palette.loopColor)),
                                           const SizedBox(width: 10),
                                           Icon(Icons.timer, size: 12, color: Palette.loopColor),
-                                          const SizedBox(width: 4),
-                                          Text(rdv.duree,
-                                              style: TextStyle(fontSize: 12, color: Palette.loopColor)),
-                                        ],
+
+                                         ],
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        "Véhicule : ${rdv["numVehicle"]}",
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -274,7 +283,7 @@ class _RdvsListState extends State<RdvsList> {
                                 // Badge statut
                                 Column(
                                   children: [
-                                    Icon(_statusIcon(rdv.status),
+                                    Icon(_statusIcon(rdv["status"]),
                                         color: _statusColor(rdv.status), size: 20),
                                     const SizedBox(height: 4),
                                     Text(rdv.status,
@@ -302,5 +311,31 @@ class _RdvsListState extends State<RdvsList> {
       ),
 
     );
+  }
+
+  Future<void> loadAppointments() async {
+    try {
+
+      final customerNumber =
+      Get.arguments["customerNumber"];
+
+      final data =
+      await appointmentService
+          .getCustomerAppointments(
+          customerNumber);
+
+      setState(() {
+        rdvs = data;
+        loading = false;
+      });
+
+    } catch (e) {
+
+      print(e);
+
+      setState(() {
+        loading = false;
+      });
+    }
   }
 }
