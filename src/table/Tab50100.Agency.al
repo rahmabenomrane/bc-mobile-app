@@ -13,7 +13,6 @@ table 50100 Agency
             end;
         }
 
-
         field(2; Name; Text[100]) { }
         field(3; Address; Text[150]) { }
         field(4; PhoneNo; Text[20]) { }
@@ -34,7 +33,6 @@ table 50100 Agency
             end;
         }
         field(7; "Office hours"; Text[100]) { }
-        // Latitude, Longitude
         field(8; Latitude; Decimal)
         {
             MinValue = -90;

@@ -5,9 +5,9 @@ enum 50117 "Appointment Status"
     {
         Caption = 'Pending';
     }
-    value(1; "Completed")
+    value(1; "confirmed")
     {
-        Caption = 'Completed';
+        Caption = 'confirmed';
     }
     value(2; "Cancelled")
     {

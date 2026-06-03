@@ -28,4 +28,7 @@ class Palette {
   static Color loopColor = const Color(0xFF6d8dea);
   static Color setsColor = const Color(0xFF9999a9);
   static Color circuitsColor = const Color(0xFF2f2f51);
+  static const Color green = Color(0xFF2D8C5A);
+  static const Color orange = Color(0xFFE07B2A);
+  static const Color red = Color(0xFFC13B3B);
 }

@@ -13,9 +13,6 @@ table 50108 ServiceAgence
         {
             TableRelation = Service."ServiceCode";
         }
-
-        field(3; "Prix"; Decimal) { }
-        field(4; "Duree"; Integer) { } 
         field(5; "Disponible"; Boolean) { }
     }
 

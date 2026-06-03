@@ -25,19 +25,9 @@ page 50125 AgencyServiceAPI
                     Caption = 'Service Code';
                 }
 
-                field(prix; Rec."Prix")
-                {
-                    Caption = 'Price';
-                }
-
-                field(duree; Rec."Duree")
-                {
-                    Caption = 'Duration';
-                }
-
                 field(disponible; Rec."Disponible")
                 {
-                    Caption = 'Available';
+                    Caption = 'Disponible';
                 }
             }
         }

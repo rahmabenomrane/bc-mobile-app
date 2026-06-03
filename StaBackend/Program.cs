@@ -1,56 +1,93 @@
-using StaBackend.Config;
-using StaBackend.Services;
+using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using StaBackend.Services;
+using StaBackend.Config;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Config BC depuis appsettings.json
-builder.Services.Configure<BcSettings>(
-    builder.Configuration.GetSection("BcSettings")
-);
+// 1. Lire la configuration JWT
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var jwtAudience = builder.Configuration["Jwt:Audience"];
 
-builder.Services.AddHttpClient();
-builder.Services.AddScoped<IBcService, BcService>();
+Console.WriteLine($"JWT Config - Key: {!string.IsNullOrEmpty(jwtKey)}, Issuer: {jwtIssuer}, Audience: {jwtAudience}");
+
+// 2. Configuration JWT 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = false;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey ?? "FALLBACK_KEY_DO_NOT_USE_IN_PRODUCTION")),
+        ValidateIssuer = true,
+        ValidIssuer = jwtIssuer,
+        ValidateAudience = true,
+        ValidAudience = jwtAudience,
+        ValidateLifetime = true,
+        ClockSkew = TimeSpan.Zero  // ← Important pour éviter les problèmes d'expiration
+    };
+
+    // Ajoutez des logs pour debug
+    options.Events = new JwtBearerEvents
+    {
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine($"🔴 JWT Authentication Failed: {context.Exception.Message}");
+            if (context.Exception is SecurityTokenExpiredException)
+                Console.WriteLine("   → Token expiré");
+            if (context.Exception is SecurityTokenInvalidSignatureException)
+                Console.WriteLine("   → Signature invalide (clé incorrecte)");
+            if (context.Exception is SecurityTokenInvalidIssuerException)
+                Console.WriteLine($"   → Issuer invalide (attendu: {jwtIssuer})");
+            if (context.Exception is SecurityTokenInvalidAudienceException)
+                Console.WriteLine($"   → Audience invalide (attendu: {jwtAudience})");
+            return Task.CompletedTask;
+        },
+        OnTokenValidated = context =>
+        {
+            Console.WriteLine("✅ JWT Token validé avec succès!");
+            var claims = context.Principal?.Claims;
+            if (claims != null)
+            {
+                foreach (var claim in claims)
+                {
+                    if (claim.Type == "CustomerNumber")
+                        Console.WriteLine($"   → CustomerNumber: {claim.Value}");
+                }
+            }
+            return Task.CompletedTask;
+        }
+    };
+});
+
+builder.Services.AddAuthorization();
+
+// 3. Autres services
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll", policy =>
-        policy.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-});
-builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = "StaBackend",
-            ValidAudience = "StaMobile",
-            IssuerSigningKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "fallback-key-min-32-chars-long!!")
-            )
-        };
-    });
-
-builder.Services.AddAuthorization();
+// 4. Configuration BcSettings
+builder.Services.Configure<BcSettings>(builder.Configuration.GetSection("BcSettings"));
+builder.Services.AddSingleton<IBcService, BcService>();
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
-app.UseCors("AllowAll");
-
-app.UseAuthentication();
+app.UseAuthentication();  
 app.UseAuthorization();
 
 app.MapControllers();

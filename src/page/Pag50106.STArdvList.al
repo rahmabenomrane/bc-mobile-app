@@ -29,7 +29,7 @@ page 50106 "STA rdv List"
                 {
                     ApplicationArea = All;
                 }
-                field("Time"; Rec."Time")
+                field("StartTime"; Rec."StartTime")
                 {
                     ApplicationArea = All;
                 }
@@ -46,37 +46,37 @@ page 50106 "STA rdv List"
         }
     }
 
-    actions
-    {
-        area(Processing)
-        {
-            action(MarkCompleted)
-            {
-                Caption = 'Mark as Completed';
-                Image = Approve;
-                ApplicationArea = All;
+    // actions
+    // {
+    //     area(Processing)
+    //     {
+    //         action(MarkCompleted)
+    //         {
+    //             Caption = 'Mark as Completed';
+    //             Image = Approve;
+    //             ApplicationArea = All;
 
-                trigger OnAction()
-                begin
-                    Rec.Status := Rec.Status::Completed;
-                    Rec.Modify();
-                end;
-            }
+    //             trigger OnAction()
+    //             begin
+    //                 Rec.Status := Rec.Status::Completed;
+    //                 Rec.Modify();
+    //             end;
+    //         }
 
-            action(CancelAppointment)
-            {
-                Caption = 'Cancel Appointment';
-                Image = Cancel;
-                ApplicationArea = All;
+    //         action(CancelAppointment)
+    //         {
+    //             Caption = 'Cancel Appointment';
+    //             Image = Cancel;
+    //             ApplicationArea = All;
 
-                trigger OnAction()
-                begin
-                    Rec.Status := Rec.Status::Canceled;
-                    Rec.Modify();
-                end;
-            }
-        }
-    }
+    //             trigger OnAction()
+    //             begin
+    //                 Rec.Status := Rec.Status::Canceled;
+    //                 Rec.Modify();
+    //             end;
+    //         }
+    //     }
+    // }
 
     var
         StatusStyle: Text;
@@ -84,12 +84,12 @@ page 50106 "STA rdv List"
     trigger OnAfterGetRecord()
     begin
         case Rec.Status of
-            Rec.Status::Scheduled:
-                StatusStyle := 'Standard';
-            Rec.Status::Canceled:
-                StatusStyle := 'Unfavorable';
-            Rec.Status::Completed:
+            Rec.Status::Pending:
+                StatusStyle := 'Ambiguous';
+            Rec.Status::confirmed:
                 StatusStyle := 'Favorable';
+            Rec.Status::Cancelled:
+                StatusStyle := 'Unfavorable';
         end;
         if AgencyRec.Get(Rec."Agency Code") then begin
             AgencyName := AgencyRec.Name;
