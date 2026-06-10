@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using StaBackend.Services;
 using Microsoft.AspNetCore.Authorization;
-
+using StaBackend.Models;
 
 namespace StaBackend.Controllers
 {
@@ -27,6 +27,34 @@ namespace StaBackend.Controllers
         }
 
         [Authorize]
+        [HttpPost]
+        public async Task<IActionResult> CreateVehicle([FromBody] CreateVehicleDto dto)
+        {
+            try
+            {
+                var customerNum = User.FindFirst("CustomerNumber")?.Value;
+
+                if (string.IsNullOrWhiteSpace(customerNum))
+                    return Unauthorized(new { success = false, message = "CustomerNumber manquant" });
+
+       
+                dto.NumCustomer = customerNum;
+
+                var success = await _bcService.CreateVehicleAsync(dto);
+
+                if (!success)
+                    return BadRequest(new { success = false, message = "Erreur lors de la création" });
+
+                return Ok(new { success = true, message = "Véhicule créé avec succès" });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return StatusCode(500);
+            }
+        }
+
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> GetUserVehicles()
         {
@@ -41,6 +69,9 @@ namespace StaBackend.Controllers
 
                 Console.WriteLine($"CustomerNum = {customerNum}");
 
+                Console.WriteLine("=================================");
+                Console.WriteLine($"Customer JWT = {customerNum}");
+                Console.WriteLine("=================================");
                 if (string.IsNullOrWhiteSpace(customerNum))
                 {
                     Console.WriteLine("CustomerNumber NULL");

@@ -2,8 +2,8 @@ import 'package:appointments_application/config/Palette.dart';
 import 'package:appointments_application/screen/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../Service/appointment_service.dart';
+import 'appointment_slot_screen.dart';
 
 // Mock data model
 class RdvModel {
@@ -12,7 +12,7 @@ class RdvModel {
   final String date;
   final String heure;
   final String duree;
-  final String status; // "confirmé", "en attente", "terminé"
+  final String status;
 
   RdvModel({
     required this.agence,
@@ -25,13 +25,20 @@ class RdvModel {
 }
 
 class RdvsList extends StatefulWidget {
+final Function(int)? onNavigate;
+final String customerNumber;
+  const RdvsList({
+    super.key,
+    required this.customerNumber,
+    this.onNavigate,
+  });
 
 
+@override
+State<RdvsList> createState() => _RdvsListState();
 
-  get onNavigate => null;
-  @override
-  State<RdvsList> createState() => _RdvsListState();
 }
+
 
 class _RdvsListState extends State<RdvsList> {
 
@@ -43,7 +50,50 @@ class _RdvsListState extends State<RdvsList> {
   }
   List<dynamic> rdvs = [];
   bool loading = true;
+  void _rescheduleAppointment(dynamic rdv) async {
+    final result = await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Reporter le rendez-vous"),
+          content: const Text("Voulez-vous reporter ce RDV ?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Annuler"),
+            ),
+            ElevatedButton.icon(
+              onPressed: () async {
+                Navigator.pop(context, true);
 
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => AppointmentSlotScreen(
+                      mode: "reschedule",
+                      existingAppointment: rdv,
+                    ),
+                  ),
+                );
+
+                if (result == true) {
+                  await loadAppointments();
+                }
+              },
+              icon: const Icon(Icons.schedule),
+              label: const Text("Reporter"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            )
+          ],
+        );
+      },
+    );
+  }
   final AppointmentService appointmentService = AppointmentService();
 
   // Couleur selon statut
@@ -94,12 +144,17 @@ class _RdvsListState extends State<RdvsList> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Barre navigation
+                  // Barre navigation
                   Row(
                     children: [
                       InkWell(
-              onTap: () {
-      Get.back();
-      },
+                        onTap: () {
+                          if (widget.onNavigate != null) {
+                            widget.onNavigate!(0);  // 0 = index de HomePage
+                          } else {
+                            Get.back();  // Fallback
+                          }
+                        },
                         child: Icon(Icons.arrow_back_ios, size: 20, color: Palette.secondPageIconColor),
                       ),
                       Expanded(child: Container()),
@@ -112,7 +167,7 @@ class _RdvsListState extends State<RdvsList> {
                   Text("Prochain Rendez-vous",
                       style: TextStyle(fontSize: 16, color: Palette.secondPageTitleColor)),
                   const SizedBox(height: 4),
-                  Text(next?.agence ?? "Aucun rendez-vous",
+                  Text(next != null ? next["agencyCode"] : "Aucun rendez-vous",
                       style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold, color: Palette.secondPageTitleColor)),
                   const SizedBox(height: 10),
 
@@ -135,7 +190,10 @@ class _RdvsListState extends State<RdvsList> {
                           children: [
                             Icon(Icons.calendar_today, size: 14, color: Palette.secondPageIconColor),
                             const SizedBox(width: 5),
-                            Text("${next?.date}  ${next?.heure}",
+                          Text(
+                            next != null
+                                ? "${next["startTime"].toString().substring(0,16)}"
+                                : "",
                                 style: TextStyle(fontSize: 11, color: Palette.secondPageIconColor)),
                           ],
                         ),
@@ -157,7 +215,8 @@ class _RdvsListState extends State<RdvsList> {
                           children: [
                             Icon(Icons.handyman_rounded, size: 16, color: Palette.secondPageIconColor),
                             const SizedBox(width: 6),
-                            Text(next?.serviceCode?.toString() ?? "",
+                          Text(
+                            next != null ? next["serviceCode"] ?? "" : "",
                                 style: TextStyle(fontSize: 13, color: Palette.secondPageIconColor)),
                           ],
                         ),
@@ -207,6 +266,8 @@ class _RdvsListState extends State<RdvsList> {
                         separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
                           final rdv = rdvs[index];
+                          print("Rdv = $rdv");
+
                           return Container(
                             padding: const EdgeInsets.all(15),
                             decoration: BoxDecoration(
@@ -253,7 +314,7 @@ class _RdvsListState extends State<RdvsList> {
                                               fontWeight: FontWeight.w600,
                                               color: Palette.circuitsColor)),
                                       const SizedBox(height: 4),
-                                      Text(rdv["agencyCode"],
+                                      Text(rdv["agencyName"],
                                           style: TextStyle(
                                               fontSize: 13,
                                               color: Palette.setsColor)),
@@ -262,35 +323,82 @@ class _RdvsListState extends State<RdvsList> {
                                         children: [
                                           Icon(Icons.calendar_today, size: 12, color: Palette.loopColor),
                                           const SizedBox(width: 4),
-                                          Text("${rdv["date"]} · ${rdv.heure}",
+                                          Text(rdv["startTime"]
+                                              .toString()
+                                              .split("T")[0]
+                                              .substring(0, 10),
                                               style: TextStyle(fontSize: 12, color: Palette.loopColor)),
                                           const SizedBox(width: 10),
+                                          Text(
+                                            rdv["startTime"]
+                                                .toString()
+                                                .split("T")[1]
+                                                .substring(0, 5),
+                                          ),
                                           Icon(Icons.timer, size: 12, color: Palette.loopColor),
 
                                          ],
                                       ),
                                       const SizedBox(height: 6),
                                       Text(
-                                        "Véhicule : ${rdv["numVehicle"]}",
+                                        "Véhicule : ${rdv["registrationNumber"]}",
                                         style: const TextStyle(
                                           fontWeight: FontWeight.bold,
                                         ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Row(
+                                        children: [
+                                          Text(rdv["mileage"].toString(),
+                                              style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Palette.setsColor)),
+                                          const SizedBox(height: 6),
+                                          Text("KM")
+                                        ],
                                       ),
                                     ],
                                   ),
                                 ),
 
-                                // Badge statut
+                                // Badge statut + Button section
                                 Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
-                                    Icon(_statusIcon(rdv["status"]),
-                                        color: _statusColor(rdv.status), size: 20),
-                                    const SizedBox(height: 4),
-                                    Text(rdv.status,
-                                        style: TextStyle(
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          _statusIcon(rdv["status"] ?? ""),
+                                          color: _statusColor(rdv["status"] ?? ""),
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          rdv["status"] ?? "",
+                                          style: TextStyle(
                                             fontSize: 10,
-                                            color: _statusColor(rdv.status),
-                                            fontWeight: FontWeight.w600)),
+                                            color: _statusColor(rdv["status"] ?? ""),
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    ElevatedButton.icon(
+                                      onPressed: () => _rescheduleAppointment(rdv),
+                                      icon: const Icon(Icons.schedule, size: 16),
+                                      label: const Text("Reporter", style: TextStyle(fontSize: 12)),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.orange,
+                                        foregroundColor: Colors.white,
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                                        minimumSize: const Size(0, 32),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                      ),
+                                    )
                                   ],
                                 ),
                               ],
@@ -316,23 +424,23 @@ class _RdvsListState extends State<RdvsList> {
   Future<void> loadAppointments() async {
     try {
 
-      final customerNumber =
-      Get.arguments["customerNumber"];
+      final customerNumber =widget.customerNumber;
+
 
       final data =
       await appointmentService
           .getCustomerAppointments(
           customerNumber);
-
+      print("data");
+      print(data);
       setState(() {
         rdvs = data;
         loading = false;
       });
-
+      print("CustomerNumber = $customerNumber");
     } catch (e) {
 
       print(e);
-
       setState(() {
         loading = false;
       });

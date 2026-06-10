@@ -1,20 +1,25 @@
-// lib/screen/VehicleSelectionScreen.dart
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../Service/vehicle_service.dart';
 import '../models/vehicle_model.dart';
 import '../config/Palette.dart';
+import 'AppFooter.dart';
 import 'step_indicator.dart';
 import 'Locations_page.dart';
 import 'add_vehicle.dart';
 
 class VehicleSelectionScreen extends StatefulWidget {
   final String customerNumber;
+  final bool appointmentMode;
+  final Function(int)? onNavigate;
 
   const VehicleSelectionScreen({
     Key? key,
     required this.customerNumber,
+    this.appointmentMode = true,
+    this.onNavigate,
   }) : super(key: key);
 
   @override
@@ -94,19 +99,33 @@ class _VehicleSelectionScreenState extends State<VehicleSelectionScreen> {
   // ─── Build ─────────────────────────────────────────────────────────────────
 
   @override
+
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Palette.homePageBackground,
+
       body: Column(
         children: [
           _buildHeader(context),
           Expanded(child: _buildBody()),
         ],
       ),
+
+      bottomNavigationBar: !widget.appointmentMode
+          ? SizedBox(
+        height: 90,
+        child: AppFooter(
+          currentIndex: 0,
+          onTap: (i) {
+            widget.onNavigate?.call(i);
+            Navigator.pop(context);
+          },
+        ),
+      )
+          : null,
     );
   }
-
-  // ─── Header avec gradient + step indicator ────────────────────────────────
+  // ─── Header + step indicator ────────────────────────────────
 
   Widget _buildHeader(BuildContext context) {
     return Container(
@@ -149,7 +168,9 @@ class _VehicleSelectionScreenState extends State<VehicleSelectionScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Choisir un véhicule',
+                          widget.appointmentMode
+                              ? 'Choisir un véhicule'
+                              : 'Mes véhicules',
                           style: GoogleFonts.playfairDisplay(
                             fontSize: 20,
                             fontWeight: FontWeight.w500,
@@ -196,21 +217,24 @@ class _VehicleSelectionScreenState extends State<VehicleSelectionScreen> {
               const SizedBox(height: 20),
 
               // Step indicator
+              if (widget.appointmentMode) ...[
+              const SizedBox(height: 20),
+
               StepIndicator(currentStep: 1, totalSteps: 5),
+
               const SizedBox(height: 6),
 
-              // Labels étapes
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  _StepLabel('Véhicule',     done: false, active: true),
-                  _StepLabel('Agence',       done: false, active: false),
-                  _StepLabel('Service',      done: false, active: false),
-                  _StepLabel('Créneau',      done: false, active: false),
-                  _StepLabel('Confirmation', done: false, active: false),
-                ],
-              ),
-            ],
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+              _StepLabel('Véhicule', active: true, done: false),
+              _StepLabel('Agence', active: false, done: false),
+              _StepLabel('Service', active: false, done: false),
+              _StepLabel('Créneau', active: false, done: false),
+    _StepLabel('Confirmation', active: false, done: false),
+    ],
+    ),
+    ],]
           ),
         ),
       ),
@@ -356,6 +380,7 @@ class _VehicleSelectionScreenState extends State<VehicleSelectionScreen> {
             ),
           ),
           const Spacer(),
+          widget.appointmentMode?
           Container(
             padding:
             const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -371,24 +396,29 @@ class _VehicleSelectionScreenState extends State<VehicleSelectionScreen> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-          ),
+          ):const Spacer(),
         ],
       ),
     );
   }
 
-  // ─── Carte véhicule ────────────────────────────────────────────────────────
+  // ─── Carte véhicule
 
   Widget _buildVehicleCard(Vehicle vehicle) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => MapScreen(selectedVehicle: vehicle),
-          ),
-        );
+        if (widget.appointmentMode) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => MapScreen(
+                selectedVehicle: vehicle,
+              ),
+            ),
+          );
+        }
       },
+
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeInOut,
@@ -471,7 +501,7 @@ class _VehicleSelectionScreenState extends State<VehicleSelectionScreen> {
                           ),
                           const SizedBox(width: 3),
                           Text(
-                            vehicle.numVehicle,
+                            vehicle.registrationNumber.toString(),
                             style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
@@ -536,7 +566,6 @@ class _VehicleSelectionScreenState extends State<VehicleSelectionScreen> {
   }
 }
 
-// ─── Micro-widget step label ───────────────────────────────────────────────
 
 class _StepLabel extends StatelessWidget {
   final String text;

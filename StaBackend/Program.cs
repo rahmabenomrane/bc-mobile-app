@@ -70,7 +70,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// 3. Autres services
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -78,6 +78,9 @@ builder.Services.AddSwaggerGen();
 // 4. Configuration BcSettings
 builder.Services.Configure<BcSettings>(builder.Configuration.GetSection("BcSettings"));
 builder.Services.AddSingleton<IBcService, BcService>();
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddSingleton<ConfirmationTokenStore>();
+builder.Services.AddScoped<EmailService>();
 
 var app = builder.Build();
 
@@ -87,7 +90,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseAuthentication();  
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

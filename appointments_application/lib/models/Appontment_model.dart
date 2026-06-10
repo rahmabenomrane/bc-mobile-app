@@ -6,7 +6,9 @@ class AppointmentModel {
   final String? status;
   final String StartTime;
   final String EndTime;
-
+  final String AgencyName;
+  final String? appointmentNo;
+  final String? numVehicle;
 
   AppointmentModel({
     required this.agencyCode,
@@ -16,6 +18,9 @@ class AppointmentModel {
     this.status,
     required this.StartTime,
     required this.EndTime,
+    required this.AgencyName,
+    this.appointmentNo,
+    this.numVehicle,
   });
 
   factory AppointmentModel.fromJson(Map<String, dynamic> json) {
@@ -25,8 +30,11 @@ class AppointmentModel {
       date: json['date'] ?? '',
       pontId: json['pontId'],
       status: json['status'],
-      StartTime: json['StartTime'] ?? '',
-      EndTime: json['EndTime'] ?? '',
+      StartTime: json['startTime'] ?? '',
+      EndTime: json['endTime'] ?? '',
+      AgencyName: json['agencyName'] ?? '',
+      appointmentNo: json['appointmentNo'],
+      numVehicle: json['numVehicle'],
     );
   }
 }

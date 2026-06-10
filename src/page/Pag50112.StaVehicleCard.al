@@ -48,7 +48,7 @@ page 50112 StaVehicleCard
                 {
                     ApplicationArea = All;
                 }
-                field("Registration number"; Rec."Registration number")
+                field("Registration Number"; Rec."RegistrationNumber")
                 {
                     ApplicationArea = All;
                 }
@@ -89,5 +89,5 @@ page 50112 StaVehicleCard
             }
         }
     }
-   
+
 }

@@ -1,5 +1,3 @@
-// lib/models/vehicle_model.dart
-
 class Vehicle {
   final String id;
   final String numVehicle;
@@ -8,6 +6,7 @@ class Vehicle {
   final String modelCode;
   final String motorisation;
   final String? registrationNumber;
+  final String mileage;
 
   Vehicle({
     required this.id,
@@ -17,6 +16,7 @@ class Vehicle {
     required this.modelCode,
     required this.motorisation,
     this.registrationNumber,
+    required this.mileage
   });
 
   // Convertir JSON → Vehicle
@@ -29,6 +29,7 @@ class Vehicle {
       modelCode: json['modelCode']?.toString() ?? '',
       motorisation: json['motorisation']?.toString() ?? '',
       registrationNumber: json['registrationNumber']?.toString() ?? json['Registration_number']?.toString(),
+      mileage: json['mileage']?.toString() ?? '',
     );
   }
 

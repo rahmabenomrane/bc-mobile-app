@@ -248,18 +248,15 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
   Future<void> _login() async {
     setState(() => _isLoading = true);
     try {
-      final data = await AuthService.login(
+      // ✅ Appeler le login D'ABORD
+      await AuthService.login(
         phoneController.text.trim(),
         passwordController.text,
       );
 
-      // Vérifier que le token est bien stocké
       final storedToken = await AuthService.getSavedToken();
       print("=== APRÈS LOGIN ===");
       print("Token stocké: ${storedToken != null ? 'OUI' : 'NON'}");
-      if (storedToken != null) {
-        print("Token (début): ${storedToken.substring(0, 50)}...");
-      }
 
       if (storedToken == null) {
         throw Exception("Le token n'a pas été stocké correctement");
@@ -267,6 +264,10 @@ class _LoginSignupScreenState extends State<LoginSignupScreen> {
 
       final customerNumber = await AuthService.getSavedCustomerNumber();
       print("CustomerNumber stocké: $customerNumber");
+
+      if (customerNumber != null) {
+        await AuthService.fetchAndStoreEmail(customerNumber);
+      }
 
       if (customerNumber == null) {
         throw Exception("Le customerNumber n'a pas été stocké correctement");

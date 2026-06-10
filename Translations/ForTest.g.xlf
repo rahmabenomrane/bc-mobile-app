@@ -63,6 +63,11 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Table Appointment - Field Agency Code - Property Caption</note>
         </trans-unit>
+        <trans-unit id="Table 1067617449 - Field 2251746532 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Agency Name</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table Appointment - Field Agency Name - Property Caption</note>
+        </trans-unit>
         <trans-unit id="Table 1067617449 - Field 1894099588 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Appointment No.</source>
           <note from="Developer" annotates="general" priority="2"></note>
@@ -383,10 +388,10 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Table StaVehicle - Field NumVehicle - Method OnValidate - NamedType tcDMS001</note>
         </trans-unit>
-        <trans-unit id="Table 4075920298 - Field 3303681198 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Registration number</source>
+        <trans-unit id="Table 4075920298 - Field 2659418638 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>RegistrationNumber</source>
           <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Table StaVehicle - Field Registration number - Property Caption</note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table StaVehicle - Field RegistrationNumber - Property Caption</note>
         </trans-unit>
         <trans-unit id="Page 2682542487 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Agences</source>
@@ -553,6 +558,11 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page AppointmentAPI - Control AgencyCode - Property Caption</note>
         </trans-unit>
+        <trans-unit id="Page 4195881585 - Control 3911286388 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Agency Name</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page AppointmentAPI - Control AgencyName - Property Caption</note>
+        </trans-unit>
         <trans-unit id="Page 4195881585 - Control 4238784354 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Appointment No.</source>
           <note from="Developer" annotates="general" priority="2"></note>
@@ -573,6 +583,11 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page AppointmentAPI - Control NumVehicle - Property Caption</note>
         </trans-unit>
+        <trans-unit id="Page 4195881585 - Control 1014281348 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Pont Id</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page AppointmentAPI - Control PontId - Property Caption</note>
+        </trans-unit>
         <trans-unit id="Page 4195881585 - Control 4230426132 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Service Code</source>
           <note from="Developer" annotates="general" priority="2"></note>
@@ -587,6 +602,31 @@
           <source>Status</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page AppointmentAPI - Control Status - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2563306001 - Control 641765680 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Active</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page CarLiftAPI - Control active - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2563306001 - Control 641603406 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Agency Code</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page CarLiftAPI - Control agencyCode - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2563306001 - Control 707985127 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Code</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page CarLiftAPI - Control code - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2563306001 - Control 2144361855 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Daily Capacity</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page CarLiftAPI - Control dailyCapacity - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2563306001 - Control 4232699882 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Description</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page CarLiftAPI - Control description - Property Caption</note>
         </trans-unit>
         <trans-unit id="Page 1420740498 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Customer Claim API</source>
@@ -884,7 +924,7 @@
           <note from="Xliff Generator" annotates="general" priority="3">Enum MotorisationType - EnumValue Diesel - Property Caption</note>
         </trans-unit>
         <trans-unit id="Enum 112536264 - EnumValue 3468637547 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Électrique</source>
+          <source>Electrique</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Enum MotorisationType - EnumValue Electrique - Property Caption</note>
         </trans-unit>

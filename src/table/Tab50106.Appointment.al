@@ -15,6 +15,11 @@ table 50106 Appointment
             Caption = 'Agency Code';
             TableRelation = Agency.Code;
         }
+        field(12; "Agency Name"; Code[20])
+        {
+            Caption = 'Agency Name';
+            TableRelation = Agency.Name;
+        }
 
         field(4; "Service Code"; Code[20])
         {

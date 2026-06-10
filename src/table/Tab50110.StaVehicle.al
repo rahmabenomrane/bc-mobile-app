@@ -39,14 +39,14 @@ table 50110 StaVehicle
         field(3; "Model Code"; Code[20])
         {
             Caption = 'Model Code';
-            TableRelation = Model.Code where("Make Code" = field("Make Code"));
+            // TableRelation = Model.Code where("Make Code" = field("Make Code"));
             DataClassification = CustomerContent;
 
-            trigger OnValidate()
-            begin
-                if "Model Code" <> xRec."Model Code" then
-                    Validate("Motorisation", 0);
-            end;
+            // trigger OnValidate()
+            // begin
+            //     if "Model Code" <> xRec."Model Code" then
+            //         Validate("Motorisation", 0);
+            // end;
         }
 
         field(4; "Motorisation"; enum MotorisationType)
@@ -60,9 +60,9 @@ table 50110 StaVehicle
             TableRelation = StaCustomer."NumCustomer";
             DataClassification = CustomerContent;
         }
-        field(6; "Registration number"; Text[20])
+        field(6; "RegistrationNumber"; Text[20])
         {
-            Caption = 'Registration number';
+            Caption = 'RegistrationNumber';
             DataClassification = CustomerContent;
         }
         field(7; "Mileage"; Integer)
@@ -76,7 +76,7 @@ table 50110 StaVehicle
                 if "Mileage" < 0 then
                     Error('Le kilométrage ne peut pas être négatif.');
             end;
-        
+
         }
     }
 

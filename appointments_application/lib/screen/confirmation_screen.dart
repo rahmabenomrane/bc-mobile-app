@@ -3,16 +3,22 @@ import 'dart:math';
 import 'package:appointments_application/screen/step_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import '../Service/appointment_service.dart';
 import '../config/Palette.dart';
 import '../models/vehicle_model.dart';
 import '../models/service_model.dart';
 
 class ConfirmationScreen extends StatefulWidget {
-  final Vehicle selectedVehicle;
+  final Vehicle? selectedVehicle;
   final Map<String, dynamic> selectedAgency;
   final ServiceModel selectedService;
   final DateTime selectedDate;
   final String selectedSlot;
+  final String appointmentNo;
+  final String customerEmail;
+
+  final Map<String, dynamic>? existingAppointment;
 
   const ConfirmationScreen({
     super.key,
@@ -21,7 +27,12 @@ class ConfirmationScreen extends StatefulWidget {
     required this.selectedService,
     required this.selectedDate,
     required this.selectedSlot,
+    required this.appointmentNo,
+    required this.customerEmail,
+    this.existingAppointment,
   });
+
+
 
   @override
   State<ConfirmationScreen> createState() => _ConfirmationScreenState();
@@ -40,7 +51,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
 
   // Numéro de RDV simulé
   final String _rdvNumber =
-      'RDV-2025-${(4000 + Random().nextInt(999)).toString()}';
+      'RDV-2026-${(4000 + Random().nextInt(999)).toString()}';
 
   @override
   void initState() {
@@ -103,7 +114,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
     return diff <= 0 ? 'Aujourd\'hui' : 'J-$diff';
   }
 
-  // ── Build ────────────────────────────────────────────────────────────────────
+
 
   @override
   Widget build(BuildContext context) {
@@ -130,7 +141,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                     bg: const Color(0xFFEAF3DE),
                     border: const Color(0xFFC0DD97),
                     title: 'Confirmation par e-mail',
-                    body: 'Un e-mail récapitulatif a été envoyé à\nclient@email.com',
+                    body: 'Un e-mail récapitulatif a été envoyé à\n${widget.customerEmail}',
                     titleColor: const Color(0xFF27500A),
                     bodyColor: const Color(0xFF3B6D11),
                     checkColor: const Color(0xFF3B6D11),
@@ -480,10 +491,14 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
             icon: Icons.directions_car_rounded,
             iconColor: const Color(0xFF534AB7),
             label: 'Véhicule',
-            value: widget.selectedVehicle.fullName,
+            value: widget.selectedVehicle?.registrationNumber ??
+                widget.selectedVehicle?.numVehicle ??
+                widget.existingAppointment?['registrationNumber']?.toString() ??
+                widget.existingAppointment?['numVehicle']?.toString() ??
+                'N/D',
             badgeBg: const Color(0xFFEEEDFE),
             badgeFg: const Color(0xFF3C3489),
-            badge: 'Berline',
+            badge: widget.selectedVehicle?.fullName ?? '',
             isLast: false,
           ),
           _recapRow(
@@ -498,9 +513,8 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
             iconBg: const Color(0xFFEAF3DE),
             icon: Icons.handyman_rounded,
             iconColor: const Color(0xFF3B6D11),
-            label: 'Service · Durée',
-            value: '${widget.selectedService.name} · '
-                '${widget.selectedService.duration}',
+            label: 'Service ',
+            value: '${widget.selectedService.name} · ',
             badgeBg: const Color(0xFFEAF3DE),
             badgeFg: const Color(0xFF27500A),
 
@@ -638,8 +652,12 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
         final a = actions[i];
         return GestureDetector(
           onTap: () {
-            if (a['danger'] == true) _confirmCancel();
-          },
+            if (a['danger'] == true) {
+              _confirmCancel();
+            } else if (a['label'] == 'Partager\nle RDV') {
+              _shareRdv();
+            }
+            },
           child: Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -685,6 +703,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
 
   // ── Confirm cancel dialog ────────────────────────────────────────────────────
 
+  // ✅ Annuler RDV
   void _confirmCancel() {
     showDialog(
       context: context,
@@ -703,9 +722,21 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                 style: TextStyle(color: Palette.gradientFirst)),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: appel API annulation
+              try {
+                await AppointmentService.cancelAppointment(widget.appointmentNo);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text("RDV annulé avec succès")),
+                  );
+                  Navigator.popUntil(context, (r) => r.isFirst);
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text("Erreur: $e")),
+                );
+              }
             },
             child: const Text('Annuler le RDV',
                 style: TextStyle(color: Color(0xFFA32D2D))),
@@ -715,6 +746,66 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
     );
   }
 
+//  Partager avec QR code
+  void _shareRdv() {
+    showDialog(
+      context: context,
+      builder: (_) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Partager le RDV',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF26215C),
+                  )),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFEEEEF5)),
+                ),
+                child: QrImageView(
+                  data: widget.appointmentNo,
+                  version: QrVersions.auto,
+                  size: 200,
+                ),
+              ),
+              const SizedBox(height: 12),
+              // Text(
+              //   widget.appointmentNo,
+              //   style: GoogleFonts.dmSans(
+              //     fontSize: 13,
+              //     fontWeight: FontWeight.w600,
+              //     color: const Color(0xFF534AB7),
+              //   ),
+              // ),
+              const SizedBox(height: 8),
+              // Text(
+              //   '$_formattedDate · ${widget.selectedSlot}',
+              //   style: GoogleFonts.dmSans(
+              //     fontSize: 12,
+              //     color: Colors.grey.shade500,
+              //   ),
+              // ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text('Fermer',
+                    style: TextStyle(color: Palette.gradientFirst)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
   // ── Bottom CTA ───────────────────────────────────────────────────────────────
 
   Widget _buildBottomCTA() {

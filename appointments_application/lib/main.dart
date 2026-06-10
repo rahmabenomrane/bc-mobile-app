@@ -1,14 +1,14 @@
-import 'package:appointments_application/screen/RDVs_List.dart';
-import 'package:appointments_application/screen/add_vehicle.dart';
-import 'package:appointments_application/screen/home_page.dart';
-import 'package:appointments_application/screen/main_screen.dart';
-import 'package:appointments_application/screen/vehicle_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:appointments_application/screen/login_signup.dart';
-import 'package:get/get.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-void main() {
+
+void main() async{
   runApp(const LoginSignupUI());
+  final storage = FlutterSecureStorage();
+  await storage.delete(key: "token");
+  await storage.delete(key: "customerNumber");
+  await storage.delete(key: "customerEmail");
 }
 
 class LoginSignupUI extends StatelessWidget {
@@ -23,6 +23,3 @@ class LoginSignupUI extends StatelessWidget {
     );
   }
 }
-//HomePage
-//LoginSignupScreen
-//VehicleSelectionScreen

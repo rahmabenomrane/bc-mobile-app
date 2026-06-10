@@ -1,9 +1,10 @@
 // lib/screen/AddVehicleScreen.dart
 import 'package:flutter/material.dart';
+import '../Service/vehicle_service.dart';
 import '../config/Palette.dart';
 
 class AddVehicleScreen extends StatefulWidget {
-  final String customerNumber; // ← transmis par VehicleSelectionScreen
+  final String customerNumber;
 
   const AddVehicleScreen({super.key, required this.customerNumber});
 
@@ -15,21 +16,21 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
   final _immatController = TextEditingController();
   final _modeleController = TextEditingController();
   final _anneeController  = TextEditingController();
+  final _mileageController = TextEditingController();
   String? _selectedMotorisation;
-
+  bool _isLoading = false;
   @override
   void dispose() {
     _immatController.dispose();
     _modeleController.dispose();
     _anneeController.dispose();
+    _mileageController.dispose();
     super.dispose();
   }
 
-  void _save() {
-    // Validation simple
+  Future<void> _save() async {
     if (_immatController.text.trim().isEmpty ||
         _modeleController.text.trim().isEmpty ||
-        _anneeController.text.trim().isEmpty ||
         _selectedMotorisation == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Veuillez remplir tous les champs.")),
@@ -37,21 +38,35 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
       return;
     }
 
-    final vehicleData = {
-      'customerNumber'  : widget.customerNumber,  // ← inclus automatiquement
-      'immatriculation' : _immatController.text.trim(),
-      'modele'          : _modeleController.text.trim(),
-      'annee'           : _anneeController.text.trim(),
-      'motorisation'    : _selectedMotorisation,
-    };
+    setState(() => _isLoading = true);
 
-    // TODO : appeler votre service ici, ex:
-    // await VehicleService().addVehicle(vehicleData);
+    try {
+      final success = await VehicleService().createVehicle(
+        makeCode: '',
+        modelCode: _modeleController.text.trim(),
+        motorisation: _selectedMotorisation!,
+        registrationNumber: _immatController.text.trim(),
+        mileage: int.tryParse(_mileageController.text.trim()) ?? 0,
 
-    debugPrint("Données envoyées : $vehicleData");
+      );
 
-    // Retourner true pour que VehicleSelectionScreen recharge la liste
-    Navigator.pop(context, true);
+      if (success) {
+        Navigator.pop(context, true);
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Erreur lors de la création du véhicule."),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+      );
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
@@ -149,6 +164,7 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                         _input("Modèle",           _modeleController),
                         _input("Année",            _anneeController,
                             inputType: TextInputType.number),
+                        _input("Kilométrage", _mileageController, inputType: TextInputType.number),
                     
                         const SizedBox(height: 15),
                     
@@ -175,28 +191,23 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                         ),
 
                         const SizedBox(height: 30),
-                    
-                        // BOUTON ENREGISTRER
+
                         GestureDetector(
-                          onTap: _save,
+                          onTap: _isLoading ? null : _save,
                           child: Container(
                             height: 55,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
                               gradient: LinearGradient(
-                                colors: [
-                                  Palette.gradientFirst,
-                                  Palette.gradientSecond,
-                                ],
+                                colors: [Palette.gradientFirst, Palette.gradientSecond],
                               ),
                             ),
-                            child: const Center(
-                              child: Text(
+                            child: Center(
+                              child: _isLoading
+                                  ? const CircularProgressIndicator(color: Colors.white)
+                                  : const Text(
                                 "Enregistrer le véhicule",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                               ),
                             ),
                           ),
