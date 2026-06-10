@@ -125,7 +125,57 @@ namespace StaBackend.Services
                 return new LoginResponse { Success = false, Error = ex.Message };
             }
         }
+        public async Task<string?> GetCustomerEmailAsync(string customerNumber)
+        {
+            var client = CreateWindowsAuthClient();
+            var url = $"http://localhost:7048/BC260/api/STA/Mobile/v1.0/companies(16be2528-96e4-f011-8d1f-00155d141f04)/customers?$filter=numCustomer eq '{customerNumber}'";
 
+            var response = await client.GetAsync(url);
+            var json = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine("GET CUSTOMER EMAIL = " + json);
+
+            var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.TryGetProperty("value", out var values) &&
+                values.GetArrayLength() > 0)
+            {
+                var first = values[0];
+                return first.TryGetProperty("email", out var email)
+                    ? email.GetString()
+                    : null;
+            }
+            return null;
+        }
+
+        public async Task ConfirmAppointmentAsync(string appointmentNo)
+        {
+            var client = CreateWindowsAuthClient();
+            var url = $"{ODataBase}/AppointmentAPI('{appointmentNo}')";
+
+            // GET pour ETag
+            var getResponse = await client.GetAsync(url);
+            var getJson = await getResponse.Content.ReadAsStringAsync();
+            var etag = JsonDocument.Parse(getJson)
+                .RootElement.GetProperty("@odata.etag").GetString();
+
+            // PATCH status = Confirmed
+            var body = new { status = "Confirmed" };
+            var content = new StringContent(
+                JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
+
+            var request = new HttpRequestMessage(HttpMethod.Patch, url) { Content = content };
+            request.Headers.Add("If-Match", etag);
+
+            var response = await client.SendAsync(request);
+            var responseText = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"CONFIRM PATCH STATUS = {response.StatusCode}");
+            Console.WriteLine($"CONFIRM PATCH RESPONSE = {responseText}");
+
+            Console.WriteLine("CONFIRM BC RESPONSE: " + responseText);
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"BC error: {responseText}");
+        }
 
 
         // ── GET CUSTOMER BY NUMBER ───────────────────────────────────────────
@@ -258,7 +308,28 @@ namespace StaBackend.Services
                 return true;
             }
         }
+        // cancel appointment
+        public async Task CancelAppointmentAsync(string appointmentNo)
+        {
+            var client = CreateWindowsAuthClient();
+            var url = $"{ODataBase}/AppointmentAPI('{appointmentNo}')";
 
+            var getResponse = await client.GetAsync(url);
+            var getJson = await getResponse.Content.ReadAsStringAsync();
+            var etag = JsonDocument.Parse(getJson)
+                .RootElement.GetProperty("@odata.etag").GetString();
+
+            var body = new { status = "Cancelled" };
+            var content = new StringContent(
+                JsonSerializer.Serialize(body), Encoding.UTF8, "application/json");
+
+            var request = new HttpRequestMessage(HttpMethod.Patch, url) { Content = content };
+            request.Headers.Add("If-Match", etag);
+
+            var response = await client.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+                throw new Exception(await response.Content.ReadAsStringAsync());
+        }
         // ── CHECK EMAIL UNIQUENESS ───────────────────────────────────────────
         public async Task<bool> IsEmailUniqueAsync(string email, string currentCustomerNumber)
         {
@@ -310,13 +381,16 @@ namespace StaBackend.Services
         {
             var client = CreateWindowsAuthClient();
             var url = $"{ODataBase}/StaCustomerAPI";
-
+            // Faire une requête GET pour voir un exemple d'enregistrement
+            var getUrl = $"{ODataBase}/StaCustomerAPI?$top=1";
+            var getResponse = await client.GetAsync(getUrl);
+            var getContent = await getResponse.Content.ReadAsStringAsync();
+            Console.WriteLine($"[REGISTER] Sample record from NAV: {getContent}");
             var bodyJson = JsonSerializer.Serialize(new
             {
                 phone = request.Phone,
                 email = request.Email,
-                firstName = request.FirstName,
-                lastName = request.LastName,
+                lastName = $"{request.FirstName} {request.LastName}".Trim(),
                 address = request.Address,
                 password = request.Password,
                 civility = request.Civility
@@ -359,7 +433,36 @@ namespace StaBackend.Services
                 return new RegisterResponse { Success = false, Error = ex.Message };
             }
         }
+        public async Task<bool> CreateVehicleAsync(CreateVehicleDto vehicle)
+        {
+            var client = CreateWindowsAuthClient();
+            var url = $"{ODataBase}/StaVehicleAPI";
 
+
+            var body = new
+            {
+                NumCustomer = vehicle.NumCustomer,
+                makeCode = vehicle.MakeCode,
+                modelCode = vehicle.ModelCode,
+                motorisation = vehicle.Motorisation,
+                registrationNumber = vehicle.RegistrationNumber,
+                Mileage = vehicle.Mileage
+            };
+
+            var json = JsonSerializer.Serialize(body);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            Console.WriteLine($"[CREATE VEHICLE] POST → {url}");
+            Console.WriteLine($"[CREATE VEHICLE] Body → {json}");
+
+            var response = await client.PostAsync(url, content);
+            var responseContent = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine($"[CREATE VEHICLE] Status → {response.StatusCode}");
+            Console.WriteLine($"[CREATE VEHICLE] Response → {responseContent}");
+
+            return response.IsSuccessStatusCode;
+        }
         // ── GET VEHICLES ───────────────────────────────────────────
         public async Task<List<VehicleDto>> GetCustomerVehiclesAsync(string customerNum)
         {
@@ -368,13 +471,15 @@ namespace StaBackend.Services
 
             Console.WriteLine($"[VEHICLES] GET → {url}");
 
+            Console.WriteLine(url);
             try
             {
                 var response = await client.GetAsync(url);
                 var content = await response.Content.ReadAsStringAsync();
-
+                Console.WriteLine("=== REPONSE BC ===");
+                Console.WriteLine(content);
                 Console.WriteLine($"[VEHICLES] Status  → {response.StatusCode}");
-
+                Console.WriteLine($"Customer recherché = {customerNum}");
                 if (!response.IsSuccessStatusCode)
                 {
                     Console.WriteLine($"[VEHICLES] ❌ Erreur BC : {content}");
@@ -406,36 +511,226 @@ namespace StaBackend.Services
                 return new List<VehicleDto>();
             }
         }
-        //customer's appointments 
+
         public async Task<List<AppointmentDto>> GetCustomerAppointmentsAsync(string customerNumber)
         {
-            var vehicles =
-                await GetCustomerVehiclesAsync(customerNumber);
-
-            var vehicleNumbers =
-                vehicles.Select(v => v.NumVehicle).ToList();
-
             var client = CreateWindowsAuthClient();
 
-            var response =
-                await client.GetAsync($"{ODataBase}/AppointmentAPI");
+            var vehicles = await GetCustomerVehiclesAsync(customerNumber);
+            var agencies = await GetAgenciesAsync();
 
-            var json =
-                await response.Content.ReadAsStringAsync();
+            var vehicleNumbers = vehicles
+                .Select(v => v.NumVehicle?.Trim().ToUpper())
+                .ToList();
 
-            var data =
-                JsonSerializer.Deserialize<CreateAppointmentResponse>(
-                    json,
-                    new JsonSerializerOptions
+            var response = await client.GetAsync($"{ODataBase}/AppointmentAPI");
+            var json = await response.Content.ReadAsStringAsync();
+
+            var data = JsonSerializer.Deserialize<BcAppointmentRawResponse>(
+                json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (data?.value == null) return new List<AppointmentDto>();
+
+            return data.value
+                .Where(raw => vehicleNumbers.Contains(raw.NumVehicle?.Trim().ToUpper()))
+                .Select(raw =>
+                {
+                    var date = DateTime.Parse(raw.Date);
+                    var start = TimeSpan.Parse(raw.StartTime);
+                    var end = TimeSpan.Parse(raw.EndTime);
+
+                    var vehicle = vehicles.FirstOrDefault(v =>
+                        v.NumVehicle?.Trim().ToUpper() == raw.NumVehicle?.Trim().ToUpper());
+                    var agence = agencies.FirstOrDefault(a =>
+                        a.Code?.Trim().ToUpper() == raw.AgencyCode?.Trim().ToUpper());
+
+                    return new AppointmentDto
                     {
-                        PropertyNameCaseInsensitive = true
-                    });
+                        AppointmentNo = raw.AppointmentNo,
+                        AgencyCode = raw.AgencyCode,
+                        AgencyName = agence?.Name,
+                        ServiceCode = raw.ServiceCode,
+                        Date = date,
+                        StartTime = date.Add(start),
+                        EndTime = date.Add(end),
+                        Status = raw.Status,
+                        NumVehicle = raw.NumVehicle,
+                        PontId = raw.PontId,
+                        RegistrationNumber = vehicle?.RegistrationNumber,
+                        Mileage = vehicle?.Mileage,
+                    };
+                }).ToList();
+        }
+        public async Task<CreateAppointmentResponse> CreateAppointmentAsync(CreateAppointmentDto dto)
+        {
+            var existing = await GetAppointmentsAsync(dto.AgencyCode, dto.ServiceCode);
 
-            return data?.value?
-                .Where(a => vehicleNumbers.Contains(a.NumVehicle))
-                .OrderBy(a => a.Date)
-                .ToList()
-                ?? new List<AppointmentDto>();
+            Console.WriteLine($"Existing count = {existing.Count}");
+            foreach (var a in existing)
+                Console.WriteLine($"  → NumVehicle={a.NumVehicle} Status={a.Status}");
+
+            // même véhicule + même service + pas cancelled
+            var vehicleConflict = existing.Any(a =>
+     string.Equals(
+         a.NumVehicle?.Trim(),
+         dto.VehicleNumber?.Trim(),
+         StringComparison.OrdinalIgnoreCase) &&
+     !string.Equals(a.Status, "Cancelled", StringComparison.OrdinalIgnoreCase));
+
+            Console.WriteLine($"VehicleNumber={dto.VehicleNumber} vehicleConflict={vehicleConflict}");
+
+            Console.WriteLine($"VehicleNumber={dto.VehicleNumber} vehicleConflict={vehicleConflict}");
+
+            if (vehicleConflict)
+                throw new Exception("Ce véhicule a déjà un rendez-vous pour ce service.");
+
+            // — trouver un pont libre
+            var allPonts = await GetCarLiftsAsync(dto.AgencyCode);
+            string assignedPontId;
+
+            if (allPonts.Count == 0)
+            {
+                assignedPontId = "AUTO";
+            }
+            else
+            {
+                var allAppointments = await GetAllAppointmentsForAgencyAsync(dto.AgencyCode);
+
+                var availablePont = allPonts
+                    .Where(p => p.Active)
+                    .FirstOrDefault(p => !allAppointments.Any(a =>
+                        a.PontId == p.Code &&
+                        a.StartTime.Date == dto.Date.Date &&
+                        a.StartTime.Hour == dto.StartTime &&
+                        a.Status != "Cancelled"));
+
+                if (availablePont == null)
+                    throw new Exception("Aucun pont disponible à ce créneau.");
+
+                assignedPontId = availablePont.Code;
+                Console.WriteLine($"✅ Pont assigné = {assignedPontId}");
+            }
+
+
+            var appointment = new AppointmentDto
+            {
+                AgencyCode = dto.AgencyCode,
+                ServiceCode = dto.ServiceCode,
+                Date = dto.Date,
+                StartTime = new DateTime(dto.Date.Year, dto.Date.Month, dto.Date.Day, dto.StartTime, 0, 0),
+                EndTime = new DateTime(dto.Date.Year, dto.Date.Month, dto.Date.Day, dto.EndTime + 1, 0, 0),
+                Status = "Pending",
+                AppointmentNo = "RDV-" + DateTime.Now.Ticks.ToString()[..12],
+                NumVehicle = dto.VehicleNumber,
+                PontId = assignedPontId,
+            };
+
+            await SaveAppointment(appointment);
+
+            return new CreateAppointmentResponse { Success = true, Message = "Created", Data = appointment };
+        }
+        public async Task<List<CarLiftDto>> GetCarLiftsAsync(string agencyCode)
+        {
+            var client = CreateWindowsAuthClient();
+            var url = $"{ODataBase}/CarLiftAPI?$filter=agencyCode eq '{agencyCode}'";
+
+            Console.WriteLine($"GET CARLIFTS = {url}");
+
+            var response = await client.GetAsync(url);
+            var json = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine($"CARLIFTS JSON = {json}");
+
+            var data = JsonSerializer.Deserialize<BcCarLiftResponse>(
+                json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            return data?.value ?? new List<CarLiftDto>();
+        }
+
+        public async Task<List<AppointmentDto>> GetAllAppointmentsForAgencyAsync(string agencyCode)
+        {
+            var client = CreateWindowsAuthClient();
+            var url = $"{ODataBase}/AppointmentAPI?$filter=AgencyCode eq '{agencyCode}'";
+
+            var response = await client.GetAsync(url);
+            var json = await response.Content.ReadAsStringAsync();
+
+            var data = JsonSerializer.Deserialize<BcAppointmentRawResponse>(
+                json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (data?.value == null) return new List<AppointmentDto>();
+
+            return data.value.Select(raw =>
+            {
+                var date = DateTime.Parse(raw.Date);
+                var start = TimeSpan.Parse(raw.StartTime);
+                var end = TimeSpan.Parse(raw.EndTime);
+
+                return new AppointmentDto
+                {
+                    AppointmentNo = raw.AppointmentNo,
+                    AgencyCode = raw.AgencyCode,
+                    ServiceCode = raw.ServiceCode,
+                    Date = date,
+                    StartTime = date.Add(start),
+                    EndTime = date.Add(end),
+                    Status = raw.Status,
+                    NumVehicle = raw.NumVehicle,
+                    PontId = raw.PontId,
+                };
+            }).ToList();
+        }
+
+
+        private class BcCarLiftResponse
+        {
+            public List<CarLiftDto> value { get; set; }
+        }
+        public async Task<bool> RescheduleAppointmentAsync(RescheduleAppointmentDto dto)
+        {
+
+            var client = CreateWindowsAuthClient();
+            var getResponse = await client.GetAsync($"{ODataBase}/AppointmentAPI('{dto.AppointmentNo}')");
+            var getJson = await getResponse.Content.ReadAsStringAsync();
+            var jsonDoc = JsonDocument.Parse(getJson);
+
+            var etag = jsonDoc.RootElement.GetProperty("@odata.etag").GetString();
+            var agencyCode = jsonDoc.RootElement.GetProperty("AgencyCode").GetString();
+            var serviceCode = jsonDoc.RootElement.GetProperty("ServiceCode").GetString();
+
+            var existing = await GetAppointmentsAsync(agencyCode, serviceCode);
+            var conflict = existing.Any(a =>
+                a.AppointmentNo != dto.AppointmentNo &&
+                a.StartTime.Date == dto.Date.Date &&
+                a.StartTime.Hour == dto.StartTime);
+
+            if (conflict)
+                throw new Exception("Ce créneau est déjà pris.");
+
+            // PATCH
+            var body = new
+            {
+                date = dto.Date.ToString("yyyy-MM-dd"),
+                startTime = $"{dto.StartTime:D2}:00:00",
+                endTime = $"{dto.EndTime:D2}:00:00",
+            };
+
+            var json = JsonSerializer.Serialize(body);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var request = new HttpRequestMessage(HttpMethod.Patch, $"{ODataBase}/AppointmentAPI('{dto.AppointmentNo}')")
+            {
+                Content = content
+            };
+            request.Headers.Add("If-Match", etag);
+
+            var response = await client.SendAsync(request);
+            var responseText = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode) return true;
+            throw new Exception($"BC error: {responseText}");
         }
         // ── LOGOUT ────────────────────────────────────────────────
         public async Task LogoutAsync(string token)
@@ -449,76 +744,151 @@ namespace StaBackend.Services
             Console.WriteLine($"[LOGOUT] POST → {url}");
             await client.PostAsync(url, bodyContent);
         }
+        private class BcServicesResponse
+        {
+            public List<BcServiceRaw> value { get; set; }
+        }
+
+        private class BcServiceRaw
+        {
+            public string ServiceCode { get; set; }
+            public string Description { get; set; }
+            public string Libelle { get; set; }
+            public string Type { get; set; }
+        }
+
+
+        private string GetServiceType(string type)
+        {
+            return type?.ToLower() switch
+            {
+                "vidange" => "vidange",
+                "diagnostic" => "diagnostic",
+                "pneumatique" => "pneumatique",
+                "climatisation" => "climatisation",
+                "revision" => "revision",
+                _ => ""
+            };
+        }
         public async Task<List<ServiceDto>> GetServicesByAgencyAsync(string agencyCode)
         {
             var client = CreateWindowsAuthClient();
 
-            var agencyServiceUrl = $"{ODataBase}/AgencyServiceAPI";
 
+            var agencyServiceUrl = $"{ODataBase}/AgencyServiceAPI";
             var response = await client.GetAsync(agencyServiceUrl);
             var content = await response.Content.ReadAsStringAsync();
-
+            Console.WriteLine($"AgencyService JSON = {content}");
             var bcAgencyServices = JsonSerializer.Deserialize<BcAgencyServiceResponse>(
                 content,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             if (bcAgencyServices?.value == null)
                 return new List<ServiceDto>();
 
-            Console.WriteLine("=== RAW DATA ===");
-
-            foreach (var a in bcAgencyServices.value)
-            {
-                Console.WriteLine($"agency='{a.agencyCode}' service='{a.serviceCode}' dispo={a.Disponible}");
-            }
-
-            var result = bcAgencyServices.value
+            var agencyServiceCodes = bcAgencyServices.value
                 .Where(a =>
                     !string.IsNullOrWhiteSpace(a.agencyCode) &&
                     !string.IsNullOrWhiteSpace(a.serviceCode) &&
                     a.agencyCode.Trim().Equals(agencyCode.Trim(), StringComparison.OrdinalIgnoreCase) &&
-                    a.Disponible == true
-                )
-                .Select(a => new ServiceDto
-                {
-                    Code = a.serviceCode?.Trim(),
-                    Name = a.serviceCode?.Trim(),
-                    Description = "",
-                    Type = "",
-                    Duration = "1h30"
-                })
+                    a.Disponible == true)
+                .Select(a => a.serviceCode?.Trim())
                 .ToList();
 
-            return result;
+            if (!agencyServiceCodes.Any())
+                return new List<ServiceDto>();
+
+            //  Récupérer les détails depuis ServicesAPI
+            var servicesUrl = $"{ODataBase}/ServicesAPI";
+            var servicesResponse = await client.GetAsync(servicesUrl);
+            var servicesContent = await servicesResponse.Content.ReadAsStringAsync();
+
+            Console.WriteLine($"SERVICES JSON = {servicesContent}");
+
+            var bcServices = JsonSerializer.Deserialize<BcServicesResponse>(
+                servicesContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (bcServices?.value == null)
+                return new List<ServiceDto>();
+            Console.WriteLine($"SERVICES URL = {servicesUrl}");
+            Console.WriteLine($"SERVICES STATUS = {servicesResponse.StatusCode}");
+            Console.WriteLine($"SERVICES JSON = {servicesContent}");
+            Console.WriteLine($"agencyServiceCodes = {string.Join(", ", agencyServiceCodes)}");
+
+
+            //Joindre par libelle OU description OU code (flexible)
+            return bcServices.value
+                .Where(s => agencyServiceCodes.Any(code =>
+                    s.Libelle?.Trim().ToUpper() == code.Trim().ToUpper() ||
+                    s.Description?.Trim().ToUpper() == code.Trim().ToUpper() ||
+                    s.ServiceCode?.Trim().ToUpper() == code.Trim().ToUpper()
+                ))
+                .Select(s => new ServiceDto
+                {
+                    Code = s.ServiceCode?.Trim(),
+                    Name = s.Libelle?.Trim() ?? s.Description?.Trim() ?? s.ServiceCode,
+                    Description = s.Description?.Trim() ?? "",
+                    Type = GetServiceType(s.Type),
+                    Duration = "1h"
+                })
+                .ToList();
+        }
+
+
+        private class BcAppointmentRaw
+        {
+            public string AppointmentNo { get; set; }
+            public string AgencyCode { get; set; }
+            public string AgencyName { get; set; }
+            public string ServiceCode { get; set; }
+            public string Date { get; set; }
+            public string StartTime { get; set; }
+            public string EndTime { get; set; }
+            public string Status { get; set; }
+            public string NumVehicle { get; set; }
+            public string PontId { get; set; }
+        }
+
+        private class BcAppointmentRawResponse
+        {
+            public List<BcAppointmentRaw> value { get; set; }
         }
 
         public async Task<List<AppointmentDto>> GetAppointmentsAsync(string agencyCode, string serviceCode)
         {
             var client = CreateWindowsAuthClient();
-
-            var url =
-                $"{ODataBase}/AppointmentAPI?$filter=AgencyCode eq '{agencyCode}' and ServiceCode eq '{serviceCode}'";
+            var url = $"{ODataBase}/AppointmentAPI?$filter=AgencyCode eq '{agencyCode}' and ServiceCode eq '{serviceCode}'";
 
             var response = await client.GetAsync(url);
-
             var json = await response.Content.ReadAsStringAsync();
 
-            Console.WriteLine(json);
-            Console.WriteLine("GET URL = " + url);
-            var data = JsonSerializer.Deserialize<CreateAppointmentResponse>(
+            var data = JsonSerializer.Deserialize<BcAppointmentRawResponse>(
                 json,
-                new JsonSerializerOptions
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (data?.value == null) return new List<AppointmentDto>();
+
+            return data.value.Select(raw =>
+            {
+                var date = DateTime.Parse(raw.Date);
+                var start = TimeSpan.Parse(raw.StartTime);
+                var end = TimeSpan.Parse(raw.EndTime);
+
+                return new AppointmentDto
                 {
-                    PropertyNameCaseInsensitive = true
-                });
-
-            if (data?.value == null)
-                return new List<AppointmentDto>();
-
-            return data.value;
+                    AppointmentNo = raw.AppointmentNo,
+                    AgencyCode = raw.AgencyCode,
+                    AgencyName = raw.AgencyName,
+                    ServiceCode = raw.ServiceCode,
+                    Date = date,
+                    StartTime = date.Add(start),
+                    EndTime = date.Add(end),
+                    Status = raw.Status,
+                    NumVehicle = raw.NumVehicle,
+                    PontId = raw.PontId,
+                };
+            }).ToList();
         }
         private async Task SaveAppointment(AppointmentDto appointment)
         {
@@ -535,6 +905,7 @@ namespace StaBackend.Services
                 status = appointment.Status,
                 appointmentNo = appointment.AppointmentNo,
                 numVehicle = appointment.NumVehicle,
+                pontId = appointment.PontId,
             };
 
             var json = JsonSerializer.Serialize(body);
@@ -546,33 +917,7 @@ namespace StaBackend.Services
             if (!response.IsSuccessStatusCode)
                 throw new Exception($"BC error: {responseText}");
         }
-        public async Task<CreateAppointmentResponse> CreateAppointmentAsync(CreateAppointmentDto dto)
-        {
-            var appointment = new AppointmentDto
-            {
-                AgencyCode = dto.AgencyCode,
-                ServiceCode = dto.ServiceCode,
-                Date = dto.Date,
 
-                StartTime = new DateTime(dto.Date.Year, dto.Date.Month, dto.Date.Day, dto.StartTime, 0, 0),
-                EndTime = new DateTime(dto.Date.Year, dto.Date.Month, dto.Date.Day, dto.EndTime + 1, 0, 0),
-
-                Status = "Pending",
-                AppointmentNo = "RDV-" + DateTime.Now.Ticks.ToString()[..12],
-
-                NumVehicle = dto.VehicleNumber,
-                PontId = dto.PontId
-            };
-
-            await SaveAppointment(appointment);
-
-            return new CreateAppointmentResponse
-            {
-                Success = true,
-                Message = "Created",
-                Data = appointment
-            };
-        }
         // ── GET AGENCIES ───────────────────────────────────────────────
         public async Task<List<AgencyDto>> GetAgenciesAsync()
         {
@@ -621,4 +966,5 @@ namespace StaBackend.Services
             }
         }
     }
+
 }

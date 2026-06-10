@@ -1,10 +1,7 @@
-// lib/screen/home_page.dart
-import 'package:appointments_application/screen/RDVs_List.dart';
 import 'package:appointments_application/screen/vehicle_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:appointments_application/config/Palette.dart' as color;
-import 'Locations_page.dart';
 
 class HomePage extends StatefulWidget {
   final Function(int)? onNavigate;
@@ -239,6 +236,8 @@ class _HomePageState extends State<HomePage> {
                         MaterialPageRoute(
                           builder: (_) => VehicleSelectionScreen(
                             customerNumber: widget.customerNumber,
+                            appointmentMode: true,
+
                           ),
                         ),
                       );
@@ -273,6 +272,8 @@ class _HomePageState extends State<HomePage> {
                         MaterialPageRoute(
                           builder: (_) => VehicleSelectionScreen(
                             customerNumber: widget.customerNumber,
+                            appointmentMode: false,
+                            onNavigate: widget.onNavigate,
                           ),
                         ),
                       );

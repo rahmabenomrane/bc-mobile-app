@@ -2,7 +2,6 @@ import 'package:appointments_application/config/Palette.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'AppFooter.dart';
-import 'Locations_page.dart';
 import 'RDVs_List.dart';
 import 'home_page.dart';
 
@@ -34,7 +33,14 @@ class _MainScreenState extends State<MainScreen> {
         },
         customerNumber: widget.customerNumber,
       ),
-      RdvsList(),
+      RdvsList(
+        customerNumber: widget.customerNumber,
+      onNavigate: (index) {
+    setState(() {
+    _currentIndex = index;
+    });}
+      ),
+
       Container(),
       Container(),
       // MapScreen(),

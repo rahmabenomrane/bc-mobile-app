@@ -20,6 +20,11 @@ page 50121 AppointmentAPI
                     Caption = 'Agency Code';
 
                 }
+                field("AgencyName"; Rec."Agency Name")
+                {
+                    Caption = 'Agency Name';
+
+                }
                 field("ServiceCode"; Rec."Service Code")
                 {
                     Caption = 'Service Code';
@@ -52,6 +57,10 @@ page 50121 AppointmentAPI
                 field("AppointmentNo"; Rec."Appointment No.")
                 {
                     Caption = 'Appointment No.';
+                }
+                field("PontId"; Rec."CarLift Code")
+                {
+                    Caption = 'Pont Id';
                 }
             }
         }

@@ -107,6 +107,12 @@ namespace StaBackend.Controllers
                 return StatusCode(500, new { error = ex.Message, detail = ex.ToString() });
             }
         }
+        [HttpGet("customer/{customerNumber}")]
+        public async Task<IActionResult> GetCustomer(string customerNumber)
+        {
+            var email = await _bcService.GetCustomerEmailAsync(customerNumber);
+            return Ok(new { email });
+        }
 
         // POST /api/auth/logout
         [HttpPost("logout")]

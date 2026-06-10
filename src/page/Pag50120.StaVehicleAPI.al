@@ -26,6 +26,7 @@ page 50120 StaVehicleAPI
                 field(modelCode; Rec."Model Code") { }
                 field(motorisation; Rec."Motorisation") { }
                 field(Mileage; Rec."Mileage") { }
+                field(registrationNumber; Rec."RegistrationNumber") { }
 
             }
         }

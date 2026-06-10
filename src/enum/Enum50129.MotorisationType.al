@@ -12,7 +12,7 @@ enum 50129 MotorisationType
     }
     value(2; Electrique)
     {
-        Caption = 'Électrique';
+        Caption = 'Electrique';
     }
     value(3; Hybride)
     {

@@ -7,4 +7,5 @@ public class CreateAppointmentDto
     public string PontId { get; set; }
     public int StartTime { get; set; }
     public int EndTime { get; set; }
+    public string CustomerNumber { get; set; }
 }

@@ -9,8 +9,6 @@ class VehicleService {
   final String baseUrl = "http://10.0.2.2:5032";
 
   Future<List<Vehicle>> getMyVehicles() async {
-    print("=== DÉBUT getMyVehicles ===");
-
     final token = await storage.read(key: "token");
 
     if (token == null) {
@@ -57,5 +55,35 @@ class VehicleService {
       print("❌ Exception: $e");
       rethrow;
     }
+  }
+  Future<bool> createVehicle({
+    required String makeCode,
+    required String modelCode,
+    required String motorisation,
+    required String registrationNumber,
+    int mileage = 0,
+  }) async {
+    final token = await const FlutterSecureStorage().read(key: 'token');
+
+    final response = await http.post(
+      Uri.parse('$baseUrl/api/vehicles'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode({
+        'makeCode': makeCode,
+        'modelCode': modelCode,
+        'motorisation': motorisation,
+        'registrationNumber': registrationNumber,
+        'mileage': mileage,
+      }),
+    );
+
+    print('[CREATE VEHICLE] Status: ${response.statusCode}');
+    print('[CREATE VEHICLE] Body: ${response.body}');
+
+    if (response.statusCode == 401) throw Exception('Session expirée');
+    return response.statusCode == 200;
   }
 }

@@ -44,13 +44,17 @@ class _MapScreenState extends State<MapScreen> {
   // ── Chargement des agences ─────────────────────────────────────────────────
 
   Future<void> _loadAgencies() async {
-    setState(() { _isLoading = true; _errorMessage = ''; });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _errorMessage = '';
+      });
+    }
     try {
       final agencies = await _agencyService.getAgencies();
 
-      // 🔧 NETTOYER ET VALIDER LES COORDONNÉES
       for (var agency in agencies) {
-        // Convertir les coordonnées si elles sont en String
+
         if (agency.latitude is String) {
           agency.latitude = double.tryParse(agency.latitude.toString().replaceAll(',', '.'));
         }
@@ -58,7 +62,6 @@ class _MapScreenState extends State<MapScreen> {
           agency.longitude = double.tryParse(agency.longitude.toString().replaceAll(',', '.'));
         }
 
-        // Arrondir à 6 décimales maximum (suffisant pour la carte)
         if (agency.latitude != null) {
           agency.latitude = double.parse(agency.latitude!.toStringAsFixed(6));
         }
@@ -131,7 +134,9 @@ class _MapScreenState extends State<MapScreen> {
       final userLocation = await location.getLocation();
       setState(() => _currentLocation = userLocation);
       _fitAllMarkers();
-      location.onLocationChanged.listen((l) => setState(() => _currentLocation = l));
+      location.onLocationChanged.listen((l) {
+        if (mounted) setState(() => _currentLocation = l);
+      });
     } catch (_) {
       _fitAllMarkers();
     }

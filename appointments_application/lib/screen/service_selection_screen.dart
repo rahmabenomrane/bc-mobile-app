@@ -475,6 +475,7 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                           selectedVehicle: widget.selectedVehicle,
                           selectedAgency: widget.selectedAgency,
                           selectedService: service,
+                          mode: 'create',
                         ),
                       ),
                     );

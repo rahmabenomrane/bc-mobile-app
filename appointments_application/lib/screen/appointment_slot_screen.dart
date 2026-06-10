@@ -4,6 +4,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import '../Service/appointment_service.dart';
+import '../Service/auth_service.dart';
 import '../config/Palette.dart';
 import '../models/Appontment_model.dart';
 import '../models/service_model.dart';
@@ -12,16 +13,23 @@ import 'confirmation_screen.dart';
 import 'step_indicator.dart';
 
 class AppointmentSlotScreen extends StatefulWidget {
-  final Vehicle selectedVehicle;
-  final Map<String, dynamic> selectedAgency;
-  final ServiceModel selectedService;
 
+  final String mode;
+  final Vehicle? selectedVehicle;
+  final Map<String, dynamic>? selectedAgency;
+  final ServiceModel? selectedService;
+
+
+  final Map<String, dynamic>? existingAppointment;
   const AppointmentSlotScreen({
     super.key,
-    required this.selectedVehicle,
-    required this.selectedAgency,
-    required this.selectedService,
+    required this.mode,
+    this.selectedVehicle,
+    this.selectedAgency,
+    this.selectedService,
+    this.existingAppointment,
   });
+
 
   @override
   State<AppointmentSlotScreen> createState() => _AppointmentSlotScreenState();
@@ -30,29 +38,85 @@ class AppointmentSlotScreen extends StatefulWidget {
 class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
   DateTime _focusedDay = DateTime.now();
   DateTime? _selectedDay;
-
+  String? _customerNumber;
   List<AppointmentModel> _appointments = [];
   String? _selectedSlot;
+  String get agencyCode {
+    return widget.selectedAgency?['code'] ??
+        widget.existingAppointment?['agencyCode'] ??
+        '';
+  }
+  String? _lastCreatedAppointmentNo;
+  String? _customerEmail;
+  String get vehicleNumber {
+    if (widget.mode == "reschedule") {
+      print("reschedule");
+      print(widget.existingAppointment);
+      return widget.existingAppointment?["numVehicle"]?.toString() ?? "";
+    }
+
+    return widget.selectedVehicle?.numVehicle ?? "";
+  }
+  String get serviceCode {
+    return widget.selectedService?.code ??
+        widget.existingAppointment?['serviceCode'] ??
+        '';
+  }
+
+  Vehicle? get vehicle {
+    if (widget.mode == "reschedule") return null;
+    return widget.selectedVehicle;
+  }
 
   @override
   void initState() {
     super.initState();
-    initializeDateFormatting('fr_FR', null); 
+    void _checkRequiredData() {
+      if (widget.mode == "create") {
+        assert(widget.selectedVehicle != null);
+        assert(widget.selectedAgency != null);
+        assert(widget.selectedService != null);
+      }
+
+      if (widget.mode == "reschedule") {
+        assert(widget.existingAppointment != null);
+        print("appppppp");
+        print(widget.existingAppointment.toString());
+         }
+    }
+    Future<void> _loadCustomerNumber() async {
+      final cn = await AuthService.storage.read(key: "customerNumber");
+      setState(() => _customerNumber = cn);
+      final em = await AuthService.storage.read(key: "customerEmail"); // ✅
+      if (mounted) setState(() {
+        _customerNumber = cn;
+        _customerEmail = em;
+      });
+    }
+    initializeDateFormatting('fr_FR', null);
+    _loadCustomerNumber();
+    _checkRequiredData();
     _loadAppointments();
+    if (widget.mode == "reschedule" && widget.existingAppointment != null) {
+      final appt = widget.existingAppointment!;
+      _selectedDay = DateTime.parse(
+        appt["date"],
+      );
+
+      _selectedSlot =
+          appt["startTime"].toString();
+    }
   }
 
   Future<void> _loadAppointments() async {
     final data = await AppointmentService.getAppointments(
-      widget.selectedAgency['code'],
-      widget.selectedService.code,
+      agencyCode,
+      serviceCode,
     );
-
-    setState(() {
+   setState(() {
       _appointments = data;
     });
   }
-
-
   bool get _canContinue =>
       _selectedDay != null && _selectedSlot != null;
 
@@ -102,15 +166,6 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
     return slots;
   }
 
-  bool isSlotTaken(DateTime day, String time) {
-    return _appointments.any((a) {
-      final d = DateTime.tryParse(a.date);
-      if (d == null) return false;
-
-      return isSameDay(d, day) && a.StartTime == time;
-    });
-  }
-
   List<Map<String, dynamic>> getDaySlots(DateTime day) {
     if (day.weekday == DateTime.saturday ||
         day.weekday == DateTime.sunday) {
@@ -118,8 +173,7 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
     }
 
     final officeHours =
-        widget.selectedAgency['OfficeHours'] ?? "9h-18h";
-
+        widget.selectedAgency?['OfficeHours'] ?? "9h-18h";
     final slots = generateSlots(day, officeHours);
 
     return slots.map((time) {
@@ -134,16 +188,27 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
 
   List<AppointmentModel> _getEventsForDay(DateTime day) {
     return _appointments.where((a) {
-      final d = DateTime.parse(a.date);
-
-      return d.year == day.year &&
-          d.month == day.month &&
-          d.day == day.day;
+      final d = DateTime.tryParse(a.StartTime);
+      if (d == null) return false;
+      return isSameDay(d, day);
     }).toList();
   }
 
+// ✅ Slots désactivés si déjà pris
+  bool isSlotTaken(DateTime day, String time) {
+    return _appointments.any((a) {
+      final d = DateTime.tryParse(a.StartTime);
+      if (d == null) {
+
+        return false;
+      }
+      final slotHour = "${d.hour.toString().padLeft(2, '0')}:00";
+     return isSameDay(d, day) && slotHour == time;
+    });
+  }
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F6FB),
       body: Column(
@@ -219,6 +284,20 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
           ),
           const SizedBox(height: 14),
           StepIndicator(currentStep: 4, totalSteps: 5),
+          const SizedBox(height: 6),
+
+          // Labels étapes
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _StepLabel('Véhicule',     done: false, active: true),
+              _StepLabel('Agence',       done: false, active: false),
+              _StepLabel('Service',      done: false, active: false),
+              _StepLabel('Créneau',      done: false, active: false),
+              _StepLabel('Confirmation', done: false, active: false),
+            ],
+          ),
+
         ],
       ),
     );
@@ -503,6 +582,8 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
               ),
             ),
           ),
+
+
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -660,40 +741,105 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
                 ),
               ),
     onPressed: () async {
-    final selectedHour = int.parse(_selectedSlot!.split(":")[0]);
-    print("selectedAgency");
-    print(widget.selectedAgency);
-    print(widget.selectedService.code);
-    print(widget.selectedVehicle.numVehicle);
-    try {
-    final success = await AppointmentService.createAppointment(
-    agencyCode: widget.selectedAgency['code'],
-    serviceCode: widget.selectedService.code,
-      vehicleNumber: widget.selectedVehicle.numVehicle,
-    date: _selectedDay!,
-      startTime: selectedHour,
-      endTime: selectedHour +1,
-    pontId: "AUTO",
+    if (_selectedSlot == null || _selectedDay == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+    const SnackBar(content: Text("Choisissez date et heure")),
     );
-
-    print("selectedAgency");
-    print(widget.selectedAgency);
-    print(widget.selectedService.code);
-    if (success) {
-    Navigator.push(
-    context,
-    MaterialPageRoute(
-    builder: (_) => ConfirmationScreen(
-    selectedVehicle: widget.selectedVehicle,
-    selectedAgency: widget.selectedAgency,
-    selectedService: widget.selectedService,
-    selectedDate: _selectedDay!,
-    selectedSlot: _selectedSlot!,
-    ),
-    ),
-    );
-
+    return;
     }
+
+    final selectedHour = int.parse(_selectedSlot!.split(":")[0]);
+
+    final agencyCode = (widget.selectedAgency?['code'] ??
+    widget.existingAppointment?['agencyCode']);
+
+    final serviceCode = (widget.selectedService?.code ??
+    widget.existingAppointment?['serviceCode']);
+
+    final vehicleNumber = this.vehicleNumber;
+
+    if (agencyCode == null ||
+        serviceCode == null ||
+        agencyCode.isEmpty ||
+        serviceCode.isEmpty ||
+        vehicleNumber.isEmpty) {
+
+      debugPrint("❌ DEBUG DATA:");
+      debugPrint("agencyCode=$agencyCode");
+      debugPrint("serviceCode=$serviceCode");
+      debugPrint("vehicleNumber=$vehicleNumber");
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Données invalides ou incomplètes"),
+        ),
+      );
+
+      return;
+    }
+    try {
+      bool success = false;
+
+      if (widget.mode == "reschedule") {
+        final apptNo = widget.existingAppointment!["appointmentNo"]
+            ?? widget.existingAppointment!["AppointmentNo"];
+
+        if (apptNo == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Numéro de rendez-vous introuvable")),
+          );
+          return;
+        }
+
+        success = await AppointmentService.rescheduleAppointment(
+          appointmentNo: apptNo.toString(),
+          date: _selectedDay!,
+          startTime: selectedHour,
+          endTime: selectedHour + 1,
+        );
+
+      } else {
+
+        final apptNo = await AppointmentService.createAppointment(
+          agencyCode: agencyCode,
+          serviceCode: serviceCode,
+          vehicleNumber: vehicleNumber,
+          date: _selectedDay!,
+          startTime: selectedHour,
+          endTime: selectedHour + 1,
+          pontId: "AUTO",
+          customerNumber: _customerNumber ?? '',
+        );
+        _lastCreatedAppointmentNo = apptNo;
+        success = apptNo != null;
+      }
+
+      if (success) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ConfirmationScreen(
+              selectedVehicle: widget.selectedVehicle,
+              selectedAgency: widget.selectedAgency ?? {
+                'code': widget.existingAppointment?['agencyCode'] ?? '',
+                'name': widget.existingAppointment?['agencyName'] ?? '',
+              },
+              existingAppointment: widget.existingAppointment,
+              selectedService: widget.selectedService ?? ServiceModel(
+                code: widget.existingAppointment?['serviceCode'] ?? '',
+                name: widget.existingAppointment?['serviceCode'] ?? '',
+                icon: Icons.miscellaneous_services_rounded,
+              ),
+              selectedDate: _selectedDay!,
+              selectedSlot: _selectedSlot!,
+              appointmentNo: widget.mode == "reschedule"
+                  ? widget.existingAppointment!["appointmentNo"].toString()
+                  : _lastCreatedAppointmentNo ?? '',
+              customerEmail: _customerEmail ?? '',
+            ),
+          ),
+        );
+      }
     } catch (e) {
     ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(content: Text("Erreur: $e")),
@@ -724,14 +870,26 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
                       const Icon(Icons.check_rounded,
                           color: Colors.white, size: 18),
                       const SizedBox(width: 8),
+                      // Text(
+                      //   "Confirmer le rendez-vous",
+
+
+                   //   style: GoogleFonts.dmSans(
+                      //     fontSize: 15,
+                      //     fontWeight: FontWeight.w700,
+                      //     color: Colors.white,
+                      //   ),
+                      // ),
                       Text(
-                        "Confirmer le rendez-vous",
+                        widget.mode == "reschedule"
+                            ? "Modifier votre rendez-vous"
+                            : "Choisir un créneau",
                         style: GoogleFonts.dmSans(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white,
+                            ),
+                      )
 
                     ],
                   ),
@@ -740,6 +898,31 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+
+class _StepLabel extends StatelessWidget {
+  final String text;
+  final bool active;
+  final bool done;
+
+  const _StepLabel(this.text, {required this.active, required this.done});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontSize: 9,
+        fontWeight: active ? FontWeight.w600 : FontWeight.w400,
+        color: active
+            ? Colors.white
+            : done
+            ? Colors.white54
+            : Colors.white38,
       ),
     );
   }

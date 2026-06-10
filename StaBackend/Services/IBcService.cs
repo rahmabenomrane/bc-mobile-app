@@ -19,5 +19,13 @@ namespace StaBackend.Services
         Task<List<AppointmentDto>> GetAppointmentsAsync(string agencyCode, string serviceCode);
         Task<CreateAppointmentResponse> CreateAppointmentAsync(CreateAppointmentDto dto);
         Task<List<AppointmentDto>> GetCustomerAppointmentsAsync(string customerNumber);
+        Task<bool> RescheduleAppointmentAsync(RescheduleAppointmentDto dto);
+        Task<string?> GetCustomerEmailAsync(string customerNumber);
+        Task ConfirmAppointmentAsync(string appointmentNo);
+        Task<List<CarLiftDto>> GetCarLiftsAsync(string agencyCode);
+        Task<List<AppointmentDto>> GetAllAppointmentsForAgencyAsync(string agencyCode);
+        Task CancelAppointmentAsync(string appointmentNo);
+
+        Task<bool> CreateVehicleAsync(CreateVehicleDto vehicle);
     }
 }
