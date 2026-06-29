@@ -9,17 +9,17 @@ class ServiceService {
 
 
   Future<List<ServiceModel>> getServicesByAgency(String agencyCode) async {
-    final _storage = const FlutterSecureStorage();
-    final token = await _storage.read(key: 'token');
-    final String _baseUrl = 'http://10.0.2.2:5032';
+    final storage = const FlutterSecureStorage();
+    final token = await storage.read(key: 'token');
+    final String baseUrl = 'http://127.0.0.1:5032';
     print('[SERVICES] agencyCode = $agencyCode');
     print('[SERVICES] token = $token');
 
-    Uri.parse('$_baseUrl/api/services/agency/$agencyCode');
+    Uri.parse('$baseUrl/api/services/agency/$agencyCode');
 
 
     final response = await http.get(
-      Uri.parse('$_baseUrl/api/services/agency/$agencyCode'),
+      Uri.parse('$baseUrl/api/services/agency/$agencyCode'),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer $token',

@@ -38,45 +38,49 @@ public class AppointmentController : ControllerBase
     //     return Ok(result);
     // }
 
+
     [HttpPost("create")]
     public async Task<IActionResult> Create([FromBody] CreateAppointmentDto dto)
     {
-        // ✅ CreateAppointmentAsync contient déjà la validation
         var result = await _bcService.CreateAppointmentAsync(dto);
-
-        // ✅ Envoyer email directement sans re-vérifier
-        var email = await _bcService.GetCustomerEmailAsync(dto.CustomerNumber);
-
-        Console.WriteLine($"📧 CustomerNumber = {dto.CustomerNumber}");
-        Console.WriteLine($"📧 Email trouvé = {email ?? "NULL"}");
-
-        if (!string.IsNullOrEmpty(email))
-        {
-            var agencies = await _bcService.GetAgenciesAsync();
-            var agency = agencies.FirstOrDefault(a => a.Code == dto.AgencyCode);
-            var agencyName = agency?.Name ?? dto.AgencyCode;
-
-            var token = _tokenStore.GenerateToken(result.Data.AppointmentNo);
-            var confirmUrl = $"http://192.168.56.1:5032/api/Appointment/confirm?token={token}";
-
-            Console.WriteLine($"📧 Envoi email à {email}...");
-
-            await _emailService.SendConfirmationEmailAsync(
-                toEmail: email,
-                customerName: dto.CustomerNumber,
-                appointmentNo: result.Data.AppointmentNo,
-                agencyName: agencyName,
-                serviceName: dto.ServiceCode,
-                date: dto.Date.ToString("dd/MM/yyyy"),
-                time: $"{dto.StartTime:D2}:00",
-                confirmUrl: confirmUrl
-            );
-
-            Console.WriteLine("✅ Email envoyé !");
-        }
-
         return Ok(result);
     }
+
+
+    [HttpPost("send-reminders")]
+    public async Task<IActionResult> SendReminders()
+    {
+        var tomorrow = DateTime.Now.AddDays(1).Date;
+        var allRdvs = await _bcService.GetAppointmentsByDateAsync(tomorrow);
+
+        int sent = 0;
+        foreach (var rdv in allRdvs)
+        {
+            var vehicles = await _bcService.GetCustomerVehiclesAsync(rdv.NumVehicle);
+            var vehicle = vehicles.FirstOrDefault();
+            if (vehicle == null) continue;
+
+            var email = await _bcService.GetCustomerEmailAsync(vehicle.NumCustomer);
+            if (string.IsNullOrEmpty(email)) continue;
+
+            var agencies = await _bcService.GetAgenciesAsync();
+            var agency = agencies.FirstOrDefault(a => a.Code == rdv.AgencyCode);
+
+            await _emailService.SendReminderEmailAsync(
+                toEmail: email,
+                customerName: vehicle.NumCustomer,
+                appointmentNo: rdv.AppointmentNo,
+                agencyName: agency?.Name ?? rdv.AgencyCode,
+                serviceName: rdv.ServiceCode,
+                date: rdv.StartTime.ToString("dd/MM/yyyy"),
+                time: rdv.StartTime.ToString("HH:mm")
+            );
+            sent++;
+        }
+
+        return Ok(new { sent, message = $"{sent} rappels envoyés" });
+    }
+
     [HttpGet("customer/{customerNumber}")]
     public async Task<IActionResult> GetCustomerAppointments(
         string customerNumber)

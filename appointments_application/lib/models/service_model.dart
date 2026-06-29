@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-
-
 class ServiceModel {
   final String code;
   final String name;
@@ -24,19 +22,20 @@ class ServiceModel {
       name: json['name']?.toString() ?? '',
       description: json['description']?.toString() ?? '',
       type: json['type']?.toString() ?? '',
-      duration: json['duration']?.toString() ?? '',
       icon: _getIcon(json['type']?.toString() ?? ''),
+      duration: json['duration']?.toString() ?? '',
+
     );
   }
   static IconData _getIcon(String type) {
     switch (type.toLowerCase()) {
-      case 'vidange':
+      case 'Diagnostic électronique':
         return Icons.opacity_rounded;
 
-      case 'diagnostic':
+      case 'Entretien périodique':
         return Icons.developer_board_rounded;
 
-      case 'pneumatique':
+      case 'pneumatiques':
         return Icons.tire_repair_rounded;
 
       case 'climatisation':
@@ -46,20 +45,6 @@ class ServiceModel {
         return Icons.miscellaneous_services_rounded;
     }
   }
+ 
 
-  // String get tag {
-  //   switch (type.toLowerCase()) {
-  //     case 'vidange':
-  //       return 'Rapide';
-  //
-  //     case 'diagnostic':
-  //       return 'Précis';
-  //
-  //     case 'revision':
-  //       return 'Complet';
-  //
-  //     default:
-  //       return 'Service';
-  //   }
-  // }
 }

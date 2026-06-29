@@ -3,6 +3,7 @@ public class AppointmentDto
     public string AgencyCode { get; set; }
     public string AgencyName { get; set; }
     public string ServiceCode { get; set; }
+    public string ServiceDescription { get; set; }
     public DateTime Date { get; set; }
     public string PontId { get; set; }
     public string Status { get; set; }

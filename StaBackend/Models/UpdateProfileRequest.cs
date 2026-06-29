@@ -17,7 +17,7 @@ namespace StaBackend.Models
         public string? Error { get; set; }
     }
 
-    // CustomerInfo.cs (pour GET profile)
+
     public class CustomerInfo
     {
         public string NumCustomer { get; set; } = "";

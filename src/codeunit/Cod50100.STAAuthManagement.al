@@ -67,6 +67,18 @@ codeunit 50100 "STA Auth Management"
         end;
     end;
 
+    procedure VerifyPassword(Customer: Record StaCustomer; PlainPassword: Text): Boolean
+    var
+        Hashed: Text;
+    begin
+        if PlainPassword = '' then
+            exit(false);
+
+        Hashed := HashPassword(PlainPassword, Customer.PasswordSalt);
+
+        exit(Customer.PasswordHash = Hashed);
+    end;
+
     procedure HashPassword(PlainPassword: Text; Salt: Text): Text
     var
         Crypto: Codeunit "Cryptography Management";

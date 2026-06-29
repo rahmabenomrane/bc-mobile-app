@@ -140,8 +140,8 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
                     iconColor: const Color(0xFF27500A),
                     bg: const Color(0xFFEAF3DE),
                     border: const Color(0xFFC0DD97),
-                    title: 'Confirmation par e-mail',
-                    body: 'Un e-mail récapitulatif a été envoyé à\n${widget.customerEmail}',
+                    title: 'Rappel par e-mail',
+                    body: 'Un e-mail de rappel sera envoyé 24h avant le rendez-vous à\n${widget.customerEmail}',
                     titleColor: const Color(0xFF27500A),
                     bodyColor: const Color(0xFF3B6D11),
                     checkColor: const Color(0xFF3B6D11),
@@ -844,7 +844,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
               ),
               child: ElevatedButton.icon(
                 onPressed: () {
-                  Navigator.popUntil(context, (r) => r.isFirst);
+                  // Navigator.popUntil(context, (r) => r.isFirst);
                 },
                 icon: const Icon(Icons.home_rounded, size: 18),
                 label: Text('Retour à l\'accueil',
@@ -868,7 +868,7 @@ class _ConfirmationScreenState extends State<ConfirmationScreen>
             width: double.infinity,
             child: OutlinedButton.icon(
               onPressed: () {
-                // TODO: naviguer vers l'écran mes rendez-vous
+                Navigator.popUntil(context, (r) => r.isFirst);
               },
               icon: const Icon(Icons.history_rounded, size: 16),
               label: Text('Voir mes rendez-vous',

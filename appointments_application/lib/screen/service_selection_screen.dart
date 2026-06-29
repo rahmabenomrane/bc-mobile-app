@@ -1,4 +1,3 @@
-// lib/screen/service_selection_screen.dart
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../config/Palette.dart';
@@ -321,19 +320,19 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                         ),
                         const SizedBox(width: 8),
                         // Tag
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 7, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? Palette.gradientSecond.withOpacity(0.12)
-                                : Palette.homePageBackground,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
+                        // Container(
+                        //   padding: const EdgeInsets.symmetric(
+                        //       horizontal: 7, vertical: 2),
+                        //   decoration: BoxDecoration(
+                        //     color: isSelected
+                        //         ? Palette.gradientSecond.withOpacity(0.12)
+                        //         : Palette.homePageBackground,
+                        //     borderRadius: BorderRadius.circular(20),
+                        //   ),
+                        // ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    // const SizedBox(height: 4),
                     // Text(
                     //   service.description,
                     //   style: GoogleFonts.dmSans(
@@ -439,13 +438,6 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                         ),
                       ),
 
-                      // Text(
-                      //   service.duration,
-                      //   style: TextStyle(
-                      //     fontSize: 11,
-                      //     color: Palette.homePageSubtitle,
-                      //   ),
-                      // ),
                     ],
                   ),
                 ),
@@ -526,7 +518,7 @@ class _InfoChip extends StatelessWidget {
     required this.label,
     required this.iconColor,
     required this.selected,
-    this.highlight = false,
+    required this.highlight,
   });
 
   @override

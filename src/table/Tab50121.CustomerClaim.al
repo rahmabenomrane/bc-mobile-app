@@ -40,6 +40,11 @@ table 50121 CustomerClaim
             DataClassification = ToBeClassified;
             TableRelation = StaVehicle.NumVehicle;
         }
+        field(8; registrationNumber; Code[20])
+        {
+            DataClassification = ToBeClassified;
+            TableRelation = StaVehicle.RegistrationNumber;
+        }
     }
 
     keys
@@ -60,7 +65,19 @@ table 50121 CustomerClaim
 
     trigger OnInsert()
     begin
+        if Rec."claim No." = 0 then
+            Rec."claim No." := GetNextClaimNo();
+    end;
 
+    local procedure GetNextClaimNo(): Integer
+    var
+        CustomerClaim: Record CustomerClaim;
+    begin
+        CustomerClaim.Reset();
+        if CustomerClaim.FindLast() then
+            exit(CustomerClaim."claim No." + 1)
+        else
+            exit(1);
     end;
 
     trigger OnModify()

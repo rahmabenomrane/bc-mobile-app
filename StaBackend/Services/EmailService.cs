@@ -4,26 +4,25 @@ using Microsoft.Extensions.Options;
 
 public class EmailService
 {
-    private readonly EmailSettings _settings;
+  private readonly EmailSettings _settings;
 
-    public EmailService(IOptions<EmailSettings> settings)
-    {
-        _settings = settings.Value;
-    }
+  public EmailService(IOptions<EmailSettings> settings)
+  {
+    _settings = settings.Value;
+  }
 
-    public async Task SendConfirmationEmailAsync(
-        string toEmail,
-        string customerName,
-        string appointmentNo,
-        string agencyName,
-        string serviceName,
-        string date,
-        string time,
-        string confirmUrl)
-    {
-        var subject = "Confirmation de votre rendez-vous — STA Garage";
+  public async Task SendReminderEmailAsync(
+  string toEmail,
+  string customerName,
+  string appointmentNo,
+  string agencyName,
+  string serviceName,
+  string date,
+  string time)
+  {
+    var subject = "Rappel de votre rendez-vous demain — STA Garage";
 
-        var body = $@"
+    var body = $@"
 <!DOCTYPE html>
 <html>
 <head>
@@ -31,7 +30,7 @@ public class EmailService
   <style>
     body {{ font-family: 'Segoe UI', sans-serif; background: #f4f6fb; margin: 0; padding: 0; }}
     .container {{ max-width: 600px; margin: 40px auto; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }}
-    .header {{ background: linear-gradient(135deg, #667eea, #764ba2); padding: 32px; text-align: center; }}
+    .header {{ background: linear-gradient(135deg, #f97316, #ea580c); padding: 32px; text-align: center; }}
     .header h1 {{ color: white; margin: 0; font-size: 24px; }}
     .header p {{ color: rgba(255,255,255,0.85); margin: 8px 0 0; }}
     .body {{ padding: 32px; }}
@@ -40,7 +39,6 @@ public class EmailService
     .info-row:last-child {{ border-bottom: none; }}
     .info-label {{ color: #9e9ebf; font-size: 13px; }}
     .info-value {{ color: #2d2d4e; font-size: 13px; font-weight: 600; }}
-    .btn {{ display: block; width: fit-content; margin: 28px auto; background: linear-gradient(135deg, #667eea, #764ba2); color: white; text-decoration: none; padding: 14px 40px; border-radius: 12px; font-size: 15px; font-weight: 700; text-align: center; }}
     .footer {{ text-align: center; padding: 20px; color: #9e9ebf; font-size: 12px; border-top: 1px solid #eeeef5; }}
   </style>
 </head>
@@ -48,11 +46,11 @@ public class EmailService
   <div class='container'>
     <div class='header'>
       <h1>🔧 STA Garage</h1>
-      <p>Votre rendez-vous est en attente de confirmation</p>
+      <p>Rappel — Vous avez un rendez-vous demain</p>
     </div>
     <div class='body'>
       <p style='color:#2d2d4e;'>Bonjour <strong>{customerName}</strong>,</p>
-      <p style='color:#6b6b8e;'>Votre rendez-vous a bien été enregistré. Veuillez cliquer sur le bouton ci-dessous pour le confirmer.</p>
+      <p style='color:#6b6b8e;'>Ceci est un rappel automatique. Vous avez un rendez-vous prévu <strong>demain</strong>.</p>
 
       <div class='info-card'>
         <div class='info-row'>
@@ -77,10 +75,8 @@ public class EmailService
         </div>
       </div>
 
-      <a href='{confirmUrl}' class='btn'>✅ Confirmer mon rendez-vous</a>
-
       <p style='color:#9e9ebf; font-size:12px; text-align:center;'>
-        Ce lien expire dans 24 heures. Si vous n'avez pas pris ce rendez-vous, ignorez cet email.
+        Si vous souhaitez annuler ou modifier votre rendez-vous, contactez-nous dès que possible.
       </p>
     </div>
     <div class='footer'>
@@ -90,22 +86,22 @@ public class EmailService
 </body>
 </html>";
 
-        using var smtp = new SmtpClient(_settings.SmtpHost, _settings.SmtpPort)
-        {
-            Credentials = new NetworkCredential(_settings.SenderEmail, _settings.AppPassword),
-            EnableSsl = true,
-        };
+    using var smtp = new SmtpClient(_settings.SmtpHost, _settings.SmtpPort)
+    {
+      Credentials = new NetworkCredential(_settings.SenderEmail, _settings.AppPassword),
+      EnableSsl = true,
+    };
 
-        var mail = new MailMessage
-        {
-            From = new MailAddress(_settings.SenderEmail, _settings.SenderName),
-            Subject = subject,
-            Body = body,
-            IsBodyHtml = true,
-        };
-        mail.To.Add(toEmail);
+    var mail = new MailMessage
+    {
+      From = new MailAddress(_settings.SenderEmail, _settings.SenderName),
+      Subject = subject,
+      Body = body,
+      IsBodyHtml = true,
+    };
+    mail.To.Add(toEmail);
 
-        await smtp.SendMailAsync(mail);
-        Console.WriteLine($"✅ Email envoyé à {toEmail}");
-    }
+    await smtp.SendMailAsync(mail);
+    Console.WriteLine($"✅ Email rappel envoyé à {toEmail}");
+  }
 }

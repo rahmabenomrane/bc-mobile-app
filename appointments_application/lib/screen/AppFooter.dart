@@ -7,10 +7,10 @@ class AppFooter extends StatelessWidget {
   final Function(int) onTap;
 
   const AppFooter({
-    Key? key,
+    super.key,
     required this.currentIndex,
     required this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -82,10 +82,10 @@ class AppFooter extends StatelessWidget {
                   ),
                 ),
 
-                // CERCLE FLOTTANT (ANIMATION PREMIUM)
+
                 AnimatedPositioned(
                   duration: const Duration(milliseconds: 400),
-                  curve: Curves.easeOutBack, // effet bounce 🔥
+                  curve: Curves.easeOutBack,
                   left: centerX - 30,
                   bottom: 30,
                   child: TweenAnimationBuilder<double>(

@@ -52,6 +52,12 @@
       "name": "Intrastat Core",
       "publisher": "Microsoft",
       "version": "26.0.30643.33317"
+    },
+    {
+      "id": "f3552374-a1f2-4356-848e-196002525837",
+      "name": "Business Foundation",
+      "publisher": "Microsoft",
+      "version": "26.3.36158.36321"
     }
   ],
   "screenshots": [],

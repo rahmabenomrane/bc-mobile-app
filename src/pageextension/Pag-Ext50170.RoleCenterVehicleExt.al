@@ -1,4 +1,4 @@
-pageextension 50170 RoleCenterVehicleExt extends "DLT Veh. ADV Role Center"
+pageextension 50170 RoleCenterVehicleExt extends "Service Advisor Role Center"
 {
 
     actions

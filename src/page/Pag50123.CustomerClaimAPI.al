@@ -44,6 +44,10 @@ page 50123 "CustomerClaim API"
                 {
                     Caption = 'Vehicle Number';
                 }
+                field(registrationNumber; Rec.registrationNumber)
+                {
+                    Caption = 'registrationNumber';
+                }
             }
         }
     }

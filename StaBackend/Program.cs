@@ -13,7 +13,49 @@ var jwtAudience = builder.Configuration["Jwt:Audience"];
 
 Console.WriteLine($"JWT Config - Key: {!string.IsNullOrEmpty(jwtKey)}, Issuer: {jwtIssuer}, Audience: {jwtAudience}");
 
-// 2. Configuration JWT 
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
+
+
+    options.AddPolicy("Development",
+        policy =>
+        {
+            policy.WithOrigins(
+                    "http://localhost:5000",      // Flutter web
+                    "http://127.0.0.1:5000",      // Flutter web
+                    "http://localhost:3000",      // Autre frontend
+                    "http://127.0.0.1:3000",      // Autre frontend
+                    "http://localhost:8080",      // Alternative
+                    "http://127.0.0.1:8080"       // Alternative
+                )
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials(); 
+        });
+
+    // Pour la production
+    options.AddPolicy("Production",
+        policy =>
+        {
+            policy.WithOrigins(
+                    "https://votre-domaine.com",
+                    "https://www.votre-domaine.com"
+                )
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials();
+        });
+});
+
+// 3. Configuration JWT 
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -32,10 +74,9 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = true,
         ValidAudience = jwtAudience,
         ValidateLifetime = true,
-        ClockSkew = TimeSpan.Zero  // ← Important pour éviter les problèmes d'expiration
+        ClockSkew = TimeSpan.Zero
     };
 
-    // Ajoutez des logs pour debug
     options.Events = new JwtBearerEvents
     {
         OnAuthenticationFailed = context =>
@@ -70,25 +111,35 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// 4. Configuration BcSettings
 builder.Services.Configure<BcSettings>(builder.Configuration.GetSection("BcSettings"));
 builder.Services.AddSingleton<IBcService, BcService>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.AddSingleton<ConfirmationTokenStore>();
 builder.Services.AddScoped<EmailService>();
+builder.Services.AddHttpClient();
+builder.Services.AddHostedService<ReminderJob>();
 
 var app = builder.Build();
+
 
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+
+    // En développement, utiliser la politique Development
+    app.UseCors("Development");
 }
+else
+{
+    // En production, utiliser la politique Production
+    app.UseCors("Production");
+}
+
 
 app.UseAuthentication();
 app.UseAuthorization();

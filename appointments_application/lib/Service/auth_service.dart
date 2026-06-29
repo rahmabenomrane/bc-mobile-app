@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthService {
-  static const String baseUrl = "http://10.0.2.2:5032";
+  static const String baseUrl = "http://127.0.0.1:5032";
   static final FlutterSecureStorage storage = const FlutterSecureStorage();
 
   // Login
@@ -98,8 +98,6 @@ class AuthService {
           "phone": phone,
           "password": password,
           "email": email,
-          // "firstName": fullName.split(' ').first,
-          // "lastName": fullName.split(' ').last,
           "address": address ?? "",
           "civility": civility ?? "Monsieur",
         }),
@@ -131,7 +129,7 @@ class AuthService {
   // Logout
   static Future<void> logout() async {
     await storage.deleteAll();
-    print("✅ Session complètement effacée");
+    print(" Session complètement effacée");
   }
 
   // Check if user is logged in

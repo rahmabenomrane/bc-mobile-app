@@ -62,7 +62,24 @@ page 50121 AppointmentAPI
                 {
                     Caption = 'Pont Id';
                 }
+                field("ServiceDescription"; ServiceDesc)
+                {
+                    Caption = 'Service Description';
+                }
             }
         }
+
     }
+    trigger OnAfterGetRecord()
+    var
+        ServiceRec: Record Service;
+    begin
+        if ServiceRec.Get(Rec."Service Code") then
+            ServiceDesc := ServiceRec.Description
+        else
+            ServiceDesc := '';
+    end;
+
+    var
+        ServiceDesc: Text[100];
 }

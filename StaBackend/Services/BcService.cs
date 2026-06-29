@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using System.Net;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace StaBackend.Services
 {
@@ -213,7 +214,7 @@ namespace StaBackend.Services
                     Address = root.TryGetProperty("address", out var addr) ? addr.GetString() ?? "" : "",
                     Phone = root.TryGetProperty("phone", out var ph) ? ph.GetString() ?? "" : "",
                     Email = root.TryGetProperty("email", out var em) ? em.GetString() ?? "" : "",
-                    Civility = root.TryGetProperty("civility", out var civ) ? civ.GetString() ?? "" : ""
+                    Civility = root.TryGetProperty("civility", out var civ) ? civ.GetString() ?? "" : "",
                 };
             }
             catch (Exception ex)
@@ -223,7 +224,55 @@ namespace StaBackend.Services
             }
         }
 
-        // ── UPDATE CUSTOMER PROFILE ───────────────────────────────────────────
+        public async Task<UpdateProfileResponse> ChangePasswordAsync(
+       string customerNumber, string currentPassword, string newPassword)
+        {
+            var client = CreateWindowsAuthClient();
+            var url = $"{ODataBase}/StaChangePasswordAPI('{customerNumber}')";
+
+            // Step 1: GET the entity
+            var getRequest = new HttpRequestMessage(HttpMethod.Get, url);
+            var getResponse = await client.SendAsync(getRequest);
+            var getContent = await getResponse.Content.ReadAsStringAsync();
+
+            if (!getResponse.IsSuccessStatusCode)
+                return new UpdateProfileResponse { Success = false, Error = $"GET failed: {getContent}" };
+
+            // Step 2: Extract ETag from the JSON body (@odata.etag)
+            var getJson = JsonDocument.Parse(getContent);
+            var etag = getJson.RootElement
+                .GetProperty("@odata.etag")
+                .GetString();
+
+            if (string.IsNullOrEmpty(etag))
+                return new UpdateProfileResponse { Success = false, Error = "No ETag in BC response body" };
+
+            // Step 3: PATCH with the ETag
+            var body = new
+            {
+                customerNumber = customerNumber,
+                currentPassword = currentPassword,
+                newPassword = newPassword
+            };
+
+            var json = JsonSerializer.Serialize(body);
+
+            var patchRequest = new HttpRequestMessage(HttpMethod.Patch, url)
+            {
+                Content = new StringContent(json, Encoding.UTF8, "application/json")
+            };
+
+            patchRequest.Headers.Add("If-Match", etag);
+
+            var response = await client.SendAsync(patchRequest);
+            var content = await response.Content.ReadAsStringAsync();
+
+            return new UpdateProfileResponse
+            {
+                Success = response.IsSuccessStatusCode,
+                Error = content
+            };
+        }
         public async Task<UpdateProfileResponse> UpdateCustomerProfileAsync(string customerNumber, UpdateProfileRequest request)
         {
             var client = CreateWindowsAuthClient();
@@ -260,10 +309,20 @@ namespace StaBackend.Services
 
             try
             {
-                var response = await client.PatchAsync(url, bodyContent);
+                var httpRequest = new HttpRequestMessage(HttpMethod.Patch, url)
+                {
+                    Content = bodyContent
+                };
+                httpRequest.Headers.TryAddWithoutValidation("If-Match", "*");
+
+                Console.WriteLine($"[UPDATE PROFILE] PATCH → {url}");
+                Console.WriteLine($"[UPDATE PROFILE] Body → {bodyJson}");
+
+                var response = await client.SendAsync(httpRequest);
                 var content = await response.Content.ReadAsStringAsync();
 
                 Console.WriteLine($"[UPDATE PROFILE] Status → {response.StatusCode}");
+                Console.WriteLine($"[UPDATE PROFILE] Response → {content}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -280,6 +339,192 @@ namespace StaBackend.Services
             }
         }
 
+        // ── GET CLAIMS ──────────────────────────────────────────────────
+        public async Task<List<ClaimInfo>> GetClaimsAsync(string customerNumber)
+        {
+            var client = CreateWindowsAuthClient();
+
+            // customerNumber vient du JWT via le controller 
+            var url = $"http://localhost:7048/BC260/api/STA/Mobile/v1.0/companies(16be2528-96e4-f011-8d1f-00155d141f04)/Claims?$filter=customerNo eq '{customerNumber}'";
+
+            Console.WriteLine($"[GET CLAIMS] GET → {url}");
+
+            try
+            {
+                var response = await client.GetAsync(url);
+                var content = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine($"[GET CLAIMS] Status  → {response.StatusCode}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"[GET CLAIMS] ❌ Error: {content}");
+                    return new List<ClaimInfo>();
+                }
+
+                var doc = JsonDocument.Parse(content);
+                if (!doc.RootElement.TryGetProperty("value", out var values))
+                    return new List<ClaimInfo>();
+
+                var result = new List<ClaimInfo>();
+                foreach (var item in values.EnumerateArray())
+                {
+                    result.Add(new ClaimInfo
+                    {
+                        ClaimNumber = item.TryGetProperty("claimNumber", out var cn) ? cn.GetInt32() : 0,
+                        CreationDate = item.TryGetProperty("creationDate", out var cd) ? cd.GetString() ?? "" : "",
+                        CustomerNo = item.TryGetProperty("customerNo", out var cno) ? cno.GetString() ?? "" : "",
+                        VehicleNo = item.TryGetProperty("vehicleNo", out var vn) ? vn.GetString() ?? "" : "",
+                        Description = item.TryGetProperty("description", out var desc) ? desc.GetString() ?? "" : "",
+                        RegistrationNumber = item.TryGetProperty("registrationNumber", out var rn) ? rn.GetString() ?? "" : "",
+                        Status = ParseStatusFromBc(item.TryGetProperty("status", out var st) ? st.GetString() ?? "" : ""),
+                        Priority = ParsePriorityFromBc(item.TryGetProperty("priority", out var pr) ? pr.GetString() ?? "" : ""),
+                    });
+                }
+
+                Console.WriteLine($"[GET CLAIMS] ✅ {result.Count} réclamation(s)");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GET CLAIMS] ❌ Exception: {ex.Message}");
+                return new List<ClaimInfo>();
+            }
+        }
+
+        // ── CREATE CLAIM ────────────────────────────────────────────────
+        public async Task<CreateClaimResponse> CreateClaimAsync(CreateClaimRequest request)
+        {
+            var client = CreateWindowsAuthClient();
+            var url = $"http://localhost:7048/BC260/api/STA/Mobile/v1.0/companies(16be2528-96e4-f011-8d1f-00155d141f04)/Claims";
+
+            var bodyJson = JsonSerializer.Serialize(new
+            {
+                creationDate = DateTime.Today.ToString("yyyy-MM-dd"),
+                customerNo = request.CustomerNo,
+                vehicleNo = request.VehicleNo,
+                description = request.Description,
+                registrationNumber = request.RegistrationNumber,
+                status = "In Progress",
+                priority = MapPriorityToBc(request.Priority),
+            });
+
+            Console.WriteLine($"[CREATE CLAIM] POST → {url}");
+            Console.WriteLine($"[CREATE CLAIM] Body → {bodyJson}");
+
+            try
+            {
+                var response = await client.PostAsync(
+                    url, new StringContent(bodyJson, Encoding.UTF8, "application/json"));
+                var content = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine($"[CREATE CLAIM] Status  → {response.StatusCode}");
+                Console.WriteLine($"[CREATE CLAIM] Content → {content}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    try
+                    {
+                        var errMsg = JsonDocument.Parse(content)
+                            .RootElement.GetProperty("error")
+                            .GetProperty("message").GetString();
+                        return new CreateClaimResponse { Success = false, Error = errMsg };
+                    }
+                    catch
+                    {
+                        return new CreateClaimResponse { Success = false, Error = $"BC {response.StatusCode}: {content}" };
+                    }
+                }
+
+                var root = JsonDocument.Parse(content).RootElement;
+                if (root.TryGetProperty("value", out var v) && v.ValueKind == JsonValueKind.Object)
+                    root = v;
+
+                return new CreateClaimResponse
+                {
+                    Success = true,
+                    ClaimNumber = root.TryGetProperty("claimNumber", out var nr) ? nr.GetInt32() : 0,
+                    CustomerNo = root.TryGetProperty("customerNo", out var cno) ? cno.GetString() ?? "" : "",
+                    VehicleNo = root.TryGetProperty("vehicleNo", out var vno) ? vno.GetString() ?? "" : "",
+                    Description = root.TryGetProperty("description", out var desc) ? desc.GetString() ?? "" : "",
+                    Status = ParseStatusFromBc(root.TryGetProperty("status", out var st) ? st.GetString() ?? "" : ""),
+                    RegistrationNumber = root.TryGetProperty("registrationNumber", out var rn) ? rn.GetString() ?? "" : "",
+                    Priority = ParsePriorityFromBc(root.TryGetProperty("priority", out var pr) ? pr.GetString() ?? "" : ""),
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CREATE CLAIM] ❌ Exception: {ex.Message}");
+                return new CreateClaimResponse { Success = false, Error = ex.Message };
+            }
+        }
+
+        // ── UPDATE STATUS ───────────────────────────────────────────────
+        public async Task UpdateClaimStatusAsync(int claimNumber, int newStatus)
+        {
+            var client = CreateWindowsAuthClient();
+            var url = $"http://localhost:7048/BC260/api/STA/Mobile/v1.0/companies(16be2528-96e4-f011-8d1f-00155d141f04)/Claims({claimNumber})";
+
+            var getResponse = await client.GetAsync(url);
+            var getJson = await getResponse.Content.ReadAsStringAsync();
+
+            string? etag = null;
+            try { etag = JsonDocument.Parse(getJson).RootElement.GetProperty("@odata.etag").GetString(); }
+            catch { Console.WriteLine("[UPDATE CLAIM] ⚠️ ETag introuvable, utilisation de *"); }
+
+            var bodyJson = JsonSerializer.Serialize(new { status = MapStatusToBc(newStatus) });
+            var patchRequest = new HttpRequestMessage(HttpMethod.Patch, url)
+            {
+                Content = new StringContent(bodyJson, Encoding.UTF8, "application/json")
+            };
+            patchRequest.Headers.Add("If-Match", etag ?? "*");
+
+            var response = await client.SendAsync(patchRequest);
+            var responseText = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine($"[UPDATE CLAIM] {response.StatusCode} → {responseText}");
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"BC error {response.StatusCode}: {responseText}");
+        }
+
+
+
+        private static int ParseStatusFromBc(string s) => s.Replace("_x0020_", " ") switch
+        {
+            "In Progress" => 0,
+            "Resolved" => 1,
+            "Closed" => 2,
+            "Cancelled" => 3,
+            _ => 0
+        };
+
+        private static int ParsePriorityFromBc(string s) => s switch
+        {
+            "Low" => 0,
+            "Medium" => 1,
+            "High" => 2,
+            _ => 1
+        };
+
+        private static string MapStatusToBc(int status) => status switch
+        {
+            0 => "In Progress",
+            1 => "Resolved",
+            2 => "Closed",
+            3 => "Cancelled",
+            _ => "In Progress"
+        };
+
+        private static string MapPriorityToBc(int priority) => priority switch
+        {
+            0 => "Low",
+            1 => "Medium",
+            2 => "High",
+            _ => "Medium"
+        };
+
+
         // ── CHECK PHONE UNIQUENESS ───────────────────────────────────────────
         public async Task<bool> IsPhoneUniqueAsync(string phone, string currentCustomerNumber)
         {
@@ -292,12 +537,12 @@ namespace StaBackend.Services
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (!response.IsSuccessStatusCode)
-                    return true; // En cas d'erreur, on assume que c'est unique
+                    return true;
 
                 var json = JsonDocument.Parse(content);
                 if (json.RootElement.TryGetProperty("value", out var valueEl))
                 {
-                    // Si y'a des résultats, le phone n'est pas unique
+
                     return valueEl.GetArrayLength() == 0;
                 }
 
@@ -330,6 +575,7 @@ namespace StaBackend.Services
             if (!response.IsSuccessStatusCode)
                 throw new Exception(await response.Content.ReadAsStringAsync());
         }
+
         // ── CHECK EMAIL UNIQUENESS ───────────────────────────────────────────
         public async Task<bool> IsEmailUniqueAsync(string email, string currentCustomerNumber)
         {
@@ -381,7 +627,6 @@ namespace StaBackend.Services
         {
             var client = CreateWindowsAuthClient();
             var url = $"{ODataBase}/StaCustomerAPI";
-            // Faire une requête GET pour voir un exemple d'enregistrement
             var getUrl = $"{ODataBase}/StaCustomerAPI?$top=1";
             var getResponse = await client.GetAsync(getUrl);
             var getContent = await getResponse.Content.ReadAsStringAsync();
@@ -463,6 +708,54 @@ namespace StaBackend.Services
 
             return response.IsSuccessStatusCode;
         }
+        private const string ApiBase =
+"http://localhost:7048/BC260/api/STA/Mobile/v1.0/companies(16be2528-96e4-f011-8d1f-00155d141f04)";
+        public async Task<List<MakeDto>> GetMakesAsync()
+        {
+            var client = CreateWindowsAuthClient();
+
+            var url = $"{ApiBase}/makes";
+
+            var response = await client.GetAsync(url);
+            var content = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine("STATUS get makes: " + response.StatusCode);
+            Console.WriteLine("CONTENT:");
+            Console.WriteLine(content);
+
+            if (!response.IsSuccessStatusCode)
+                return new List<MakeDto>();
+
+            var result = JsonSerializer.Deserialize<BcMakeResponse>(
+                content,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+            );
+
+            return result?.Value?.Select(x => new MakeDto
+            {
+                Code = x.Code,
+                Name = x.Name
+            }).ToList() ?? new List<MakeDto>();
+        }
+        public async Task<List<ModelDto>> GetModelsByMakeAsync(string makeCode)
+        {
+            var client = CreateWindowsAuthClient();
+
+            var url = $"{ApiBase}/models?$filter=makeCode eq '{makeCode}'";
+
+            var response = await client.GetAsync(url);
+            var content = await response.Content.ReadAsStringAsync();
+
+            var result = JsonSerializer.Deserialize<BcModelResponse>(content,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            return result?.Value?.Select(x => new ModelDto
+            {
+                Code = x.Code,
+                MakeCode = x.MakeCode,
+                Name = x.Name
+            }).ToList() ?? new List<ModelDto>();
+        }
         // ── GET VEHICLES ───────────────────────────────────────────
         public async Task<List<VehicleDto>> GetCustomerVehiclesAsync(string customerNum)
         {
@@ -499,7 +792,9 @@ namespace StaBackend.Services
                     MakeCode = v.MakeCode,
                     ModelCode = v.ModelCode,
                     Motorisation = v.Motorisation,
-                    RegistrationNumber = v.RegistrationNumber
+                    RegistrationNumber = v.RegistrationNumber,
+                    Mileage = v.Mileage
+
                 }).ToList() ?? new List<VehicleDto>();
 
                 Console.WriteLine($"[VEHICLES] {vehicles.Count} véhicule(s) pour client {customerNum}");
@@ -512,6 +807,63 @@ namespace StaBackend.Services
             }
         }
 
+        public async Task<List<AppointmentDto>> GetAppointmentsByDateAsync(DateTime date)
+        {
+            var client = CreateWindowsAuthClient();
+            var dateStr = date.ToString("yyyy-MM-dd");
+            var url = $"{ODataBase}/AppointmentAPI?$filter=Date eq '{dateStr}'";
+
+            var response = await client.GetAsync(url);
+            var json = await response.Content.ReadAsStringAsync();
+
+            var data = JsonSerializer.Deserialize<BcAppointmentRawResponse>(
+                json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (data?.value == null) return new List<AppointmentDto>();
+
+            return data.value.Select(raw =>
+            {
+                var d = DateTime.Parse(raw.Date);
+                var start = TimeSpan.Parse(raw.StartTime);
+                var end = TimeSpan.Parse(raw.EndTime);
+
+                return new AppointmentDto
+                {
+                    AppointmentNo = raw.AppointmentNo,
+                    AgencyCode = raw.AgencyCode,
+                    AgencyName = raw.AgencyName,
+                    ServiceCode = raw.ServiceCode,
+                    ServiceDescription = raw.ServiceDescription,
+                    Date = d,
+                    StartTime = d.Add(start),
+                    EndTime = d.Add(end),
+                    Status = raw.Status,
+                    NumVehicle = raw.NumVehicle,
+                    PontId = raw.PontId,
+                };
+            }).ToList();
+        }
+
+        public async Task<VehicleDto?> GetVehicleByNumAsync(string numVehicle)
+        {
+            var client = CreateWindowsAuthClient();
+            var url = $"{ODataBase}/StaVehicleAPI?$filter=numVehicle eq '{numVehicle}'";
+
+            var response = await client.GetAsync(url);
+            var content = await response.Content.ReadAsStringAsync();
+
+            var bcResponse = JsonSerializer.Deserialize<BcVehicleResponse>(
+                content,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            return bcResponse?.value?.Select(v => new VehicleDto
+            {
+                NumVehicle = v.NumVehicle,
+                NumCustomer = v.NumCustomer,
+                RegistrationNumber = v.RegistrationNumber,
+            }).FirstOrDefault();
+        }
         public async Task<List<AppointmentDto>> GetCustomerAppointmentsAsync(string customerNumber)
         {
             var client = CreateWindowsAuthClient();
@@ -525,13 +877,15 @@ namespace StaBackend.Services
 
             var response = await client.GetAsync($"{ODataBase}/AppointmentAPI");
             var json = await response.Content.ReadAsStringAsync();
-
             var data = JsonSerializer.Deserialize<BcAppointmentRawResponse>(
                 json,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             if (data?.value == null) return new List<AppointmentDto>();
-
+            foreach (var raw in data.value)
+            {
+                Console.WriteLine($"{raw.ServiceCode} -> {raw.ServiceDescription}");
+            }
             return data.value
                 .Where(raw => vehicleNumbers.Contains(raw.NumVehicle?.Trim().ToUpper()))
                 .Select(raw =>
@@ -551,6 +905,7 @@ namespace StaBackend.Services
                         AgencyCode = raw.AgencyCode,
                         AgencyName = agence?.Name,
                         ServiceCode = raw.ServiceCode,
+                        ServiceDescription = raw.ServiceDescription,
                         Date = date,
                         StartTime = date.Add(start),
                         EndTime = date.Add(end),
@@ -617,6 +972,7 @@ namespace StaBackend.Services
             {
                 AgencyCode = dto.AgencyCode,
                 ServiceCode = dto.ServiceCode,
+                ServiceDescription = dto.ServiceDescription,
                 Date = dto.Date,
                 StartTime = new DateTime(dto.Date.Year, dto.Date.Month, dto.Date.Day, dto.StartTime, 0, 0),
                 EndTime = new DateTime(dto.Date.Year, dto.Date.Month, dto.Date.Day, dto.EndTime + 1, 0, 0),
@@ -762,7 +1118,7 @@ namespace StaBackend.Services
         {
             return type?.ToLower() switch
             {
-                "vidange" => "vidange",
+                "Entretien periodique" => "Entretien periodique",
                 "diagnostic" => "diagnostic",
                 "pneumatique" => "pneumatique",
                 "climatisation" => "climatisation",
@@ -817,7 +1173,6 @@ namespace StaBackend.Services
             Console.WriteLine($"agencyServiceCodes = {string.Join(", ", agencyServiceCodes)}");
 
 
-            //Joindre par libelle OU description OU code (flexible)
             return bcServices.value
                 .Where(s => agencyServiceCodes.Any(code =>
                     s.Libelle?.Trim().ToUpper() == code.Trim().ToUpper() ||
@@ -841,6 +1196,7 @@ namespace StaBackend.Services
             public string AppointmentNo { get; set; }
             public string AgencyCode { get; set; }
             public string AgencyName { get; set; }
+            public string ServiceDescription { get; set; }
             public string ServiceCode { get; set; }
             public string Date { get; set; }
             public string StartTime { get; set; }
@@ -881,6 +1237,7 @@ namespace StaBackend.Services
                     AgencyCode = raw.AgencyCode,
                     AgencyName = raw.AgencyName,
                     ServiceCode = raw.ServiceCode,
+                    ServiceDescription = raw.ServiceDescription,
                     Date = date,
                     StartTime = date.Add(start),
                     EndTime = date.Add(end),
@@ -899,6 +1256,7 @@ namespace StaBackend.Services
             {
                 agencyCode = appointment.AgencyCode,
                 serviceCode = appointment.ServiceCode,
+                serviceDescription = appointment.ServiceDescription,
                 date = appointment.Date.ToString("yyyy-MM-dd"),
                 startTime = appointment.StartTime.ToString("HH:mm:ss"),
                 endTime = appointment.EndTime.ToString("HH:mm:ss"),
@@ -968,3 +1326,4 @@ namespace StaBackend.Services
     }
 
 }
+

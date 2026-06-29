@@ -3,22 +3,100 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:appointments_application/config/Palette.dart' as color;
 
+import '../Service/appointment_service.dart';
+import '../Service/auth_service.dart';
+import 'claims_list_screen.dart';
+import 'login_signup.dart';
+
 class HomePage extends StatefulWidget {
   final Function(int)? onNavigate;
   final String customerNumber;
 
   const HomePage({
-    Key? key,
+    super.key,
     this.onNavigate,
     required this.customerNumber,
-  }) : super(key: key);
+  });
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  List<dynamic> rdvs = [];
+  bool loading = true;
+  final AppointmentService appointmentService = AppointmentService();
+  @override
+  void initState() {
+    super.initState();
+    loadAppointments();
+  }
+  Future<void> _logout() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Déconnexion'),
+        content: const Text(
+          'Voulez-vous vraiment vous déconnecter ?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Déconnecter'),
+          ),
+        ],
+      ),
+    );
 
+    if (confirm == true) {
+      await AuthService.logout();
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const LoginSignupScreen(),
+        ),
+            (route) => false,
+      );
+    }
+  }
+  Future<void> loadAppointments() async {
+    try {
+      final data = await appointmentService.getCustomerAppointments(
+          widget.customerNumber
+      );
+      setState(() {
+        rdvs = data;
+        loading = false;
+      });
+    } catch (e) {
+      print(e);
+      setState(() {
+        loading = false;
+      });
+    }
+  }
+  Map<String, dynamic>? getNextAppointment() {
+    final now = DateTime.now();
+    final futureRdvs = rdvs.where((rdv) {
+      final endTimeStr = rdv["endTime"];
+      final endTime = DateTime.tryParse(endTimeStr ?? "");
+      return endTime != null && endTime.isAfter(now);
+    }).toList();
+
+    // Trier par date (le plus proche d'abord)
+    futureRdvs.sort((a, b) {
+      final aTime = DateTime.tryParse(a["startTime"] ?? "") ?? DateTime.now();
+      final bTime = DateTime.tryParse(b["startTime"] ?? "") ?? DateTime.now();
+      return aTime.compareTo(bTime);
+    });
+
+    return futureRdvs.isNotEmpty ? futureRdvs.first : null;
+  }
   // ─── Service card ──────────────────────────────────────────────────────────
 
   Widget _buildEnhancedServiceCard({
@@ -119,8 +197,12 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Image.asset("images/STA.jpg", height: 36),
                     const Spacer(),
+
+                    // Bouton de notification
                     Container(
-                      width: 38, height: 38,
+                      width: 38,
+                      height: 38,
+                      margin: const EdgeInsets.only(right: 8),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(11),
@@ -138,9 +220,11 @@ class _HomePageState extends State<HomePage> {
                           Icon(Icons.notifications_none_rounded,
                               size: 20, color: color.Palette.homePageTitle),
                           Positioned(
-                            top: 8, right: 8,
+                            top: 8,
+                            right: 8,
                             child: Container(
-                              width: 7, height: 7,
+                              width: 7,
+                              height: 7,
                               decoration: BoxDecoration(
                                 color: color.Palette.gradientFirst,
                                 shape: BoxShape.circle,
@@ -152,11 +236,35 @@ class _HomePageState extends State<HomePage> {
                         ],
                       ),
                     ),
+
+                    // Bouton de déconnexion (indépendant)
+                    GestureDetector(
+                      onTap: _logout,
+                      child: Container(
+                        width: 38,
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(11),
+                          border: Border.all(color: Colors.grey.shade100),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 8,
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.logout,
+                          size: 20,
+                          color: color.Palette.homePageTitle,
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-
             // ── SECTION 2 : Titre ───────────────────────────────────────────
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
@@ -248,9 +356,12 @@ class _HomePageState extends State<HomePage> {
                     icon: Icons.report_problem_rounded,
                     iconBg: const Color(0xFFFCEBEB),
                     iconColor: const Color(0xFFA32D2D),
-                    onTap: () {
-                      // TODO
-                    },
+    onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (_) => const ClaimsListScreen()),
+  );
+},
                   ),
                   _buildEnhancedServiceCard(
                     title: 'News & Offres',
@@ -285,7 +396,7 @@ class _HomePageState extends State<HomePage> {
 
             // ── Footer ──────────────────────────────────────────────────────
             const SliverPadding(
-              padding: EdgeInsets.only(bottom: 110),
+              padding: EdgeInsets.only(bottom: 140),
               sliver: SliverToBoxAdapter(child: SizedBox()),
             ),
           ],
@@ -297,6 +408,7 @@ class _HomePageState extends State<HomePage> {
   // ─── Carte prochain RDV ────────────────────────────────────────────────────
 
   Widget _buildNextRdvCard(BuildContext context) {
+    final nextRdv = getNextAppointment();
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -359,7 +471,7 @@ class _HomePageState extends State<HomePage> {
           const SizedBox(height: 16),
 
           Text(
-            'Agence Lac 1',
+            nextRdv != null ? nextRdv["agencyName"] ?? "Agence" : "Aucun rendez-vous prévu",
             style: GoogleFonts.playfairDisplay(
               fontSize: 22,
               color: Colors.white,
@@ -368,7 +480,7 @@ class _HomePageState extends State<HomePage> {
           ),
           const SizedBox(height: 2),
           Text(
-            'Service Réparation',
+            nextRdv != null ? nextRdv["serviceDescription"] ?? "Service" : "",
             style: GoogleFonts.dmSans(
               fontSize: 14,
               color: Colors.white.withOpacity(0.75),
@@ -376,8 +488,8 @@ class _HomePageState extends State<HomePage> {
           ),
 
           const SizedBox(height: 20),
-
-          Row(
+          if (nextRdv != null)
+            Row(
             children: [
               // Puce date
               Container(
@@ -394,7 +506,7 @@ class _HomePageState extends State<HomePage> {
                         color: Colors.white.withOpacity(0.9)),
                     const SizedBox(width: 6),
                     Text(
-                      '19/04/2026 · 10h00',
+                      _formatDateTime(nextRdv["startTime"]),
                       style: GoogleFonts.dmSans(
                         fontSize: 12,
                         color: Colors.white,
@@ -447,6 +559,20 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  String _formatDateTime(String? dateTimeStr) {
+    if (dateTimeStr == null) return "";
+    try {
+      final dateTime = DateTime.parse(dateTimeStr);
+      final day = dateTime.day.toString().padLeft(2, '0');
+      final month = dateTime.month.toString().padLeft(2, '0');
+      final year = dateTime.year;
+      final hour = dateTime.hour.toString().padLeft(2, '0');
+      final minute = dateTime.minute.toString().padLeft(2, '0');
+      return '$day/$month/$year · ${hour}h${minute}';
+    } catch (e) {
+      return dateTimeStr.substring(0, 16);
+    }
+  }
   // ─── Banner SAV ────────────────────────────────────────────────────────────
 
   Widget _buildSavBanner() {
@@ -520,17 +646,16 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 6),
                 Text(
                   "Service client\nd'exception",
                   style: GoogleFonts.dmSans(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: color.Palette.homePageTitle,
-                    height: 1.3,
+                    height: 1.1,
                   ),
                 ),
-                const SizedBox(height: 4),
+
                 Text(
                   'Techniciens certifiés à votre service',
                   style: GoogleFonts.dmSans(
@@ -546,3 +671,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+
