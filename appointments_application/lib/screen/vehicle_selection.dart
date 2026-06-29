@@ -16,11 +16,11 @@ class VehicleSelectionScreen extends StatefulWidget {
   final Function(int)? onNavigate;
 
   const VehicleSelectionScreen({
-    Key? key,
+    super.key,
     required this.customerNumber,
     this.appointmentMode = true,
     this.onNavigate,
-  }) : super(key: key);
+  });
 
   @override
   State<VehicleSelectionScreen> createState() => _VehicleSelectionScreenState();
@@ -112,8 +112,7 @@ class _VehicleSelectionScreenState extends State<VehicleSelectionScreen> {
       ),
 
       bottomNavigationBar: !widget.appointmentMode
-          ? SizedBox(
-        height: 90,
+          ? SafeArea(
         child: AppFooter(
           currentIndex: 0,
           onTap: (i) {
@@ -340,10 +339,14 @@ class _VehicleSelectionScreenState extends State<VehicleSelectionScreen> {
         // Liste
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            padding: EdgeInsets.only(
+              left: 16,
+              right: 16,
+              top: 12,
+              bottom: 90 + MediaQuery.of(context).padding.bottom,
+            ),
             itemCount: _vehicles.length,
-            itemBuilder: (context, index) =>
-                _buildVehicleCard(_vehicles[index]),
+            itemBuilder: (context, index) => _buildVehicleCard(_vehicles[index]),
           ),
         ),
       ],
@@ -475,12 +478,24 @@ class _VehicleSelectionScreenState extends State<VehicleSelectionScreen> {
                       ),
                     ),
                     const SizedBox(height: 3),
-                    Text(
-                      vehicle.motorisation,
-                      style: GoogleFonts.dmSans(
-                        fontSize: 12,
-                        color: Palette.homePageSubtitle,
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          vehicle.motorisation,
+                          style: GoogleFonts.dmSans(
+                            fontSize: 12,
+                            color: Palette.homePageSubtitle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          '${vehicle.mileage} kM',
+                          style: GoogleFonts.dmSans(
+                            fontSize: 12,
+                            color: Palette.homePageSubtitle,
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 6),
                     // Chip numéro

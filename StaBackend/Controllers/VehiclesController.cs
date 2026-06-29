@@ -25,7 +25,46 @@ namespace StaBackend.Controllers
         {
             return Ok(new { message = "API fonctionne", status = "OK" });
         }
+        [AllowAnonymous]
+        [HttpGet("makes")]
+        public async Task<IActionResult> GetMakes()
+        {
+            try
+            {
+                var makes = await _bcService.GetMakesAsync();
 
+                return Ok(new
+                {
+                    success = true,
+                    data = makes
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting makes");
+                return StatusCode(500);
+            }
+        }
+        [AllowAnonymous]
+        [HttpGet("models/{makeCode}")]
+        public async Task<IActionResult> GetModels(string makeCode)
+        {
+            try
+            {
+                var models = await _bcService.GetModelsByMakeAsync(makeCode);
+
+                return Ok(new
+                {
+                    success = true,
+                    data = models
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting models");
+                return StatusCode(500);
+            }
+        }
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateVehicle([FromBody] CreateVehicleDto dto)
@@ -53,6 +92,7 @@ namespace StaBackend.Controllers
                 return StatusCode(500);
             }
         }
+        
 
         [Authorize]
         [HttpGet]

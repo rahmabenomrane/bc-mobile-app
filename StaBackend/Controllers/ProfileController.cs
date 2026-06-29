@@ -62,7 +62,56 @@ namespace StaBackend.Controllers
                 return StatusCode(500, new { error = "Internal server error", detail = ex.Message });
             }
         }
+        // PATCH /api/profile/password
+        [HttpPatch("password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            try
+            {
+                var customerNumber = User.FindFirst("CustomerNumber")?.Value;
+                if (string.IsNullOrEmpty(customerNumber))
+                    return Unauthorized(new { error = "Customer number not found in token" });
 
+                // 1. Validation basique
+                if (string.IsNullOrEmpty(request.CurrentPassword) ||
+                    string.IsNullOrEmpty(request.NewPassword) ||
+                    string.IsNullOrEmpty(request.ConfirmPassword))
+                    return BadRequest(new { error = "All fields are required" });
+
+                if (request.NewPassword != request.ConfirmPassword)
+                    return BadRequest(new { error = "Passwords do not match" });
+
+                if (request.NewPassword.Length < 6)
+                    return BadRequest(new { error = "New password must be at least 6 characters" });
+
+                if (request.CurrentPassword == request.NewPassword)
+                    return BadRequest(new { error = "New password must be different from current password" });
+
+                // 2. Vérifier l'ancien mot de passe et mettre à jour
+                var result = await _bcService.ChangePasswordAsync(
+    customerNumber,
+    request.CurrentPassword,
+    request.NewPassword
+);
+
+                if (!result.Success)
+                {
+                    var errorMsg = string.IsNullOrEmpty(result.Error)
+                        ? "BC returned an error with no details"
+                        : result.Error;
+
+                    _logger.LogWarning($"BC password change failed for {customerNumber}: {errorMsg}");
+                    return BadRequest(new { error = errorMsg });
+                }
+                _logger.LogInformation($"Password changed for customer {customerNumber}");
+                return Ok(new { success = true, message = "Password changed successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error changing password");
+                return StatusCode(500, new { error = "Internal server error", detail = ex.Message });
+            }
+        }
         // PATCH /api/profile
         [HttpPatch]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
@@ -168,4 +217,5 @@ namespace StaBackend.Controllers
             return fields;
         }
     }
+
 }

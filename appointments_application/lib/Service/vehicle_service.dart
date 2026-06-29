@@ -6,7 +6,7 @@ import '../models/vehicle_model.dart';
 
 class VehicleService {
   final storage = const FlutterSecureStorage();
-  final String baseUrl = "http://10.0.2.2:5032";
+  final String baseUrl = "http://127.0.0.1:5032";
 
   Future<List<Vehicle>> getMyVehicles() async {
     final token = await storage.read(key: "token");
@@ -56,6 +56,22 @@ class VehicleService {
       rethrow;
     }
   }
+  Future<List> getMakes() async {
+    final res = await http.get(Uri.parse("$baseUrl/api/vehicles/makes"));
+
+    final data = jsonDecode(res.body);
+    return data['data'];
+  }
+
+  Future<List> getModels(String makeCode) async {
+    final res = await http.get(
+      Uri.parse("$baseUrl/api/vehicles/models/$makeCode"),
+    );
+
+    final data = jsonDecode(res.body);
+    return data['data'];
+  }
+
   Future<bool> createVehicle({
     required String makeCode,
     required String modelCode,

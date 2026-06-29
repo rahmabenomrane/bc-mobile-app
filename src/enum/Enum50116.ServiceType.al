@@ -2,9 +2,9 @@ enum 50116 ServiceType
 {
     Extensible = true;
 
-    value(0; Vidange)
+    value(0; "Entretien périodique")
     {
-        Caption = 'Vidange';
+        Caption = 'Entretien périodique';
     }
 
     value(1; "Diagnostic électronique")

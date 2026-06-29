@@ -7,7 +7,7 @@ import '../models/agency_model.dart';
 
 
 class AgencyService {
-  static const String _baseUrl = 'http://10.0.2.2:5032';
+  static const String _baseUrl = 'http://127.0.0.1:5032';
   final _storage = const FlutterSecureStorage();
 
   get content => null;

@@ -39,7 +39,9 @@ table 50110 StaVehicle
         field(3; "Model Code"; Code[20])
         {
             Caption = 'Model Code';
-            // TableRelation = Model.Code where("Make Code" = field("Make Code"));
+            TableRelation = Model.Code where("Make Code" = field("Make Code"));
+            ValidateTableRelation = false;
+            TestTableRelation = false;
             DataClassification = CustomerContent;
 
             // trigger OnValidate()

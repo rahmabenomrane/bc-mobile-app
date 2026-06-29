@@ -19,7 +19,7 @@ class Vehicle {
     required this.mileage
   });
 
-  // Convertir JSON → Vehicle
+
   factory Vehicle.fromJson(Map<String, dynamic> json) {
     return Vehicle(
       id: json['id']?.toString() ?? '',
@@ -29,7 +29,7 @@ class Vehicle {
       modelCode: json['modelCode']?.toString() ?? '',
       motorisation: json['motorisation']?.toString() ?? '',
       registrationNumber: json['registrationNumber']?.toString() ?? json['Registration_number']?.toString(),
-      mileage: json['mileage']?.toString() ?? '',
+      mileage: (json['Mileage'] ?? json['mileage'] ?? 0).toString(),
     );
   }
 

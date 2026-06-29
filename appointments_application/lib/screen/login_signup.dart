@@ -7,6 +7,8 @@ import 'dart:async';
 import '../Service/auth_service.dart';
 
 class LoginSignupScreen extends StatefulWidget {
+  const LoginSignupScreen({super.key});
+
   @override
   _LoginSignupScreenState createState() => _LoginSignupScreenState();
 }

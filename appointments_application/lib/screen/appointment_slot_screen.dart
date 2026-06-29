@@ -10,6 +10,7 @@ import '../models/Appontment_model.dart';
 import '../models/service_model.dart';
 import '../models/vehicle_model.dart';
 import 'confirmation_screen.dart';
+import 'error_toast.dart';
 import 'step_indicator.dart';
 
 class AppointmentSlotScreen extends StatefulWidget {
@@ -71,7 +72,7 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
   @override
   void initState() {
     super.initState();
-    void _checkRequiredData() {
+    void checkRequiredData() {
       if (widget.mode == "create") {
         assert(widget.selectedVehicle != null);
         assert(widget.selectedAgency != null);
@@ -84,18 +85,20 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
         print(widget.existingAppointment.toString());
          }
     }
-    Future<void> _loadCustomerNumber() async {
+    Future<void> loadCustomerNumber() async {
       final cn = await AuthService.storage.read(key: "customerNumber");
       setState(() => _customerNumber = cn);
       final em = await AuthService.storage.read(key: "customerEmail"); // ✅
-      if (mounted) setState(() {
+      if (mounted) {
+        setState(() {
         _customerNumber = cn;
         _customerEmail = em;
       });
+      }
     }
     initializeDateFormatting('fr_FR', null);
-    _loadCustomerNumber();
-    _checkRequiredData();
+    loadCustomerNumber();
+    checkRequiredData();
     _loadAppointments();
     if (widget.mode == "reschedule" && widget.existingAppointment != null) {
       final appt = widget.existingAppointment!;
@@ -740,112 +743,115 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-    onPressed: () async {
-    if (_selectedSlot == null || _selectedDay == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(content: Text("Choisissez date et heure")),
-    );
-    return;
-    }
+              onPressed: () async {
+                if (_selectedSlot == null || _selectedDay == null) {
+                  AppToast.error(context, "Veuillez choisir une date et un créneau.");
+                  return;
+                }
 
-    final selectedHour = int.parse(_selectedSlot!.split(":")[0]);
+                final selectedHour = int.parse(_selectedSlot!.split(":")[0]);
+                final agencyCode = (widget.selectedAgency?['code'] ?? widget.existingAppointment?['agencyCode']);
+                final serviceCode = (widget.selectedService?.code ?? widget.existingAppointment?['serviceCode']);
+                final vehicleNumber = this.vehicleNumber;
 
-    final agencyCode = (widget.selectedAgency?['code'] ??
-    widget.existingAppointment?['agencyCode']);
+                if (agencyCode == null || serviceCode == null ||
+                    agencyCode.isEmpty || serviceCode.isEmpty || vehicleNumber.isEmpty) {
+                  AppToast.error(context, "Données invalides ou incomplètes.");
+                  return;
+                }
 
-    final serviceCode = (widget.selectedService?.code ??
-    widget.existingAppointment?['serviceCode']);
+                try {
+                  bool success = false;
 
-    final vehicleNumber = this.vehicleNumber;
+                  if (widget.mode == "reschedule") {
+                    final apptNo = widget.existingAppointment!["appointmentNo"]
+                        ?? widget.existingAppointment!["AppointmentNo"];
 
-    if (agencyCode == null ||
-        serviceCode == null ||
-        agencyCode.isEmpty ||
-        serviceCode.isEmpty ||
-        vehicleNumber.isEmpty) {
+                    if (apptNo == null) {
+                      AppToast.error(context, "Numéro de rendez-vous introuvable.");
+                      return;
+                    }
 
-      debugPrint("❌ DEBUG DATA:");
-      debugPrint("agencyCode=$agencyCode");
-      debugPrint("serviceCode=$serviceCode");
-      debugPrint("vehicleNumber=$vehicleNumber");
+                    success = await AppointmentService.rescheduleAppointment(
+                      appointmentNo: apptNo.toString(),
+                      date: _selectedDay!,
+                      startTime: selectedHour,
+                      endTime: selectedHour + 1,
+                    );
+                  } else {
+                    final apptNo = await AppointmentService.createAppointment(
+                      agencyCode: agencyCode,
+                      serviceCode: serviceCode,
+                      vehicleNumber: vehicleNumber,
+                      date: _selectedDay!,
+                      startTime: selectedHour,
+                      endTime: selectedHour + 1,
+                      pontId: "AUTO",
+                      customerNumber: _customerNumber ?? '',
+                      serviceDescription: widget.selectedService?.description ?? '',
+                    );
+                    _lastCreatedAppointmentNo = apptNo;
+                    success = apptNo != null;
+                  }
+                  var serv = widget.selectedService?.description;
+                  print("servicccceeeeeee");
+                  print(serv);
+                  if (success) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => ConfirmationScreen(
+                          selectedVehicle: widget.selectedVehicle,
+                          selectedAgency: widget.selectedAgency ?? {
+                            'code': widget.existingAppointment?['agencyCode'] ?? '',
+                            'name': widget.existingAppointment?['agencyName'] ?? '',
+                          },
+                          existingAppointment: widget.existingAppointment,
+                          selectedService: widget.selectedService ?? ServiceModel(
+                            code: widget.existingAppointment?['serviceCode'] ?? '',
+                            name: widget.existingAppointment?['serviceCode'] ?? '',
+                            icon: Icons.miscellaneous_services_rounded,
+                          ),
+                          selectedDate: _selectedDay!,
+                          selectedSlot: _selectedSlot!,
+                          appointmentNo: widget.mode == "reschedule"
+                              ? widget.existingAppointment!["appointmentNo"].toString()
+                              : _lastCreatedAppointmentNo ?? '',
+                          customerEmail: _customerEmail ?? '',
+                        ),
+                      ),
+                    );
+                  }
+                } catch (e) {
+                  final raw = e.toString();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Données invalides ou incomplètes"),
-        ),
-      );
+                  String msg = raw;
+                  if (raw.contains('Exception:')) {
+                    msg = raw.split('Exception:').last.trim();
+                  }
+                  if (raw.contains('Bad state:')) {
+                    msg = raw.split('Bad state:').last.trim();
+                  }
 
-      return;
-    }
-    try {
-      bool success = false;
+                  if (msg.length > 80) msg = '${msg.substring(0, 80)}...';
 
-      if (widget.mode == "reschedule") {
-        final apptNo = widget.existingAppointment!["appointmentNo"]
-            ?? widget.existingAppointment!["AppointmentNo"];
-
-        if (apptNo == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Numéro de rendez-vous introuvable")),
-          );
-          return;
-        }
-
-        success = await AppointmentService.rescheduleAppointment(
-          appointmentNo: apptNo.toString(),
-          date: _selectedDay!,
-          startTime: selectedHour,
-          endTime: selectedHour + 1,
-        );
-
-      } else {
-
-        final apptNo = await AppointmentService.createAppointment(
-          agencyCode: agencyCode,
-          serviceCode: serviceCode,
-          vehicleNumber: vehicleNumber,
-          date: _selectedDay!,
-          startTime: selectedHour,
-          endTime: selectedHour + 1,
-          pontId: "AUTO",
-          customerNumber: _customerNumber ?? '',
-        );
-        _lastCreatedAppointmentNo = apptNo;
-        success = apptNo != null;
-      }
-
-      if (success) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => ConfirmationScreen(
-              selectedVehicle: widget.selectedVehicle,
-              selectedAgency: widget.selectedAgency ?? {
-                'code': widget.existingAppointment?['agencyCode'] ?? '',
-                'name': widget.existingAppointment?['agencyName'] ?? '',
+                  if (raw.contains('pont') || raw.contains('Aucun pont')) {
+                    AppToast.show(context,
+                      title: 'Aucun pont disponible',
+                      message: 'Ce créneau est complet. Choisissez un autre horaire.',
+                      type: ToastType.error,
+                    );
+                  } else if (raw.contains('SocketException') || raw.contains('connexion')) {
+                    AppToast.show(context,
+                      title: 'Erreur de connexion',
+                      message: 'Vérifiez votre connexion réseau.',
+                      type: ToastType.error,
+                    );
+                  } else {
+                    AppToast.error(context, msg);
+                  }
+                }
               },
-              existingAppointment: widget.existingAppointment,
-              selectedService: widget.selectedService ?? ServiceModel(
-                code: widget.existingAppointment?['serviceCode'] ?? '',
-                name: widget.existingAppointment?['serviceCode'] ?? '',
-                icon: Icons.miscellaneous_services_rounded,
-              ),
-              selectedDate: _selectedDay!,
-              selectedSlot: _selectedSlot!,
-              appointmentNo: widget.mode == "reschedule"
-                  ? widget.existingAppointment!["appointmentNo"].toString()
-                  : _lastCreatedAppointmentNo ?? '',
-              customerEmail: _customerEmail ?? '',
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text("Erreur: $e")),
-    );
-    }
-    },
               child: Ink(
                 decoration: BoxDecoration(
                   gradient: LinearGradient(

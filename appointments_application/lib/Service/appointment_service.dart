@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import '../models/Appontment_model.dart';
 
 class AppointmentService {
-  static const String baseUrl = "http://10.0.2.2:5032/api";
+  static const String baseUrl = "http://127.0.0.1:5032/api";
 
   // ================= CREATE =================
   static Future<String?> createAppointment({
@@ -16,6 +16,7 @@ class AppointmentService {
     required String pontId,
     required String vehicleNumber,
     required String customerNumber,
+    required String serviceDescription,
   }) async {
 
     final url = Uri.parse("$baseUrl/Appointment/create");
@@ -30,6 +31,7 @@ class AppointmentService {
       "status": "Pending",
       "vehicleNumber": vehicleNumber,
       "customerNumber": customerNumber,
+      "serviceDescription": serviceDescription,
     };
 
     final response = await http.post(
@@ -49,7 +51,6 @@ class AppointmentService {
     throw Exception(response.body);
   }
 
-  // ================= GET SLOTS =================
   static Future<List<AppointmentModel>> getAppointments(
       String agencyCode,
       String serviceCode,
@@ -77,9 +78,16 @@ class AppointmentService {
   Future<List<dynamic>> getCustomerAppointments(String customerNumber) async {
     final response = await http.get(
       Uri.parse("$baseUrl/Appointment/customer/$customerNumber"),
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
     );
 
     if (response.statusCode == 200) {
+      print("resppp du get customer rdv");
+      print("${response.body}");
       return jsonDecode(response.body);
     }
 

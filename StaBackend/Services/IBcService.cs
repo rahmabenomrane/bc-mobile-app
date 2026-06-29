@@ -1,5 +1,4 @@
 using StaBackend.Models;
-
 namespace StaBackend.Services
 {
     public interface IBcService
@@ -27,5 +26,13 @@ namespace StaBackend.Services
         Task CancelAppointmentAsync(string appointmentNo);
 
         Task<bool> CreateVehicleAsync(CreateVehicleDto vehicle);
+        Task<List<ClaimInfo>> GetClaimsAsync(string customerNumber);
+        Task<CreateClaimResponse> CreateClaimAsync(CreateClaimRequest request);
+        Task UpdateClaimStatusAsync(int claimNumber, int newStatus);
+        Task<List<MakeDto>> GetMakesAsync();
+        Task<List<ModelDto>> GetModelsByMakeAsync(string makeCode);
+        Task<List<AppointmentDto>> GetAppointmentsByDateAsync(DateTime date);
+        Task<VehicleDto?> GetVehicleByNumAsync(string numVehicle);
+        Task<UpdateProfileResponse> ChangePasswordAsync(string customerNumber, string currentPassword, string newPassword);
     }
 }

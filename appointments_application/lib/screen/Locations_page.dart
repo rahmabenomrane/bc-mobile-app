@@ -1,4 +1,3 @@
-import 'dart:convert';
 
 import 'package:appointments_application/screen/service_selection_screen.dart';
 import 'package:appointments_application/screen/step_indicator.dart';
@@ -6,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import 'package:latlong2/latlong.dart';
 import 'package:location/location.dart';
 
@@ -545,7 +543,7 @@ class _MapScreenState extends State<MapScreen> {
             elevation: 4,
             icon: const Icon(Icons.list_rounded, size: 20),
             label: Text(
-              'Tous les locaux',
+              'Tous les agences',
               style: GoogleFonts.dmSans(
                   fontWeight: FontWeight.w600, fontSize: 13),
             ),
@@ -1017,8 +1015,9 @@ class _AllLocationsSheet extends StatelessWidget {
                         .withOpacity(0.08),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text(
-                    '${agencies.length} locaux',
+                  child:
+                  Text(
+                    '${agencies.length} ${agencies.length > 1 ? 'Agences' : 'Agence'}',
                     style: TextStyle(
                       fontSize: 11,
                       color: Palette.secondPageContainerGradient2ndColor,

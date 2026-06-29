@@ -1,11 +1,13 @@
 // lib/screen/AddVehicleScreen.dart
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import '../Service/vehicle_service.dart';
 import '../config/Palette.dart';
 
 class AddVehicleScreen extends StatefulWidget {
   final String customerNumber;
-
   const AddVehicleScreen({super.key, required this.customerNumber});
 
   @override
@@ -15,22 +17,58 @@ class AddVehicleScreen extends StatefulWidget {
 class _AddVehicleScreenState extends State<AddVehicleScreen> {
   final _immatController = TextEditingController();
   final _modeleController = TextEditingController();
-  final _anneeController  = TextEditingController();
   final _mileageController = TextEditingController();
   String? _selectedMotorisation;
   bool _isLoading = false;
+  List makes = [];
+  List models = [];
+
+  String? selectedMake;
+  String? selectedModel;
+  @override
+  void initState() {
+    super.initState();
+    loadMakes();
+  }
   @override
   void dispose() {
     _immatController.dispose();
     _modeleController.dispose();
-    _anneeController.dispose();
     _mileageController.dispose();
     super.dispose();
   }
 
+  final String baseUrl = "http://127.0.0.1:5032";
+  Future<void> loadMakes() async {
+    final res = await http.get(Uri.parse("$baseUrl/api/vehicles/makes"));
+
+    final data = jsonDecode(res.body);
+
+    setState(() {
+      makes = data['data'] ?? [];
+    });
+
+    print("MAKES => $makes");
+  }
+  Future<void> loadModels(String makeCode) async {
+    final res = await http.get(
+      Uri.parse("$baseUrl/api/vehicles/models/$makeCode"),
+    );
+
+    final data = jsonDecode(res.body);
+
+    setState(() {
+      models = data['data'] ?? [];
+    });
+    print("MODELS => $models");
+  }
   Future<void> _save() async {
+    print ("saveeeeeee");
+    print(_immatController.text, );
+    print(selectedModel);
+        print(_selectedMotorisation);
     if (_immatController.text.trim().isEmpty ||
-        _modeleController.text.trim().isEmpty ||
+        selectedModel== null  ||
         _selectedMotorisation == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Veuillez remplir tous les champs.")),
@@ -42,8 +80,9 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
 
     try {
       final success = await VehicleService().createVehicle(
-        makeCode: '',
-        modelCode: _modeleController.text.trim(),
+
+        modelCode: selectedModel!,
+        makeCode: selectedMake!,
         motorisation: _selectedMotorisation!,
         registrationNumber: _immatController.text.trim(),
         mileage: int.tryParse(_mileageController.text.trim()) ?? 0,
@@ -161,11 +200,42 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                     
                         // INPUTS
                         _input("Immatriculation", _immatController),
-                        _input("Modèle",           _modeleController),
-                        _input("Année",            _anneeController,
-                            inputType: TextInputType.number),
                         _input("Kilométrage", _mileageController, inputType: TextInputType.number),
-                    
+                        DropdownButton<String>(
+                          value: selectedMake,
+                          hint: const Text("Marque"),
+                          items: makes.map<DropdownMenuItem<String>>((m) {
+                            return DropdownMenuItem<String>(
+                              value: m['code'].toString(),
+                              child: Text(m['name'].toString()),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedMake = value;
+                              selectedModel = null;
+                              models.clear();
+                            });
+
+                            loadModels(value!);
+                          },
+                        ),
+                        DropdownButton<String>(
+                          value: selectedModel,
+                          hint: const Text("Modèle"),
+                          items: models.map<DropdownMenuItem<String>>((m) {
+                            return DropdownMenuItem<String>(
+                              value: m['code'].toString(),
+                              child: Text(m['name'].toString()),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedModel = value;
+                            });
+                          },
+                        ),
+
                         const SizedBox(height: 15),
                     
                         // MOTORISATION

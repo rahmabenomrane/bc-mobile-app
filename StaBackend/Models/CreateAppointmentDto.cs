@@ -2,6 +2,7 @@ public class CreateAppointmentDto
 {
     public string AgencyCode { get; set; }
     public string ServiceCode { get; set; }
+    public string ServiceDescription { get; set; }
     public DateTime Date { get; set; }
     public string VehicleNumber { get; set; }
     public string PontId { get; set; }
