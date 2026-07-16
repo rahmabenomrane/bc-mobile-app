@@ -11,7 +11,6 @@ table 50107 Service
         field(3; "Libelle"; Text[100]) { }
 
         field(4; "Type Service"; Enum ServiceType) { }
-
     }
 
     keys

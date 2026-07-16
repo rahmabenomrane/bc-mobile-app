@@ -46,7 +46,7 @@ page 50123 "CustomerClaim API"
                 }
                 field(registrationNumber; Rec.registrationNumber)
                 {
-                    Caption = 'registrationNumber';
+                    Caption = 'Registration Number';
                 }
             }
         }
@@ -54,6 +54,26 @@ page 50123 "CustomerClaim API"
 
     actions
     {
+        area(Processing)
+        {
+            action(UpdateStatus)
+            {
+                Caption = 'Update Claim Status';
 
+                trigger OnAction()
+                var
+                    Claim: Record CustomerClaim;
+                    NewStatus: Enum "Claim Status";
+                begin
+                    // Récupérer la réclamation à mettre à jour
+                    if not Claim.Get(Rec."claim No.") then
+                        Error('Claim not found');
+
+                    // Mettre à jour le statut
+                    Claim.status := NewStatus;
+                    Claim.Modify(true);
+                end;
+            }
+        }
     }
 }

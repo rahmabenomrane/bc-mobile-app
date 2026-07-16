@@ -17,10 +17,10 @@ class RdvsList extends StatefulWidget {
   });
 
   @override
-  State<RdvsList> createState() => _RdvsListState();
+  State<RdvsList> createState() => RdvsListState();
 }
 
-class _RdvsListState extends State<RdvsList> {
+class RdvsListState extends State<RdvsList> {
   List<dynamic> rdvs = [];
   bool loading = true;
   final AppointmentService appointmentService = AppointmentService();

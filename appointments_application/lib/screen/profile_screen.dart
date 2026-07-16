@@ -147,22 +147,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      "Client n° ${profile?["customerNumber"] ?? ""}",
-                      style: TextStyle(
-                        color: Palette.secondPageTitleColor.withOpacity(0.85),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
+
                 ],
               ),
             ),
@@ -217,7 +202,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 12),
 
-// Bouton changer mot de passe
                       GestureDetector(
                         onTap: () => Navigator.push(
                           context,

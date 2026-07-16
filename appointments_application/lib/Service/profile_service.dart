@@ -5,15 +5,6 @@ import 'auth_service.dart';
 
 class ProfileService {
   static const String baseUrl = 'http://127.0.0.1:5032';
-  static const _storage = FlutterSecureStorage();
-  static Future<Map<String, String>> _headers() async {
-    final token = await _storage.read(key: 'token');
-
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
-  }
 
   static Future<Map<String, dynamic>> changePassword({
     required String currentPassword,

@@ -8,7 +8,7 @@ namespace StaBackend.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]  // 🔒 Toutes les actions nécessitent authentification
+    [Authorize] 
     public class ProfileController : ControllerBase
     {
         private readonly IBcService _bcService;
@@ -33,9 +33,6 @@ namespace StaBackend.Controllers
                     return Unauthorized(new { error = "Customer number not found in token" });
 
                 Console.WriteLine($"GET PROFILE — CustomerNumber: {customerNumber}");
-
-                // Récupérer les infos du client depuis BC
-                // Note: Vous devez ajouter cette méthode dans IBcService
                 var customer = await _bcService.GetCustomerByNumberAsync(customerNumber);
 
                 if (customer == null)
@@ -136,7 +133,7 @@ namespace StaBackend.Controllers
                 if (validationError != null)
                     return BadRequest(new { error = validationError });
 
-                // 4. Vérifier unicité du phone (si changé)
+          
                 if (!string.IsNullOrEmpty(request.Phone))
                 {
                     var isPhoneUnique = await _bcService.IsPhoneUniqueAsync(request.Phone, customerNumber);
@@ -144,7 +141,7 @@ namespace StaBackend.Controllers
                         return BadRequest(new { error = "Phone number already used by another account" });
                 }
 
-                // 5. Vérifier unicité de l'email (si changé)
+             
                 if (!string.IsNullOrEmpty(request.Email))
                 {
                     var isEmailUnique = await _bcService.IsEmailUniqueAsync(request.Email, customerNumber);
@@ -152,13 +149,11 @@ namespace StaBackend.Controllers
                         return BadRequest(new { error = "Email already used by another account" });
                 }
 
-                // 6. Appeler BC pour mettre à jour
                 var result = await _bcService.UpdateCustomerProfileAsync(customerNumber, request);
 
                 if (!result.Success)
                     return BadRequest(new { error = result.Error });
 
-                // 7. Log l'action
                 _logger.LogInformation($"Profile updated for customer {customerNumber}");
                 Console.WriteLine($"PROFILE UPDATED SUCCESSFULLY — Customer: {customerNumber}");
 

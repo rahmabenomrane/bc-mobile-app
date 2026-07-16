@@ -10,6 +10,9 @@ namespace StaBackend.Models
         public string Email { get; set; } = "";
         public int Capacity { get; set; }
         public string OfficeHours { get; set; } = "";
+
+        public double? Latitude { get; set; }
+        public double? Longitude { get; set; }
     }
 
     public class BcAgencyResponse

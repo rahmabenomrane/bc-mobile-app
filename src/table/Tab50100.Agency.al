@@ -6,13 +6,8 @@ table 50100 Agency
     {
         field(1; Code; Code[20])
         {
-            trigger OnValidate()
-            begin
-                if Code = '' then
-                    Error('Agency code cannot be empty.');
-            end;
-        }
 
+        }
         field(2; Name; Text[100]) { }
         field(3; Address; Text[150]) { }
         field(4; PhoneNo; Text[20]) { }
@@ -61,6 +56,24 @@ table 50100 Agency
 
         if not Appointment.IsEmpty() then
             Error('You cannot delete this agency because it has appointments.');
+    end;
+
+    trigger OnInsert()
+    var
+        Agency: Record Agency;
+        LastNo: Integer;
+    begin
+        Message('OnInsert exécuté');
+        if Code <> '' then
+            exit;
+
+        if Agency.FindLast() then begin
+            Evaluate(LastNo, CopyStr(Agency.Code, 3));
+            LastNo += 1;
+        end else
+            LastNo := 1;
+
+        Code := 'AG' + Format(LastNo, 4, '<Integer,4><Filler Character,0>');
     end;
 
 }

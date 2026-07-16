@@ -109,9 +109,6 @@ namespace StaBackend.Controllers
 
                 Console.WriteLine($"CustomerNum = {customerNum}");
 
-                Console.WriteLine("=================================");
-                Console.WriteLine($"Customer JWT = {customerNum}");
-                Console.WriteLine("=================================");
                 if (string.IsNullOrWhiteSpace(customerNum))
                 {
                     Console.WriteLine("CustomerNumber NULL");

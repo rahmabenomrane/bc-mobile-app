@@ -5,8 +5,8 @@ page 50111 StaVehicleList
     UsageCategory = Lists;
     SourceTable = StaVehicle;
     Caption = 'Vehicles';
-
     CardPageId = StaVehicleCard;
+
 
     layout
     {
@@ -56,6 +56,11 @@ page 50111 StaVehicleList
                     ApplicationArea = All;
                     Caption = 'Customer Name';
                 }
+                field("Registration No."; Rec."RegistrationNumber")
+                {
+                    ApplicationArea = All;
+                    Caption = 'Registration No.', Locked = true;
+                }
             }
         }
     }
@@ -70,12 +75,34 @@ page 50111 StaVehicleList
                 Caption = 'Open Card';
                 Image = EditLines;
 
+
                 trigger OnAction()
+                var
+                    Vehicle: Record Vehicle;
                 begin
-                    Page.Run(Page::StaVehicleCard, Rec);
+
+                    Vehicle.Reset();
+                    Vehicle.SetRange("Registration No.", Rec."RegistrationNumber");
+
+                    if Vehicle.FindFirst() then begin
+
+                        Page.Run(Page::"Vehicle Card", Vehicle);
+                        exit;
+                    end;
+
+
+                    Clear(Vehicle);
+                    Vehicle.Init();
+                    Vehicle.Validate("Registration No.", Rec."RegistrationNumber");
+                    Vehicle.Validate("Make Code", Rec."Make Code");
+                    Vehicle.Validate("Model Code", Rec."Model Code");
+
+                    Page.Run(Page::"Vehicle Card", Vehicle);
                 end;
             }
+
         }
+
 
         area(Processing)
         {
@@ -89,7 +116,36 @@ page 50111 StaVehicleList
                     Rec.Delete(true);
                 end;
             }
+            action(OpenVehicleCard)
+            {
+                Caption = 'Ouvrir une fiche';
+                Image = New;
+                ApplicationArea = All;
+
+                trigger OnAction()
+                var
+                    Vehicle: Record Vehicle;
+                begin
+                    Vehicle.Reset();
+                    Vehicle.SetRange("Registration No.", Rec."RegistrationNumber");
+
+                    if Vehicle.FindFirst() then begin
+                        Page.Run(Page::"Vehicle Card", Vehicle);
+                        exit;
+                    end;
+
+                    Clear(Vehicle);
+
+                    Vehicle.Init();
+                    Vehicle."Registration No." := Rec."RegistrationNumber";
+                    Vehicle."Make Code" := Rec."Make Code";
+                    Vehicle."Model Code" := Rec."Model Code";
+
+                    Page.Run(Page::"Vehicle Card", Vehicle);
+                end;
+            }
         }
+
     }
     var
         CustomerName: Text[100];
@@ -97,12 +153,9 @@ page 50111 StaVehicleList
 
     trigger OnAfterGetCurrRecord()
     begin
-        if CustomerRec.Get(Rec."NumCustomer") then begin
-            CustomerName := CustomerRec.Name;
-        end
-        else begin
+        if CustomerRec.Get(Rec."NumCustomer") then
+            CustomerName := CustomerRec.Name
+        else
             CustomerName := 'vide';
-        end;
     end;
-
 }
