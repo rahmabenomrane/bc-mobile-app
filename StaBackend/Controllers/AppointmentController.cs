@@ -31,13 +31,6 @@ public class AppointmentController : ControllerBase
 
         return Ok(slots);
     }
-    // [HttpPost("create")]
-    // public async Task<IActionResult> Create([FromBody] CreateAppointmentDto dto)
-    // {
-    //     var result = await _bcService.CreateAppointmentAsync(dto);
-    //     return Ok(result);
-    // }
-
 
     [HttpPost("create")]
     public async Task<IActionResult> Create([FromBody] CreateAppointmentDto dto)

@@ -53,21 +53,6 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Table Agency - Field PhoneNo - Property Caption</note>
         </trans-unit>
-        <trans-unit id="Table 252561560 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Agency Map Setup</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Table Agency Map Setup - Property Caption</note>
-        </trans-unit>
-        <trans-unit id="Table 252561560 - Field 3886915811 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Clé API Google Maps</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Table Agency Map Setup - Field GoogleMapsApiKey - Property Caption</note>
-        </trans-unit>
-        <trans-unit id="Table 252561560 - Field 2333076789 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Primary Key</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Table Agency Map Setup - Field PrimaryKey - Property Caption</note>
-        </trans-unit>
         <trans-unit id="Table 1067617449 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Appointment</source>
           <note from="Developer" annotates="general" priority="2"></note>
@@ -469,29 +454,9 @@
           <note from="Xliff Generator" annotates="general" priority="3">Page Agency Card - Action ResetGPS - Property Caption</note>
         </trans-unit>
         <trans-unit id="Page 2472918536 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Agency Map Part</source>
+          <source>Carte GPS</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page Agency Map Part - Property Caption</note>
-        </trans-unit>
-        <trans-unit id="Page 252561560 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Configuration Carte GPS</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Page Agency Map Setup - Property Caption</note>
-        </trans-unit>
-        <trans-unit id="Page 252561560 - Control 2445482498 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Google Maps</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Page Agency Map Setup - Control General - Property Caption</note>
-        </trans-unit>
-        <trans-unit id="Page 252561560 - Control 3886915811 - Property 1295455071" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Obtenez votre clé sur console.cloud.google.com</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Page Agency Map Setup - Control GoogleMapsApiKey - Property ToolTip</note>
-        </trans-unit>
-        <trans-unit id="Page 252561560 - Control 3886915811 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Clé API Google Maps</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Page Agency Map Setup - Control GoogleMapsApiKey - Property Caption</note>
         </trans-unit>
         <trans-unit id="Page 1384629993 - Control 3168444338 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Agency Address</source>
@@ -912,6 +877,11 @@
           <source>Delete</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page StaVehicleList - Action DeleteVehicle - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 409839088 - Action 524391836 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Ouvrir une fiche</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page StaVehicleList - Action OpenVehicleCard - Property Caption</note>
         </trans-unit>
         <trans-unit id="PageExtension 2041230858 - Action 527617690 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve" al-object-target="Page 399713418">
           <source>STA Management</source>

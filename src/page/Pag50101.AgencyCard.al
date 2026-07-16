@@ -28,7 +28,27 @@ page 50101 "Agency Card"
             group(Contact)
             {
                 Caption = 'Contact Details';
-                field(Address; Rec.Address) { ApplicationArea = All; }
+                field(Address; Rec.Address)
+                {
+                    ApplicationArea = All;
+
+                    trigger OnValidate()
+                    var
+                        Geocode: Codeunit "Agency Geocode";
+                        NewLat: Decimal;
+                        NewLng: Decimal;
+                    begin
+                        if Rec.Address = '' then exit;
+
+                        if Geocode.GeocodeAddress(Rec.Address, NewLat, NewLng) then begin
+                            Rec.Latitude := NewLat;
+                            Rec.Longitude := NewLng;
+                            Rec.Modify(true);
+                            CurrPage.AgencyMap.Page.SetCoordinates(NewLat, NewLng);
+                        end else
+                            Message('Adresse introuvable. Vérifiez la saisie ou cliquez directement sur la carte.');
+                    end;
+                }
                 field(PhoneNo; Rec.PhoneNo) { ApplicationArea = All; }
                 field(Email; Rec.Email) { ApplicationArea = All; }
             }
@@ -56,14 +76,14 @@ page 50101 "Agency Card"
                     Editable = false;
                     Style = Strong;
                 }
-                
             }
 
-          
             part(AgencyMap; "Agency Map Part")
             {
                 ApplicationArea = All;
                 Caption = 'Carte GPS';
+                SubPageLink = Code = field(Code);
+                UpdatePropagation = Both;
             }
 
             part(Ponts; "CarLift SubPage")
@@ -104,7 +124,7 @@ page 50101 "Agency Card"
                     Rec.Latitude := 0;
                     Rec.Longitude := 0;
                     Rec.Modify(true);
-                    // ← syntaxe correcte pour appeler une procédure de part
+
                     CurrPage.AgencyMap.Page.SetCoordinates(0, 0);
                     Message('Position GPS réinitialisée.');
                 end;
@@ -112,16 +132,7 @@ page 50101 "Agency Card"
         }
     }
 
-    var
-        GPSStyle: Text;
-
-    trigger OnAfterGetRecord()
-    begin
-        RefreshMap();
-    end;
-
-
-    local procedure RefreshMap()
+    trigger OnAfterGetCurrRecord()
     begin
         CurrPage.AgencyMap.Page.SetCoordinates(Rec.Latitude, Rec.Longitude);
     end;

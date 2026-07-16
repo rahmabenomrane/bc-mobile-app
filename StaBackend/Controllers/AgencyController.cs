@@ -16,13 +16,6 @@ namespace StaBackend.Controllers
             _bcService = bcService;
         }
 
-        // GET /api/agency
-        // [HttpGet]
-        // public async Task<IActionResult> GetAgencies()
-        // {
-        //     var agencies = await _bcService.GetAgenciesAsync();
-        //     return Ok(agencies);
-        // }
 
         [HttpGet]
         public async Task<IActionResult> GetAgencies()

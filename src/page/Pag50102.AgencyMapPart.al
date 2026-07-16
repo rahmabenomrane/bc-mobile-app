@@ -1,86 +1,46 @@
 page 50102 "Agency Map Part"
 {
     PageType = CardPart;
-    Caption = 'Agency Map Part';
+    Caption = 'Carte GPS';
     ApplicationArea = All;
+    SourceTable = Agency;
 
     layout
     {
         area(Content)
         {
-            usercontrol(MapControl; "Microsoft.Dynamics.Nav.Client.WebPageViewer")
+            usercontrol(MapControl; AgencyMapPicker)
             {
                 ApplicationArea = All;
 
-                trigger ControlAddInReady(callbackUrl: Text)
-                var
-                    MapHtml: Codeunit "Agency Map Html";
+                trigger ControlAddInReady()
                 begin
-                    CurrPage.MapControl.Navigate(MapHtml.GetMapDataUrl());
+                    if (Rec.Latitude <> 0) or (Rec.Longitude <> 0) then
+                        CurrPage.MapControl.SetCoordinates(Rec.Latitude, Rec.Longitude);
                 end;
 
-                trigger DocumentReady()
+                trigger CoordinatesSelected(Lat: Decimal; Lng: Decimal; Confirmed: Boolean; Address: Text)
                 begin
-                    if (StoredLat <> 0) or (StoredLng <> 0) then
-                        InjectCoords();
-                end;
+                    if not Confirmed then exit;
 
-                trigger Callback(data: Text)
-                var
-                    JsonObj: JsonObject;
-                    TypeToken: JsonToken;
-                    LatToken: JsonToken;
-                    LngToken: JsonToken;
-                    ConfToken: JsonToken;
-                    NewLat: Decimal;
-                    NewLng: Decimal;
-                    IsConfirmed: Boolean;
-                begin
-                    if not JsonObj.ReadFrom(data) then exit;
-
-                    if JsonObj.Get('type', TypeToken) then
-                        if TypeToken.AsValue().AsText() <> 'AGENCY_COORDS' then exit;
-
-                    if not JsonObj.Get('lat', LatToken) then exit;
-                    if not JsonObj.Get('lng', LngToken) then exit;
-                    if not JsonObj.Get('confirmed', ConfToken) then exit;
-
-                    Evaluate(NewLat, LatToken.AsValue().AsText());
-                    Evaluate(NewLng, LngToken.AsValue().AsText());
-                    Evaluate(IsConfirmed, ConfToken.AsValue().AsText());
-
-                    OnCoordinatesReceived(NewLat, NewLng, IsConfirmed);
+                    Rec.Latitude := Lat;
+                    Rec.Longitude := Lng;
+                    if Address <> '' then
+                        Rec.Address := CopyStr(Address, 1, MaxStrLen(Rec.Address));
+                    Rec.Modify(true);
+                    CurrPage.Update(false);
                 end;
             }
         }
     }
 
-    var
-        StoredLat: Decimal;
-        StoredLng: Decimal;
-
     procedure SetCoordinates(NewLat: Decimal; NewLng: Decimal)
     begin
-        StoredLat := NewLat;
-        StoredLng := NewLng;
-        InjectCoords();
-    end;
-
-    local procedure InjectCoords()
-    var
-        Script: Text;
-    begin
-        // ← PostMessage au lieu de Invoke
-        Script := StrSubstNo(
-            'if(typeof setCoords==="function")setCoords("%1","%2");',
-            Format(StoredLat, 0, 9),
-            Format(StoredLng, 0, 9)
-        );
-        CurrPage.MapControl.PostMessage(Script, '*', false);
+        CurrPage.MapControl.SetCoordinates(NewLat, NewLng);
     end;
 
     [IntegrationEvent(false, false)]
-    procedure OnCoordinatesReceived(Lat: Decimal; Lng: Decimal; Confirmed: Boolean)
+    local procedure OnCoordinatesReceived(AgencyCode: Code[20]; Lat: Decimal; Lng: Decimal; NewAddress: Text[100])
     begin
     end;
 }

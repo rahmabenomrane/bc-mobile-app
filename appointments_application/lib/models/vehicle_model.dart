@@ -32,6 +32,17 @@ class Vehicle {
       mileage: (json['Mileage'] ?? json['mileage'] ?? 0).toString(),
     );
   }
+  factory Vehicle.empty() {
+    return Vehicle(
+      id: '',
+      numVehicle: '',
+      numCustomer: '',
+      makeCode: '',
+      modelCode: '',
+      motorisation: '',
+      mileage: '',
+    );
+  }
 
   // Nom complet
   String get fullName => "$makeCode $modelCode";
@@ -46,4 +57,5 @@ class Vehicle {
       default: return 'Inconnu';
     }
   }
+
 }

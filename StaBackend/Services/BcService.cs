@@ -4,7 +4,6 @@ using Microsoft.Extensions.Options;
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 
 namespace StaBackend.Services
 {
@@ -53,9 +52,6 @@ namespace StaBackend.Services
                 password = password
             });
 
-            Console.WriteLine($"[LOGIN] POST → {url}");
-            Console.WriteLine($"[LOGIN] Body → {bodyJson}");
-
             var bodyContent = new StringContent(bodyJson, Encoding.UTF8, "application/json");
 
             try
@@ -63,8 +59,6 @@ namespace StaBackend.Services
                 var response = await client.PostAsync(url, bodyContent);
                 var content = await response.Content.ReadAsStringAsync();
 
-                Console.WriteLine($"[LOGIN] Status  → {response.StatusCode}");
-                Console.WriteLine($"[LOGIN] Content → {content}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -85,7 +79,6 @@ namespace StaBackend.Services
 
                 var json = JsonDocument.Parse(content);
 
-                // BC peut retourner le résultat directement ou dans "value"
                 JsonElement root;
                 if (json.RootElement.TryGetProperty("value", out var valueEl) &&
                     valueEl.ValueKind == JsonValueKind.Object)
@@ -97,7 +90,6 @@ namespace StaBackend.Services
                     root = json.RootElement;
                 }
 
-                // Lecture null-safe de chaque champ
                 var token = root.TryGetProperty("token", out var t) ? t.GetString() ?? "" : "";
                 var customerNumber = root.TryGetProperty("customerNumber", out var cn) ? cn.GetString() ?? "" : "";
                 var expiresAt = root.TryGetProperty("expiresAt", out var ea) ? ea.GetString() ?? "" : "";
@@ -106,8 +98,6 @@ namespace StaBackend.Services
 
                 if (string.IsNullOrEmpty(customerNumber))
                 {
-                    // Affiche toutes les clés disponibles pour debug
-                    Console.WriteLine("[LOGIN] ⚠️ customerNumber vide — clés disponibles :");
                     foreach (var prop in root.EnumerateObject())
                         Console.WriteLine($"  → {prop.Name} = {prop.Value}");
                 }
@@ -153,7 +143,6 @@ namespace StaBackend.Services
             var client = CreateWindowsAuthClient();
             var url = $"{ODataBase}/AppointmentAPI('{appointmentNo}')";
 
-            // GET pour ETag
             var getResponse = await client.GetAsync(url);
             var getJson = await getResponse.Content.ReadAsStringAsync();
             var etag = JsonDocument.Parse(getJson)
@@ -169,8 +158,6 @@ namespace StaBackend.Services
 
             var response = await client.SendAsync(request);
             var responseText = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"CONFIRM PATCH STATUS = {response.StatusCode}");
-            Console.WriteLine($"CONFIRM PATCH RESPONSE = {responseText}");
 
             Console.WriteLine("CONFIRM BC RESPONSE: " + responseText);
 
@@ -230,7 +217,7 @@ namespace StaBackend.Services
             var client = CreateWindowsAuthClient();
             var url = $"{ODataBase}/StaChangePasswordAPI('{customerNumber}')";
 
-            // Step 1: GET the entity
+
             var getRequest = new HttpRequestMessage(HttpMethod.Get, url);
             var getResponse = await client.SendAsync(getRequest);
             var getContent = await getResponse.Content.ReadAsStringAsync();
@@ -238,7 +225,7 @@ namespace StaBackend.Services
             if (!getResponse.IsSuccessStatusCode)
                 return new UpdateProfileResponse { Success = false, Error = $"GET failed: {getContent}" };
 
-            // Step 2: Extract ETag from the JSON body (@odata.etag)
+
             var getJson = JsonDocument.Parse(getContent);
             var etag = getJson.RootElement
                 .GetProperty("@odata.etag")
@@ -247,7 +234,7 @@ namespace StaBackend.Services
             if (string.IsNullOrEmpty(etag))
                 return new UpdateProfileResponse { Success = false, Error = "No ETag in BC response body" };
 
-            // Step 3: PATCH with the ETag
+
             var body = new
             {
                 customerNumber = customerNumber,
@@ -304,8 +291,6 @@ namespace StaBackend.Services
             var bodyJson = JsonSerializer.Serialize(updateData);
             var bodyContent = new StringContent(bodyJson, Encoding.UTF8, "application/json");
 
-            Console.WriteLine($"[UPDATE PROFILE] PATCH → {url}");
-            Console.WriteLine($"[UPDATE PROFILE] Body → {bodyJson}");
 
             try
             {
@@ -315,14 +300,8 @@ namespace StaBackend.Services
                 };
                 httpRequest.Headers.TryAddWithoutValidation("If-Match", "*");
 
-                Console.WriteLine($"[UPDATE PROFILE] PATCH → {url}");
-                Console.WriteLine($"[UPDATE PROFILE] Body → {bodyJson}");
-
                 var response = await client.SendAsync(httpRequest);
                 var content = await response.Content.ReadAsStringAsync();
-
-                Console.WriteLine($"[UPDATE PROFILE] Status → {response.StatusCode}");
-                Console.WriteLine($"[UPDATE PROFILE] Response → {content}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -343,8 +322,6 @@ namespace StaBackend.Services
         public async Task<List<ClaimInfo>> GetClaimsAsync(string customerNumber)
         {
             var client = CreateWindowsAuthClient();
-
-            // customerNumber vient du JWT via le controller 
             var url = $"http://localhost:7048/BC260/api/STA/Mobile/v1.0/companies(16be2528-96e4-f011-8d1f-00155d141f04)/Claims?$filter=customerNo eq '{customerNumber}'";
 
             Console.WriteLine($"[GET CLAIMS] GET → {url}");
@@ -353,8 +330,6 @@ namespace StaBackend.Services
             {
                 var response = await client.GetAsync(url);
                 var content = await response.Content.ReadAsStringAsync();
-
-                Console.WriteLine($"[GET CLAIMS] Status  → {response.StatusCode}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -369,7 +344,7 @@ namespace StaBackend.Services
                 var result = new List<ClaimInfo>();
                 foreach (var item in values.EnumerateArray())
                 {
-                    result.Add(new ClaimInfo
+                    var claim = new ClaimInfo
                     {
                         ClaimNumber = item.TryGetProperty("claimNumber", out var cn) ? cn.GetInt32() : 0,
                         CreationDate = item.TryGetProperty("creationDate", out var cd) ? cd.GetString() ?? "" : "",
@@ -379,10 +354,28 @@ namespace StaBackend.Services
                         RegistrationNumber = item.TryGetProperty("registrationNumber", out var rn) ? rn.GetString() ?? "" : "",
                         Status = ParseStatusFromBc(item.TryGetProperty("status", out var st) ? st.GetString() ?? "" : ""),
                         Priority = ParsePriorityFromBc(item.TryGetProperty("priority", out var pr) ? pr.GetString() ?? "" : ""),
-                    });
+                        // Récupérer l'appointmentRef si disponible
+                        AppointmentRef = item.TryGetProperty("appointmentRef", out var ar) ? ar.GetString() ?? "" : "",
+                    };
+
+                    // Si la réclamation a un rendez-vous, récupérer les détails
+                    if (!string.IsNullOrEmpty(claim.AppointmentRef))
+                    {
+                        try
+                        {
+                            var appointmentDetails = await GetAppointmentDetails(claim.AppointmentRef);
+                            claim.ServiceName = appointmentDetails.ServiceName;
+                            claim.AgencyName = appointmentDetails.AgencyName;
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[GET CLAIMS] Error fetching appointment: {ex.Message}");
+                        }
+                    }
+
+                    result.Add(claim);
                 }
 
-                Console.WriteLine($"[GET CLAIMS] ✅ {result.Count} réclamation(s)");
                 return result;
             }
             catch (Exception ex)
@@ -392,6 +385,46 @@ namespace StaBackend.Services
             }
         }
 
+        // Ajouter cette méthode pour récupérer les détails du rendez-vous
+        private async Task<(string ServiceName, string AgencyName)> GetAppointmentDetails(string appointmentRef)
+        {
+            try
+            {
+                var client = CreateWindowsAuthClient();
+                var url = $"http://localhost:7048/BC260/api/STA/Mobile/v1.0/companies(16be2528-96e4-f011-8d1f-00155d141f04)/Appointments?$filter=appointmentNo eq '{appointmentRef}'";
+
+                var response = await client.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                    return ("", "");
+
+                var content = await response.Content.ReadAsStringAsync();
+                var doc = JsonDocument.Parse(content);
+
+                if (!doc.RootElement.TryGetProperty("value", out var values) || values.GetArrayLength() == 0)
+                    return ("", "");
+
+                var appointment = values.EnumerateArray().First();
+
+                string serviceName = "";
+                if (appointment.TryGetProperty("serviceDescription", out var sd))
+                    serviceName = sd.GetString() ?? "";
+                else if (appointment.TryGetProperty("serviceName", out var sn))
+                    serviceName = sn.GetString() ?? "";
+
+                string agencyName = "";
+                if (appointment.TryGetProperty("agencyName", out var an))
+                    agencyName = an.GetString() ?? "";
+                else if (appointment.TryGetProperty("AgencyName", out var an2))
+                    agencyName = an2.GetString() ?? "";
+
+                return (serviceName, agencyName);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GET APPOINTMENT] Error: {ex.Message}");
+                return ("", "");
+            }
+        }
         // ── CREATE CLAIM ────────────────────────────────────────────────
         public async Task<CreateClaimResponse> CreateClaimAsync(CreateClaimRequest request)
         {
@@ -409,17 +442,11 @@ namespace StaBackend.Services
                 priority = MapPriorityToBc(request.Priority),
             });
 
-            Console.WriteLine($"[CREATE CLAIM] POST → {url}");
-            Console.WriteLine($"[CREATE CLAIM] Body → {bodyJson}");
-
             try
             {
                 var response = await client.PostAsync(
                     url, new StringContent(bodyJson, Encoding.UTF8, "application/json"));
                 var content = await response.Content.ReadAsStringAsync();
-
-                Console.WriteLine($"[CREATE CLAIM] Status  → {response.StatusCode}");
-                Console.WriteLine($"[CREATE CLAIM] Content → {content}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -924,15 +951,16 @@ namespace StaBackend.Services
             Console.WriteLine($"Existing count = {existing.Count}");
             foreach (var a in existing)
                 Console.WriteLine($"  → NumVehicle={a.NumVehicle} Status={a.Status}");
+            var now = DateTime.Now;
 
-            // même véhicule + même service + pas cancelled
-            var vehicleConflict = existing.Any(a =>
-     string.Equals(
-         a.NumVehicle?.Trim(),
-         dto.VehicleNumber?.Trim(),
-         StringComparison.OrdinalIgnoreCase) &&
-     !string.Equals(a.Status, "Cancelled", StringComparison.OrdinalIgnoreCase));
+            var futureAppointments = (await GetAppointmentsAsync(dto.AgencyCode, dto.ServiceCode))
+                .Where(a => a.StartTime > now &&
+                            !string.Equals(a.Status, "Cancelled", StringComparison.OrdinalIgnoreCase))
+                .ToList();
 
+            var vehicleConflict = futureAppointments.Any(a =>
+                string.Equals(a.NumVehicle?.Trim(), dto.VehicleNumber?.Trim(), StringComparison.OrdinalIgnoreCase)
+                && string.Equals(a.ServiceCode?.Trim(), dto.ServiceCode?.Trim(), StringComparison.OrdinalIgnoreCase));
             Console.WriteLine($"VehicleNumber={dto.VehicleNumber} vehicleConflict={vehicleConflict}");
 
             Console.WriteLine($"VehicleNumber={dto.VehicleNumber} vehicleConflict={vehicleConflict}");
@@ -1280,7 +1308,6 @@ namespace StaBackend.Services
         public async Task<List<AgencyDto>> GetAgenciesAsync()
         {
             var client = CreateWindowsAuthClient();
-
             var url = $"{ODataBase}/AgencyAPI";
 
             Console.WriteLine($"[AGENCIES] GET → {url}");
@@ -1289,8 +1316,6 @@ namespace StaBackend.Services
             {
                 var response = await client.GetAsync(url);
                 var content = await response.Content.ReadAsStringAsync();
-
-                Console.WriteLine($"[AGENCIES] Status  → {response.StatusCode}");
 
                 if (!response.IsSuccessStatusCode)
                 {
@@ -1303,17 +1328,7 @@ namespace StaBackend.Services
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
                 );
 
-                var agencies = bcResponse?.value?.Select(a => new AgencyDto
-                {
-                    Name = a.Name,
-                    Code = a.Code,
-                    Address = a.Address,
-                    PhoneNo = a.PhoneNo,
-                    Email = a.Email,
-                    Capacity = a.Capacity,
-                    OfficeHours = a.OfficeHours,
-                }).ToList() ?? new List<AgencyDto>();
-
+                var agencies = bcResponse?.value ?? new List<AgencyDto>();
                 Console.WriteLine($"[AGENCIES] {agencies.Count} agence(s) trouvée(s)");
                 return agencies;
             }

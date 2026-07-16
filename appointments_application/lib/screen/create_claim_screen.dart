@@ -440,7 +440,6 @@ class _VehicleCard extends StatelessWidget {
 }
 
 // ── Card RDV ─────────────────────────────────────────────────
-// ── Card RDV ─────────────────────────────────────────────────
 class _RdvCard extends StatelessWidget {
   final AppointmentModel appointment;
   final bool isSelected;
@@ -459,30 +458,6 @@ class _RdvCard extends StatelessWidget {
       final d = DateTime.parse(iso);
       return '${d.day.toString().padLeft(2,'0')}/${d.month.toString().padLeft(2,'0')}/${d.year}';
     } catch(_) { return iso; }
-  }
-
-  Color get _sColor {
-    switch ((appointment.status ?? '').toLowerCase()) {
-      case 'confirmed': return const Color(0xFF2E7D32);
-      case 'pending': return const Color(0xFFF57F17);
-      default: return Colors.grey;
-    }
-  }
-
-  Color get _sBg {
-    switch ((appointment.status ?? '').toLowerCase()) {
-      case 'confirmed': return const Color(0xFFE8F5E9);
-      case 'pending': return const Color(0xFFFFF8E1);
-      default: return Colors.grey.shade100;
-    }
-  }
-
-  String get _sLabel {
-    switch ((appointment.status ?? '').toLowerCase()) {
-      case 'confirmed': return 'Confirmé';
-      case 'pending': return 'En attente';
-      default: return appointment.status ?? '';
-    }
   }
 
   @override
@@ -520,7 +495,7 @@ class _RdvCard extends StatelessWidget {
             ),
             const SizedBox(width: 14),
 
-            // Contenu principal - Flexible pour éviter l'overflow
+            // Contenu principal
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -536,14 +511,17 @@ class _RdvCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 3),
+                  // Utiliser serviceDescription au lieu de serviceCode
                   Text(
-                    appointment.serviceCode,
+                    appointment.serviceDescription.isNotEmpty
+                        ? appointment.serviceDescription
+                        : appointment.serviceCode, // Fallback sur le code si description vide
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 6),
-                  // Date et heure - avec Wrap pour s'adapter
+                  // Date et heure
                   Wrap(
                     spacing: 6,
                     runSpacing: 4,
@@ -581,27 +559,11 @@ class _RdvCard extends StatelessWidget {
               ),
             ),
 
-            // Statut et sélection - aligné à droite
+            // Sélection
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: _sBg,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    _sLabel,
-                    style: TextStyle(
-                      color: _sColor,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 8),
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 200),
                   child: isSelected
@@ -625,9 +587,7 @@ class _RdvCard extends StatelessWidget {
       ),
     );
   }
-}
-// ── Utilitaires ──────────────────────────────────────────────
-class _SectionTitle extends StatelessWidget {
+}class _SectionTitle extends StatelessWidget {
   final IconData icon; final String label;
   const _SectionTitle({required this.icon, required this.label});
   @override

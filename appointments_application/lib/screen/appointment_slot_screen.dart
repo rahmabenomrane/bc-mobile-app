@@ -876,16 +876,7 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
                       const Icon(Icons.check_rounded,
                           color: Colors.white, size: 18),
                       const SizedBox(width: 8),
-                      // Text(
-                      //   "Confirmer le rendez-vous",
 
-
-                   //   style: GoogleFonts.dmSans(
-                      //     fontSize: 15,
-                      //     fontWeight: FontWeight.w700,
-                      //     color: Colors.white,
-                      //   ),
-                      // ),
                       Text(
                         widget.mode == "reschedule"
                             ? "Modifier votre rendez-vous"

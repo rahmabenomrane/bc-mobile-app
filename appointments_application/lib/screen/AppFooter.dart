@@ -17,7 +17,7 @@ class AppFooter extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final itemWidth = width / 5;
+        final itemWidth = width / 4;
         final centerX = itemWidth * currentIndex + itemWidth / 2;
 
         return Material(
@@ -57,7 +57,7 @@ class AppFooter extends StatelessWidget {
                 // ICÔNES
                 Positioned.fill(
                   child: Row(
-                    children: List.generate(5, (index) {
+                    children: List.generate(4, (index) {
                       final isActive = index == currentIndex;
 
                       return Expanded(
@@ -139,13 +139,13 @@ class AppFooter extends StatelessWidget {
     switch (index) {
       case 0:
         return Icons.home_rounded;
+      // case 1:
+      //   return Icons.calendar_month_rounded;
       case 1:
-        return Icons.calendar_month_rounded;
-      case 2:
         return Icons.person_rounded;
-      case 3:
+      case 2:
         return Icons.history_rounded;
-      case 4:
+      case 3:
         return Icons.map_rounded;
       default:
         return Icons.home;

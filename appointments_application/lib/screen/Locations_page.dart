@@ -1,4 +1,3 @@
-
 import 'package:appointments_application/screen/service_selection_screen.dart';
 import 'package:appointments_application/screen/step_indicator.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +14,13 @@ import '../models/vehicle_model.dart';
 
 class MapScreen extends StatefulWidget {
   final Vehicle selectedVehicle;
+  final bool fromFooter;
 
-  const MapScreen({super.key, required this.selectedVehicle});
+  const MapScreen({
+    super.key,
+    required this.selectedVehicle,
+    this.fromFooter = false,
+  });
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -31,6 +35,9 @@ class _MapScreenState extends State<MapScreen> {
   bool _isLoading = true;
   String _errorMessage = '';
   int? _selectedIndex;
+
+
+  static const Color _greenColor = Colors.greenAccent;
 
   @override
   void initState() {
@@ -51,32 +58,24 @@ class _MapScreenState extends State<MapScreen> {
     try {
       final agencies = await _agencyService.getAgencies();
 
+      // 🔥 AFFICHER TOUTES LES COORDONNÉES CHARGÉES
+      print('🔍 === AGENCES CHARGÉES ===');
       for (var agency in agencies) {
-
-        if (agency.latitude is String) {
-          agency.latitude = double.tryParse(agency.latitude.toString().replaceAll(',', '.'));
+        print('📍 ${agency.name} -> Lat: ${agency.latitude}, Lng: ${agency.longitude}');
+        if (agency.latitude == null || agency.longitude == null) {
+          print('⚠️ ${agency.name} a des coordonnées NULLES !');
         }
-        if (agency.longitude is String) {
-          agency.longitude = double.tryParse(agency.longitude.toString().replaceAll(',', '.'));
-        }
-
-        if (agency.latitude != null) {
-          agency.latitude = double.parse(agency.latitude!.toStringAsFixed(6));
-        }
-        if (agency.longitude != null) {
-          agency.longitude = double.parse(agency.longitude!.toStringAsFixed(6));
-        }
-
-        print('✅ Agence chargée: ${agency.name} - Lat: ${agency.latitude}, Lng: ${agency.longitude}');
       }
 
-      setState(() { _agencies = agencies; _isLoading = false; });
+      setState(() {
+        _agencies = agencies;
+        _isLoading = false;
+      });
 
-      // Attendre que le widget soit construit avant de centrer la carte
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _fitAllMarkers();
       });
-    } catch (e) {
+    }  catch (e) {
       print('❌ Erreur: $e');
       if (e.toString().contains("401") ||
           e.toString().contains("Session expirée")) {
@@ -116,14 +115,13 @@ class _MapScreenState extends State<MapScreen> {
     bool serviceEnabled = await location.serviceEnabled();
     if (!serviceEnabled) {
       serviceEnabled = await location.requestService();
-      if (!serviceEnabled) { _fitAllMarkers(); return; }
+      if (!serviceEnabled) { return; }
     }
 
     PermissionStatus permissionGranted = await location.hasPermission();
     if (permissionGranted == PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();
       if (permissionGranted != PermissionStatus.granted) {
-        _fitAllMarkers();
         return;
       }
     }
@@ -131,13 +129,10 @@ class _MapScreenState extends State<MapScreen> {
     try {
       final userLocation = await location.getLocation();
       setState(() => _currentLocation = userLocation);
-      _fitAllMarkers();
       location.onLocationChanged.listen((l) {
         if (mounted) setState(() => _currentLocation = l);
       });
-    } catch (_) {
-      _fitAllMarkers();
-    }
+    } catch (_) {}
   }
 
   // ── Carte ──────────────────────────────────────────────────────────────────
@@ -145,93 +140,120 @@ class _MapScreenState extends State<MapScreen> {
   void _fitAllMarkers() {
     if (!mounted) return;
 
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (!mounted || _agencies.isEmpty) return;
+    // Attendre un peu pour que tout soit prêt
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
 
-      final allPoints = <LatLng>[];
+      print('🔍 === FIT ALL MARKERS ===');
+      print('📊 Nombre d\'agences: ${_agencies.length}');
 
-      // Ajouter les agences avec coordonnées valides
+      // 🔥 VÉRIFIER CHAQUE AGENCE AVANT DE CENTRER
+      int validCount = 0;
       for (var agency in _agencies) {
+        print('📍 ${agency.name}: Lat=${agency.latitude}, Lng=${agency.longitude}');
         if (agency.latitude != null && agency.longitude != null) {
-          try {
-            final point = LatLng(agency.latitude!, agency.longitude!);
-            allPoints.add(point);
-            print('📍 Point ajouté: ${agency.name} - ${point.latitude}, ${point.longitude}');
-          } catch (e) {
-            print('❌ Erreur coordonnées pour ${agency.name}: $e');
-          }
+          validCount++;
         }
       }
+      print('✅ Nombre d\'agences avec coordonnées valides: $validCount');
 
-      if (_currentLocation != null) {
-        allPoints.add(LatLng(
-            _currentLocation!.latitude!, _currentLocation!.longitude!));
-      }
-
-      if (allPoints.isEmpty) {
-        print('⚠️ Aucun point valide à afficher');
-        // Centre par défaut sur Tunis
+      if (validCount == 0) {
+        print('⚠️ AUCUNE AGENCE VALIDE - Utilisation des coordonnées par défaut');
         _mapController.move(const LatLng(36.819, 10.1658), 12.0);
         return;
       }
 
-      double minLat = allPoints.first.latitude, maxLat = allPoints.first.latitude;
-      double minLng = allPoints.first.longitude, maxLng = allPoints.first.longitude;
+      final allPoints = <LatLng>[];
+
+      for (var agency in _agencies) {
+        if (agency.latitude != null && agency.longitude != null) {
+          try {
+            double lat = agency.latitude!;
+            double lng = agency.longitude!;
+
+            print('🔎 Vérification ${agency.name}: lat=$lat, lng=$lng');
+
+            if (!lat.isNaN && !lng.isNaN && lat != 0.0 && lng != 0.0) {
+              final point = LatLng(lat, lng);
+              allPoints.add(point);
+              print('✅ POINT AJOUTÉ: ${agency.name} -> ${point.latitude}, ${point.longitude}');
+            } else {
+              print('⚠️ ${agency.name}: coordonnées invalides');
+            }
+          } catch (e) {
+            print('❌ Erreur pour ${agency.name}: $e');
+          }
+        }
+      }
+
+      print('📊 Total points valides: ${allPoints.length}');
+
+      if (allPoints.isEmpty) {
+        print('⚠️ Aucun point valide à afficher');
+        _mapController.move(const LatLng(36.819, 10.1658), 12.0);
+        return;
+      }
+
+      // Si un seul point, zoomer sur lui
+      if (allPoints.length == 1) {
+        print('📍 Un seul point: ${allPoints.first}');
+        _mapController.move(allPoints.first, 15.0);
+        return;
+      }
+
+      // Calcul des limites
+      double minLat = allPoints.first.latitude;
+      double maxLat = allPoints.first.latitude;
+      double minLng = allPoints.first.longitude;
+      double maxLng = allPoints.first.longitude;
 
       for (final p in allPoints) {
-        if (p.latitude  < minLat) minLat = p.latitude;
-        if (p.latitude  > maxLat) maxLat = p.latitude;
+        if (p.latitude < minLat) minLat = p.latitude;
+        if (p.latitude > maxLat) maxLat = p.latitude;
         if (p.longitude < minLng) minLng = p.longitude;
         if (p.longitude > maxLng) maxLng = p.longitude;
       }
+
+      print('📐 Bounds: minLat=$minLat, maxLat=$maxLat, minLng=$minLng, maxLng=$maxLng');
 
       try {
         _mapController.fitCamera(
           CameraFit.bounds(
             bounds: LatLngBounds(
-                LatLng(minLat, minLng), LatLng(maxLat, maxLng)),
+                LatLng(minLat, minLng),
+                LatLng(maxLat, maxLng)
+            ),
             padding: const EdgeInsets.all(60),
           ),
         );
         print('✅ Carte centrée sur ${allPoints.length} points');
       } catch (e) {
         print('❌ Erreur fitCamera: $e');
-        _mapController.move(const LatLng(36.819, 10.1658), 12.0);
+        _mapController.move(allPoints.first, 12.0);
       }
     });
-  }
-
-  // ── Déterminer la couleur de disponibilité ──
-  Color _getAvailabilityColor(Agency agency) {
-    // Adaptez selon vos données
-    // Pour l'exemple, je mets toutes les agences en vert
-    // À modifier selon votre logique métier
-    return Colors.green;
-
-    // Exemple avec la capacité :
-    // final capacity = agency.capacity ?? 50;
-    // if (capacity > 70) return Colors.green;
-    // if (capacity > 30) return Colors.orange;
-    // return Colors.red;
   }
 
   List<Marker> _buildAgencyMarkers() {
     final markers = <Marker>[];
 
+    print('🔍 === BUILD MARKERS ===');
+    print('📊 Nombre d\'agences: ${_agencies.length}');
+
     for (int index = 0; index < _agencies.length; index++) {
       final agency = _agencies[index];
 
-      // Vérification stricte
+      print('🔎 Vérification ${agency.name}: Lat=${agency.latitude}, Lng=${agency.longitude}');
+
       if (agency.latitude == null || agency.longitude == null) {
-        print('⚠️ ${agency.name}: coordonnées nulles');
+        print('⚠️ ${agency.name}: coordonnées nulles, marqueur ignoré');
         continue;
       }
 
-      // Vérifier que ce sont des nombres valides
       double lat, lng;
       try {
-        lat = agency.latitude is double ? agency.latitude! : double.parse(agency.latitude.toString());
-        lng = agency.longitude is double ? agency.longitude! : double.parse(agency.longitude.toString());
+        lat = agency.latitude!;
+        lng = agency.longitude!;
 
         if (lat.isNaN || lng.isNaN || lat == 0.0 || lng == 0.0) {
           print('⚠️ ${agency.name}: coordonnées invalides ($lat, $lng)');
@@ -242,12 +264,11 @@ class _MapScreenState extends State<MapScreen> {
         continue;
       }
 
-
       print('✅ Création marqueur: ${agency.name} à ($lat, $lng)');
 
       final isSelected = _selectedIndex == index;
-      final availabilityColor = _getAvailabilityColor(agency);
-       markers.add(
+
+      markers.add(
         Marker(
           width: isSelected ? 56 : 44,
           height: isSelected ? 70 : 56,
@@ -262,7 +283,6 @@ class _MapScreenState extends State<MapScreen> {
               duration: const Duration(milliseconds: 200),
               child: _AgencyPin(
                 isSelected: isSelected,
-                availabilityColor: availabilityColor,
               ),
             ),
           ),
@@ -270,7 +290,7 @@ class _MapScreenState extends State<MapScreen> {
       );
     }
 
-    print('📊 Total marqueurs: ${markers.length}/${_agencies.length}');
+    print('📊 Total marqueurs créés: ${markers.length}/${_agencies.length}');
     return markers;
   }
 
@@ -302,7 +322,8 @@ class _MapScreenState extends State<MapScreen> {
       backgroundColor: Colors.transparent,
       builder: (_) => _AgencyDetailSheet(
         agency: agency,
-        availabilityColor: _getAvailabilityColor(agency),
+
+        showBookButton: !widget.fromFooter,
         onZoom: () {
           Navigator.pop(context);
           if (agency.latitude != null && agency.longitude != null) {
@@ -328,7 +349,6 @@ class _MapScreenState extends State<MapScreen> {
       isScrollControlled: true,
       builder: (_) => _AllLocationsSheet(
         agencies: _agencies,
-        getAvailabilityColor: _getAvailabilityColor,
         onSelect: (index) {
           Navigator.pop(context);
           setState(() => _selectedIndex = index);
@@ -395,23 +415,38 @@ class _MapScreenState extends State<MapScreen> {
               ),
             ),
         ],
-        bottom: PreferredSize(
+        bottom: widget.fromFooter
+            ? null
+            : PreferredSize(
           preferredSize: const Size.fromHeight(54),
           child: Container(
             color: Palette.secondPageContainerGradient2ndColor,
             padding: const EdgeInsets.fromLTRB(24, 0, 24, 14),
             child: Column(
               children: [
-                StepIndicator(currentStep: 2, totalSteps: 5),
+                StepIndicator(
+                  currentStep: 2,
+                  totalSteps: 5,
+                ),
                 const SizedBox(height: 6),
                 const Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _StepLabel('Véhicule',     active: false, done: true),
-                    _StepLabel('Agence',       active: true,  done: false),
-                    _StepLabel('Service',      active: false, done: false),
-                    _StepLabel('Créneau',      active: false, done: false),
-                    _StepLabel('Confirmation', active: false, done: false),
+                    _StepLabel('Véhicule',
+                        active: false,
+                        done: true),
+                    _StepLabel('Agence',
+                        active: true,
+                        done: false),
+                    _StepLabel('Service',
+                        active: false,
+                        done: false),
+                    _StepLabel('Créneau',
+                        active: false,
+                        done: false),
+                    _StepLabel('Confirmation',
+                        active: false,
+                        done: false),
                   ],
                 ),
               ],
@@ -426,7 +461,7 @@ class _MapScreenState extends State<MapScreen> {
           : FlutterMap(
         mapController: _mapController,
         options: MapOptions(
-          initialCenter: const LatLng(36.819, 10.1658), // Tunis centre
+          initialCenter: const LatLng(36.819, 10.1658),
           initialZoom: 12.0,
           minZoom: 3.0,
           maxZoom: 19.0,
@@ -463,6 +498,7 @@ class _MapScreenState extends State<MapScreen> {
         ],
       ),
       floatingActionButton: _buildFABs(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 
@@ -515,7 +551,9 @@ class _MapScreenState extends State<MapScreen> {
 
   Widget _buildFABs() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(
+        bottom: widget.fromFooter ? 125 : 16,
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
@@ -526,7 +564,9 @@ class _MapScreenState extends State<MapScreen> {
               _mapController.camera.zoom + 1,
             ),
           ),
+
           const SizedBox(width: 8),
+
           _MapFAB(
             icon: Icons.remove_rounded,
             onTap: () => _mapController.move(
@@ -534,18 +574,26 @@ class _MapScreenState extends State<MapScreen> {
               _mapController.camera.zoom - 1,
             ),
           ),
+
           const SizedBox(width: 10),
+
           FloatingActionButton.extended(
             heroTag: 'list',
             onPressed: _showAllLocations,
-            backgroundColor: Palette.secondPageContainerGradient2ndColor,
-            foregroundColor: Palette.secondPageIconColor,
-            elevation: 4,
-            icon: const Icon(Icons.list_rounded, size: 20),
+            backgroundColor:
+            Palette.secondPageContainerGradient2ndColor,
+            foregroundColor:
+            Palette.secondPageIconColor,
+            icon: const Icon(
+              Icons.list_rounded,
+              size: 20,
+            ),
             label: Text(
               'Tous les agences',
               style: GoogleFonts.dmSans(
-                  fontWeight: FontWeight.w600, fontSize: 13),
+                fontWeight: FontWeight.w600,
+                fontSize: 13,
+              ),
             ),
           ),
         ],
@@ -553,16 +601,14 @@ class _MapScreenState extends State<MapScreen> {
     );
   }
 }
-// ─── Widgets auxiliaires ──────────────────────────────────────────────────────
+
+// ─── Widgets auxiliaires (inchangés) ─────────────────────────────────────────
 
 class _AgencyPin extends StatelessWidget {
   final bool isSelected;
-  final Color availabilityColor; // Nouvelle propriété
+  static const Color _greenColor = Colors.greenAccent;
 
-  const _AgencyPin({
-    required this.isSelected,
-    required this.availabilityColor,
-  });
+  const _AgencyPin({required this.isSelected});
 
   @override
   Widget build(BuildContext context) {
@@ -575,18 +621,18 @@ class _AgencyPin extends StatelessWidget {
           Container(
             width: 52, height: 52,
             decoration: BoxDecoration(
-              color: availabilityColor.withOpacity(0.15),
+              color: _greenColor.withOpacity(0.15),
               shape: BoxShape.circle,
             ),
             child: Center(
               child: Container(
                 width: 38, height: 38,
                 decoration: BoxDecoration(
-                  color: availabilityColor,
+                  color: _greenColor,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: availabilityColor.withOpacity(0.4),
+                      color: _greenColor.withOpacity(0.4),
                       blurRadius: 8,
                       offset: const Offset(0, 2),
                     ),
@@ -600,7 +646,7 @@ class _AgencyPin extends StatelessWidget {
           Container(
             width: 4, height: 4,
             decoration: BoxDecoration(
-              color: availabilityColor,
+              color: _greenColor,
               shape: BoxShape.circle,
             ),
           ),
@@ -614,11 +660,11 @@ class _AgencyPin extends StatelessWidget {
         Container(
           width: size, height: size,
           decoration: BoxDecoration(
-            color: availabilityColor,
+            color: _greenColor,
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: availabilityColor.withOpacity(0.35),
+                color: _greenColor.withOpacity(0.35),
                 blurRadius: 8,
                 offset: const Offset(0, 3),
               ),
@@ -630,7 +676,7 @@ class _AgencyPin extends StatelessWidget {
         Container(
           width: 4, height: 4,
           decoration: BoxDecoration(
-            color: availabilityColor,
+            color: _greenColor,
             shape: BoxShape.circle,
           ),
         ),
@@ -712,28 +758,21 @@ class _StepLabel extends StatelessWidget {
   }
 }
 
-// ─── Bottom sheets ─────────────────────────────────────────────────────────────
-
 class _AgencyDetailSheet extends StatelessWidget {
   final Agency agency;
-  final Color availabilityColor;
   final VoidCallback onZoom;
   final VoidCallback onBook;
   final VoidCallback onGlobalView;
+  static const Color _greenColor = Colors.greenAccent;
+  final bool showBookButton;
 
   const _AgencyDetailSheet({
     required this.agency,
-    required this.availabilityColor,
     required this.onZoom,
     required this.onBook,
     required this.onGlobalView,
+    required this.showBookButton,
   });
-
-  String _getAvailabilityText() {
-    if (availabilityColor == Colors.green) return 'Disponibilité élevée';
-    if (availabilityColor == Colors.orange) return 'Disponibilité moyenne';
-    return 'Disponibilité faible';
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -767,17 +806,16 @@ class _AgencyDetailSheet extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // En-tête agence avec indicateur de disponibilité
                 Row(
                   children: [
                     Container(
                       width: 46, height: 46,
                       decoration: BoxDecoration(
-                        color: availabilityColor.withOpacity(0.1),
+                        color: _greenColor.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(Icons.business_rounded,
-                          color: availabilityColor, size: 22),
+                          color: _greenColor, size: 22),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -814,14 +852,11 @@ class _AgencyDetailSheet extends StatelessWidget {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 12),
-
-                // Indicateur de disponibilité
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: availabilityColor.withOpacity(0.1),
+                    color: _greenColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -830,27 +865,24 @@ class _AgencyDetailSheet extends StatelessWidget {
                       Container(
                         width: 8,
                         height: 8,
-                        decoration: BoxDecoration(
-                          color: availabilityColor,
+                        decoration: const BoxDecoration(
+                          color: Colors.greenAccent,
                           shape: BoxShape.circle,
                         ),
                       ),
                       const SizedBox(width: 6),
                       Text(
-                        _getAvailabilityText(),
+                        'Disponible',
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: availabilityColor,
+                          color: _greenColor,
                         ),
                       ),
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 18),
-
-                // Stats
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
@@ -859,7 +891,6 @@ class _AgencyDetailSheet extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-
                       _StatChip(
                         icon: Icons.access_time_rounded,
                         label: agency.officeHours.isEmpty
@@ -878,10 +909,8 @@ class _AgencyDetailSheet extends StatelessWidget {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 16),
-
-                // Bouton principal
+                if (showBookButton)
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton.icon(
@@ -893,7 +922,7 @@ class _AgencyDetailSheet extends StatelessWidget {
                           fontSize: 15, fontWeight: FontWeight.w600),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: availabilityColor,
+                      backgroundColor: _greenColor,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 15),
                       elevation: 0,
@@ -902,9 +931,7 @@ class _AgencyDetailSheet extends StatelessWidget {
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 10),
-
                 Row(
                   children: [
                     Expanded(
@@ -916,8 +943,8 @@ class _AgencyDetailSheet extends StatelessWidget {
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500)),
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: availabilityColor,
-                          side: BorderSide(color: availabilityColor, width: 1),
+                          foregroundColor: _greenColor,
+                          side: BorderSide(color: _greenColor, width: 1),
                           padding:
                           const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
@@ -960,12 +987,11 @@ class _AgencyDetailSheet extends StatelessWidget {
 
 class _AllLocationsSheet extends StatelessWidget {
   final List<Agency> agencies;
-  final Color Function(Agency) getAvailabilityColor;
   final void Function(int index) onSelect;
+  static const Color _greenColor = Colors.greenAccent;
 
   const _AllLocationsSheet({
     required this.agencies,
-    required this.getAvailabilityColor,
     required this.onSelect,
   });
 
@@ -987,7 +1013,7 @@ class _AllLocationsSheet extends StatelessWidget {
           Center(
             child: Container(
               width: 36, height: 4,
-              margin: const EdgeInsets.only(top: 10, bottom: 12),
+              margin: const EdgeInsets.only(top: 10, bottom: 16),
               decoration: BoxDecoration(
                 color: Palette.textColor1,
                 borderRadius: BorderRadius.circular(2),
@@ -1041,7 +1067,6 @@ class _AllLocationsSheet extends StatelessWidget {
             ),
             itemBuilder: (_, index) {
               final agency = agencies[index];
-              final availabilityColor = getAvailabilityColor(agency);
 
               return InkWell(
                 onTap: () => onSelect(index),
@@ -1053,11 +1078,11 @@ class _AllLocationsSheet extends StatelessWidget {
                       Container(
                         width: 40, height: 40,
                         decoration: BoxDecoration(
-                          color: availabilityColor.withOpacity(0.1),
+                          color: _greenColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Icon(Icons.business_rounded,
-                            color: availabilityColor, size: 18),
+                            color: _greenColor, size: 18),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -1089,8 +1114,8 @@ class _AllLocationsSheet extends StatelessWidget {
                           Container(
                             width: 8,
                             height: 8,
-                            decoration: BoxDecoration(
-                              color: availabilityColor,
+                            decoration: const BoxDecoration(
+                              color: Colors.greenAccent,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -1117,8 +1142,6 @@ class _AllLocationsSheet extends StatelessWidget {
     );
   }
 }
-
-// ─── Micro widgets ─────────────────────────────────────────────────────────────
 
 class _StatChip extends StatelessWidget {
   final IconData icon;

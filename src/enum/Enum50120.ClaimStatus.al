@@ -13,13 +13,13 @@ enum 50120 "Claim Status"
         Caption = 'Resolved';
     }
 
-    value(2; "Closed")
-    {
-        Caption = 'Closed';
-    }
+    // value(2; "Closed")
+    // {
+    //     Caption = 'Closed';
+    // }
 
-    value(3; "Cancelled")
-    {
-        Caption = 'Cancelled';
-    }
+    // value(3; "Cancelled")
+    // {
+    //     Caption = 'Cancelled';
+    // }
 }

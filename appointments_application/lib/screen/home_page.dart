@@ -1,3 +1,4 @@
+import 'package:appointments_application/screen/RDVs_List.dart';
 import 'package:appointments_application/screen/vehicle_selection.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -9,14 +10,25 @@ import 'claims_list_screen.dart';
 import 'login_signup.dart';
 
 class HomePage extends StatefulWidget {
+
   final Function(int)? onNavigate;
+  final VoidCallback? onOpenRdvs;
   final String customerNumber;
 
+
   const HomePage({
+
     super.key,
+
     this.onNavigate,
+
+    this.onOpenRdvs,
+
     required this.customerNumber,
+
   });
+
+
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -364,12 +376,14 @@ class _HomePageState extends State<HomePage> {
 },
                   ),
                   _buildEnhancedServiceCard(
-                    title: 'News & Offres',
-                    icon: Icons.campaign_rounded,
+                    title: 'Mes RDVs',
+                    icon: Icons.calendar_month_rounded,
                     iconBg: const Color(0xFFFAEEDA),
                     iconColor: const Color(0xFF854F0B),
                     onTap: () {
-                      // TODO
+
+                      widget.onOpenRdvs?.call();
+
                     },
                   ),
                   _buildEnhancedServiceCard(
@@ -519,7 +533,7 @@ class _HomePageState extends State<HomePage> {
               const Spacer(),
               // Bouton voir
               GestureDetector(
-                onTap: () => widget.onNavigate?.call(1),
+                onTap: () => widget.onOpenRdvs?.call(),
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                       horizontal: 14, vertical: 8),
@@ -537,12 +551,16 @@ class _HomePageState extends State<HomePage> {
                   child: Row(
                     children: [
                       Text(
+
                         'Voir',
+
                         style: GoogleFonts.dmSans(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                           color: color.Palette.gradientFirst,
+
                         ),
+
                       ),
                       const SizedBox(width: 4),
                       Icon(Icons.arrow_forward_rounded,
