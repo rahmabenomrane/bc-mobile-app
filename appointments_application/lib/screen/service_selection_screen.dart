@@ -9,11 +9,13 @@ import '../Service/service_service.dart';
 class ServiceSelectionScreen extends StatefulWidget {
   final Vehicle selectedVehicle;
   final Map<String, dynamic> selectedAgency;
+  final bool viewOnly;
 
   const ServiceSelectionScreen({
     super.key,
     required this.selectedVehicle,
     required this.selectedAgency,
+    this.viewOnly = false,
   });
 
   @override
@@ -72,7 +74,9 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                 ? Center(child: Text(_error))
                 : _buildServiceList(),
           ),
-          if (_selectedServiceIndex != null) _buildBottomCTA(),
+          if (!widget.viewOnly &&
+              _selectedServiceIndex != null)
+            _buildBottomCTA(),
         ],
       ),
     );
@@ -119,7 +123,9 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Choisir un service',
+                        widget.viewOnly
+                            ? 'Services disponibles'
+                            : 'Choisir un service',
                         style: GoogleFonts.playfairDisplay(
                           fontSize: 20,
                           fontWeight: FontWeight.w500,
@@ -135,10 +141,15 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
               const SizedBox(height: 20),
 
               // Step indicator
-              StepIndicator(currentStep: 3, totalSteps: 5),
+              if (!widget.viewOnly)
+                StepIndicator(
+                  currentStep: 3,
+                  totalSteps: 5,
+                ),
               const SizedBox(height: 6),
 
               // Labels étapes
+              if (!widget.viewOnly)
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -200,12 +211,14 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
             ),
           ),
           // Badge agence
+          if (!widget.viewOnly)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: Palette.gradientFirst.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
             ),
+
             child: Text(
               'Étape 3',
               style: TextStyle(
@@ -234,9 +247,14 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
     final isSelected = _selectedServiceIndex == index;
 
     return GestureDetector(
-      onTap: () => setState(() {
-        _selectedServiceIndex = isSelected ? null : index;
-      }),
+      onTap: widget.viewOnly
+          ? null
+          : () {
+        setState(() {
+          _selectedServiceIndex =
+          isSelected ? null : index;
+        });
+      },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 220),
         curve: Curves.easeInOut,

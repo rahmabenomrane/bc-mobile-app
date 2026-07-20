@@ -30,6 +30,13 @@ pageextension 50170 RoleCenterVehicleExt extends "Service Advisor Role Center"
                     RunObject = Page 50106;
                     ApplicationArea = All;
                 }
+
+                action(claims)
+                {
+                    Caption = 'Réclamations';
+                    RunObject = Page 50129;
+                    ApplicationArea = All;
+                }
             }
         }
     }

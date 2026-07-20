@@ -305,7 +305,18 @@ class _MapScreenState extends State<MapScreen> {
       ),
     );
   }
-
+  void _navigateToAgencyServices(Agency agency) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ServiceSelectionScreen(
+          selectedVehicle: widget.selectedVehicle,
+          selectedAgency: agency.toMap(),
+          viewOnly: true,
+        ),
+      ),
+    );
+  }
   void _showLocationInfo(int index) {
     final agency = _agencies[index];
 
@@ -322,7 +333,10 @@ class _MapScreenState extends State<MapScreen> {
       backgroundColor: Colors.transparent,
       builder: (_) => _AgencyDetailSheet(
         agency: agency,
-
+        onViewServices: (){
+          Navigator.pop(context);
+          _navigateToAgencyServices(agency);
+        },
         showBookButton: !widget.fromFooter,
         onZoom: () {
           Navigator.pop(context);
@@ -765,12 +779,14 @@ class _AgencyDetailSheet extends StatelessWidget {
   final VoidCallback onGlobalView;
   static const Color _greenColor = Colors.greenAccent;
   final bool showBookButton;
+  final VoidCallback onViewServices;
 
   const _AgencyDetailSheet({
     required this.agency,
     required this.onZoom,
     required this.onBook,
     required this.onGlobalView,
+    required this.onViewServices,
     required this.showBookButton,
   });
 
@@ -953,15 +969,19 @@ class _AgencyDetailSheet extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 10),
+                    if (!showBookButton)
                     Expanded(
                       child: OutlinedButton.icon(
-                        onPressed: onGlobalView,
-                        icon: const Icon(Icons.zoom_out_map_rounded,
+                        onPressed: onViewServices,
+                        icon: const Icon(Icons.miscellaneous_services_rounded,
                             size: 16),
-                        label: Text('Vue globale',
-                            style: GoogleFonts.dmSans(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500)),
+                        label: Text(
+                          'Voir services',
+                          style: GoogleFonts.dmSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Palette.textColor1,
                           side: BorderSide(

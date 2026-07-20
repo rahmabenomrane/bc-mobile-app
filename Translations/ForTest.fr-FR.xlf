@@ -23,7 +23,7 @@
         </trans-unit>
         <trans-unit id="Table 521314001 - Field 1285973296 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Email</source>
-          <target>Courriel</target>
+          <target>Adresse e-mail</target>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Table Agency - Field Email - Property Caption</note>
         </trans-unit>

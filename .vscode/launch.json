@@ -37,7 +37,7 @@
             "serverInstance": "BC260",
             "authentication": "Windows",
             "port": 7049,
-            "sessionId": 2082,
+            "sessionId": 24,
             "breakOnNext": "WebClient",
             "executionContext": "DebugAndProfile"
         },

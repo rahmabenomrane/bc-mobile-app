@@ -5,12 +5,41 @@ var map,
   selAddress = "";
 var mapReady = false;
 var pendingCoords = null;
-var markerIcon = L.icon({
-  iconUrl: "marker.png",
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32],
-});
+var markerIcon = null;
+function getMarkerIcon() {
+  if (markerIcon) return markerIcon;
+
+  markerIcon = L.divIcon({
+    className: "custom-marker",
+    html: `
+            <div style="
+                width: 30px;
+                height: 30px;
+                background: #e74c3c;
+                border: 3px solid white;
+                border-radius: 50% 50% 50% 0;
+                transform: rotate(-45deg);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+                position: relative;
+            ">
+                <div style="
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%) rotate(45deg);
+                    color: white;
+                    font-size: 14px;
+                ">STA</div>
+            </div>
+        `,
+    iconSize: [30, 30],
+    iconAnchor: [15, 30],
+    popupAnchor: [0, -30],
+  });
+
+  return markerIcon;
+}
+
 function initLeafletMap() {
   map = L.map("map").setView([36.8065, 10.1815], 12);
 
@@ -62,7 +91,7 @@ function moveMarker(lat, lng) {
   if (marker) {
     marker.setLatLng([lat, lng]);
   } else {
-    marker = L.marker([lat, lng], { icon: markerIcon }).addTo(map);
+    marker = L.marker([lat, lng], { icon: getMarkerIcon() }).addTo(map);
   }
   map.panTo([lat, lng]);
 }
@@ -98,26 +127,16 @@ function confirmPos() {
 }
 
 function notifyBC(confirmed) {
-  console.log("notifyBC appelé, confirmed=" + confirmed);
-  console.log(
-    "Microsoft dispo ?",
-    typeof Microsoft,
-    Microsoft && Microsoft.Dynamics
-  );
-
   if (
     typeof Microsoft !== "undefined" &&
     Microsoft.Dynamics &&
     Microsoft.Dynamics.NAV
   ) {
-    console.log("Envoi vers BC :", selLat, selLng, confirmed, selAddress);
     Microsoft.Dynamics.NAV.InvokeExtensibilityMethod(
       "CoordinatesSelected",
       [selLat, selLng, confirmed, selAddress || ""],
       false
     );
-  } else {
-    console.warn("Microsoft.Dynamics.NAV non disponible !");
   }
 }
 

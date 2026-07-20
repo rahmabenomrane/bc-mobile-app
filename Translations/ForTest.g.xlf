@@ -153,10 +153,20 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Table CustomerClaim - Field creationDate - Property Caption</note>
         </trans-unit>
+        <trans-unit id="Table 2795553130 - Field 1881986821 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Customer Name</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table CustomerClaim - Field CustomerName - Property Caption</note>
+        </trans-unit>
         <trans-unit id="Table 2795553130 - Field 1108861191 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>customerNo</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Table CustomerClaim - Field customerNo - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 2795553130 - Field 2118146484 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Phone</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table CustomerClaim - Field CustomerPhone - Property Caption</note>
         </trans-unit>
         <trans-unit id="Table 2795553130 - Field 4232699882 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>description</source>
@@ -182,6 +192,11 @@
           <source>status</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Table CustomerClaim - Field status - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 2795553130 - Field 1481906422 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Model</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table CustomerClaim - Field VehicleModelCode - Property Caption</note>
         </trans-unit>
         <trans-unit id="Table 2795553130 - Field 3979225819 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>vehicleNo</source>
@@ -409,7 +424,7 @@
           <note from="Xliff Generator" annotates="general" priority="3">Page AgenceSTA - Action ViewAppointments - Property Caption</note>
         </trans-unit>
         <trans-unit id="Page 2542778461 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Agency</source>
+          <source>Agence</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page Agency Card - Property Caption</note>
         </trans-unit>
@@ -418,18 +433,23 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page Agency Card - Control AgencyMap - Property Caption</note>
         </trans-unit>
+        <trans-unit id="Page 2542778461 - Control 1060644019 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Services proposés</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Agency Card - Control AgencyServices - Property Caption</note>
+        </trans-unit>
         <trans-unit id="Page 2542778461 - Control 3993128796 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Contact Details</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page Agency Card - Control Contact - Property Caption</note>
         </trans-unit>
         <trans-unit id="Page 2542778461 - Control 318613646 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Additional Details</source>
+          <source>Détails supplémentaires</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page Agency Card - Control Details - Property Caption</note>
         </trans-unit>
         <trans-unit id="Page 2542778461 - Control 2445482498 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>General Information</source>
+          <source>Informations générales</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page Agency Card - Control General - Property Caption</note>
         </trans-unit>
@@ -457,6 +477,26 @@
           <source>Carte GPS</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page Agency Map Part - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2805161610 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Services proposés</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Agency Services Part - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2805161610 - Control 1557638375 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Disponible</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Agency Services Part - Control Disponible - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2805161610 - Control 893932817 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Service</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Agency Services Part - Control Libelle - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2805161610 - Control 4230426132 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Code</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Agency Services Part - Control ServiceCode - Property Caption</note>
         </trans-unit>
         <trans-unit id="Page 1384629993 - Control 3168444338 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Agency Address</source>
@@ -658,6 +698,76 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page CarLiftAPI - Control description - Property Caption</note>
         </trans-unit>
+        <trans-unit id="Page 1497276006 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Réclamation du client</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Customer Claim Card - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1497276006 - Control 1994964448 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Informations client</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Customer Claim Card - Control Customer - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1497276006 - Control 1881986821 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Nom du client</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Customer Claim Card - Control CustomerName - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1497276006 - Control 3689535207 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Numéro du client</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Customer Claim Card - Control CustomerNo - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1497276006 - Control 2118146484 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Numéro de téléphone</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Customer Claim Card - Control CustomerPhone - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1497276006 - Control 3461834954 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Description du réclamation</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Customer Claim Card - Control Description - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1497276006 - Control 2707392224 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Description</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Customer Claim Card - Control ClaimDescription - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1497276006 - Control 2445482498 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Informations générales</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Customer Claim Card - Control General - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1497276006 - Control 1193173812 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Informations véhicule</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Customer Claim Card - Control Vehicle - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1497276006 - Control 3321702588 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Immatriculation</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Customer Claim Card - Control Immatriculation - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1497276006 - Control 4253326217 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Modèle</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Customer Claim Card - Control VehicleModel - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1497276006 - Control 3519825531 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Numéro du véhicule</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Customer Claim Card - Control VehicleNo - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1137545408 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Customer Claims</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Customer Claim List - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1137545408 - Control 3321702588 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Immatriculation</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Customer Claim List - Control Immatriculation - Property Caption</note>
+        </trans-unit>
         <trans-unit id="Page 1420740498 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Customer Claim API</source>
           <note from="Developer" annotates="general" priority="2"></note>
@@ -689,7 +799,7 @@
           <note from="Xliff Generator" annotates="general" priority="3">Page CustomerClaim API - Control priority - Property Caption</note>
         </trans-unit>
         <trans-unit id="Page 1420740498 - Control 2232587950 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>registrationNumber</source>
+          <source>Registration Number</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page CustomerClaim API - Control registrationNumber - Property Caption</note>
         </trans-unit>
@@ -702,6 +812,11 @@
           <source>Vehicle Number</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page CustomerClaim API - Control vehicleNo - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1420740498 - Action 2421935703 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Update Claim Status</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page CustomerClaim API - Action UpdateStatus - Property Caption</note>
         </trans-unit>
         <trans-unit id="Page 363045002 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Clients</source>
@@ -767,6 +882,11 @@
           <source>Rendez-vous</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page STA rdv List - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2136995768 - Control 284175460 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Heure de début</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page STA rdv List - Control Heure de début - Property Caption</note>
         </trans-unit>
         <trans-unit id="Page 3368149822 - Control 1762530770 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Address</source>
@@ -898,6 +1018,11 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">PageExtension RoleCenterVehicleExt - Action Appointments - Property Caption</note>
         </trans-unit>
+        <trans-unit id="PageExtension 2041230858 - Action 1327948699 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve" al-object-target="Page 399713418">
+          <source>Réclamations</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">PageExtension RoleCenterVehicleExt - Action claims - Property Caption</note>
+        </trans-unit>
         <trans-unit id="PageExtension 2041230858 - Action 1593837442 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve" al-object-target="Page 399713418">
           <source>Véhicules</source>
           <note from="Developer" annotates="general" priority="2"></note>
@@ -932,16 +1057,6 @@
           <source>Claim Status</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Enum Claim Status - Property Caption</note>
-        </trans-unit>
-        <trans-unit id="Enum 2560465946 - EnumValue 4069904181 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Cancelled</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Enum Claim Status - EnumValue Cancelled - Property Caption</note>
-        </trans-unit>
-        <trans-unit id="Enum 2560465946 - EnumValue 1778072510 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Closed</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Enum Claim Status - EnumValue Closed - Property Caption</note>
         </trans-unit>
         <trans-unit id="Enum 2560465946 - EnumValue 1090713286 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>In Progress</source>

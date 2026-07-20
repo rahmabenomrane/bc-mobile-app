@@ -15,7 +15,11 @@ container.appendChild(mapDiv);
 setTimeout(function () {
   initLeafletMap();
 }, 300);
-
+console.log("Images disponibles :");
+console.log(
+  "marker.png ->",
+  Microsoft.Dynamics.NAV.GetImageResource("marker.png")
+);
 if (
   typeof Microsoft !== "undefined" &&
   Microsoft.Dynamics &&

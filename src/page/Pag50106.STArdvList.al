@@ -17,7 +17,7 @@ page 50106 "STA rdv List"
                 {
                     ApplicationArea = All;
                 }
-                field("Agency"; AgencyName)
+                field("Agence"; AgencyName)
                 {
                     ApplicationArea = All;
                 }
@@ -29,8 +29,9 @@ page 50106 "STA rdv List"
                 {
                     ApplicationArea = All;
                 }
-                field("StartTime"; Rec."StartTime")
+                field("Heure de début"; Rec."StartTime")
                 {
+                    Caption = 'Heure de début';
                     ApplicationArea = All;
                 }
                 field("Status"; Rec."Status")
@@ -38,7 +39,7 @@ page 50106 "STA rdv List"
                     ApplicationArea = All;
                     StyleExpr = StatusStyle;
                 }
-                field("Customer"; ClientName)
+                field("Client"; ClientName)
                 {
                     ApplicationArea = All;
                 }

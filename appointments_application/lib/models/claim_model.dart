@@ -29,10 +29,8 @@ class ClaimModel {
 
   String get statusLabel {
     switch (status) {
-      case 0: return 'En attente';
-      case 1: return 'En cours';
-      case 2: return 'Résolue';
-      case 3: return 'Rejetée';
+      case 0: return 'Envoyé';
+      case 1: return 'Résolue';
       default: return 'Inconnu';
     }
   }

@@ -45,6 +45,31 @@ table 50121 CustomerClaim
             DataClassification = ToBeClassified;
             TableRelation = StaVehicle.RegistrationNumber;
         }
+        field(20; CustomerName; Text[100])
+        {
+            Caption = 'Customer Name';
+            FieldClass = FlowField;
+            CalcFormula = lookup(StaCustomer.Name
+                         where(NumCustomer = field(customerNo)));
+            Editable = false;
+        }
+
+        field(21; CustomerPhone; Code[20])
+        {
+            Caption = 'Phone';
+            FieldClass = FlowField;
+            CalcFormula = lookup(StaCustomer.Phone
+                         where(NumCustomer = field(customerNo)));
+            Editable = false;
+        }
+
+        field(22; VehicleModelCode; Code[20])
+        {
+            Caption = 'Model';
+            FieldClass = FlowField;
+            CalcFormula = lookup(StaVehicle."Model Code"
+                         where(NumVehicle = field(vehicleNo)));
+        }
     }
 
     keys
