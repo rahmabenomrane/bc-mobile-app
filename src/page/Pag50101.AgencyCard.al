@@ -2,7 +2,7 @@ page 50101 "Agency Card"
 {
     PageType = Card;
     SourceTable = Agency;
-    Caption = 'Agency';
+    Caption = 'Agence';
     ApplicationArea = All;
 
     layout
@@ -11,7 +11,7 @@ page 50101 "Agency Card"
         {
             group(General)
             {
-                Caption = 'General Information';
+                Caption = 'Informations générales';
                 field(Code; Rec.Code)
                 {
                     ApplicationArea = All;
@@ -55,7 +55,7 @@ page 50101 "Agency Card"
 
             group(Details)
             {
-                Caption = 'Additional Details';
+                Caption = 'Détails supplémentaires';
                 field(Capacity; Rec.Capacity) { ApplicationArea = All; }
                 field("Office hours"; Rec."Office hours") { ApplicationArea = All; }
             }
@@ -91,6 +91,11 @@ page 50101 "Agency Card"
                 ApplicationArea = All;
                 Caption = 'Ponts';
                 SubPageLink = "Agency Code" = field(Code);
+            }
+            part(AgencyServices; "Agency Services Part")
+            {
+                ApplicationArea = All;
+                Caption = 'Services proposés';
             }
         }
     }
@@ -134,8 +139,11 @@ page 50101 "Agency Card"
 
     trigger OnAfterGetCurrRecord()
     begin
-        CurrPage.AgencyMap.Page.SetCoordinates(Rec.Latitude, Rec.Longitude);
-    end;
+        CurrPage.AgencyServices.Page.SetAgency(Rec.Code);
 
+        CurrPage.AgencyMap.Page.SetCoordinates(
+            Rec.Latitude,
+            Rec.Longitude);
+    end;
 
 }

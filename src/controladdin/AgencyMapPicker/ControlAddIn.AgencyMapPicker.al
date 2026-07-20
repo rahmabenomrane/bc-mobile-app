@@ -9,7 +9,6 @@ controladdin AgencyMapPicker
         'src/Ressources/CSS/style.css';
 
     StartupScript = 'src/Ressources/JS/startup.js';
-    Images ='src/Ressources/images/marker.png';
     RequestedHeight = 500;
     VerticalStretch = true;
     VerticalShrink = true;

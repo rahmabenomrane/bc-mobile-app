@@ -3,23 +3,22 @@ enum 50120 "Claim Status"
     Caption = 'Claim Status';
     Extensible = true;
 
-    value(0; "In Progress")
+    value(0; "Ouverte")
     {
-        Caption = 'In Progress';
+        Caption = 'Ouverte';
     }
 
-    value(1; "Resolved")
+    value(1; "Prise en charge")
     {
-        Caption = 'Resolved';
+        Caption = 'Prise en charge';
+    }
+    value(2; "Résolue")
+    {
+        Caption = 'Résolue';
+    }
+    value(3; "Closed")
+    {
+        Caption = 'Closed';
     }
 
-    // value(2; "Closed")
-    // {
-    //     Caption = 'Closed';
-    // }
-
-    // value(3; "Cancelled")
-    // {
-    //     Caption = 'Cancelled';
-    // }
 }
