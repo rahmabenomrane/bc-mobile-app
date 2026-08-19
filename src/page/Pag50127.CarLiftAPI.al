@@ -25,11 +25,12 @@ page 50127 "CarLiftAPI"
                 }
                 field(agencyCode; Rec."Agency Code")
                 {
-                    Caption = 'Agency Code';
+                    Caption = 'Code agence';
+                    
                 }
                 field(dailyCapacity; Rec."Daily Capacity")
                 {
-                    Caption = 'Daily Capacity';
+                    Caption = 'Capacité journalière(H)';
                 }
                 field(active; Rec.Active)
                 {

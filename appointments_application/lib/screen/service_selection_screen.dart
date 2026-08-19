@@ -326,28 +326,22 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          service.name,
-                          style: GoogleFonts.dmSans(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: isSelected
-                                ? Palette.gradientFirst
-                                : Palette.homePageTitle,
+                        Expanded(
+                          child: Text(
+                            service.name,
+                            softWrap: true,
+                            maxLines: 3,
+                            overflow: TextOverflow.visible,
+                            style: GoogleFonts.dmSans(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w600,
+                              height: 1.25,
+                              color: isSelected
+                                  ? Palette.gradientFirst
+                                  : Palette.homePageTitle,
+                            ),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        // Tag
-                        // Container(
-                        //   padding: const EdgeInsets.symmetric(
-                        //       horizontal: 7, vertical: 2),
-                        //   decoration: BoxDecoration(
-                        //     color: isSelected
-                        //         ? Palette.gradientSecond.withOpacity(0.12)
-                        //         : Palette.homePageBackground,
-                        //     borderRadius: BorderRadius.circular(20),
-                        //   ),
-                        // ),
                       ],
                     ),
                     // const SizedBox(height: 4),

@@ -116,6 +116,98 @@ namespace StaBackend.Services
                 return new LoginResponse { Success = false, Error = ex.Message };
             }
         }
+        public async Task<List<ServiceDto>> GetServicesByAgencyAsync(string agencyCode)
+        {
+            var client = CreateWindowsAuthClient();
+
+
+            var agencyServiceUrl = $"{ODataBase}/AgencyServiceAPI";
+            var response = await client.GetAsync(agencyServiceUrl);
+            var content = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"AgencyService JSON = {content}");
+            var bcAgencyServices = JsonSerializer.Deserialize<BcAgencyServiceResponse>(
+                content,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (bcAgencyServices?.value == null)
+                return new List<ServiceDto>();
+
+            var agencyServiceCodes = bcAgencyServices.value
+                .Where(a =>
+                    !string.IsNullOrWhiteSpace(a.AgencyCode) &&
+                    !string.IsNullOrWhiteSpace(a.ServiceCode) &&
+                    a.AgencyCode.Trim().Equals(agencyCode.Trim(), StringComparison.OrdinalIgnoreCase) &&
+                    a.Disponible == true)
+                .Select(a => a.ServiceCode?.Trim())
+                .ToList();
+
+            if (!agencyServiceCodes.Any())
+                return new List<ServiceDto>();
+
+            //  Récupérer les détails depuis ServicesAPI
+            var servicesUrl = $"{ODataBase}/ServicesAPI";
+            var servicesResponse = await client.GetAsync(servicesUrl);
+            var servicesContent = await servicesResponse.Content.ReadAsStringAsync();
+
+            Console.WriteLine($"SERVICES JSON = {servicesContent}");
+
+            var bcServices = JsonSerializer.Deserialize<BcServicesResponse>(
+                servicesContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (bcServices?.value == null)
+                return new List<ServiceDto>();
+            Console.WriteLine($"SERVICES URL = {servicesUrl}");
+            Console.WriteLine($"SERVICES STATUS = {servicesResponse.StatusCode}");
+            Console.WriteLine($"SERVICES JSON = {servicesContent}");
+            Console.WriteLine($"agencyServiceCodes = {string.Join(", ", agencyServiceCodes)}");
+
+
+            return bcServices.value
+                .Where(s => agencyServiceCodes.Any(code =>
+                    s.Libelle?.Trim().ToUpper() == code.Trim().ToUpper() ||
+                    s.Description?.Trim().ToUpper() == code.Trim().ToUpper() ||
+                    s.ServiceCode?.Trim().ToUpper() == code.Trim().ToUpper()
+                ))
+                .Select(s => new ServiceDto
+                {
+                    Code = s.ServiceCode?.Trim(),
+                    Name = s.Description?.Trim(),
+                    Description = s.Description?.Trim() ?? "",
+                    Type = GetServiceType(s.Type),
+                    Duration = "1h"
+                })
+                .ToList();
+        }
+
+        public async Task<List<BCServiceModel>> GetAllServicesAsync()
+        {
+            using var client = CreateWindowsAuthClient();
+
+            var url = $"{ODataBase}/ServicesAPI";
+
+            var response = await client.GetAsync(url);
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine(
+                    $"Erreur ServicesAPI {(int)response.StatusCode} : {content}"
+                );
+
+                return new List<BCServiceModel>();
+            }
+
+            var result = JsonSerializer.Deserialize<BcServiceResponse>(
+                content,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }
+            );
+
+            return result?.value ?? new List<BCServiceModel>();
+        }
         public async Task<string?> GetCustomerEmailAsync(string customerNumber)
         {
             var client = CreateWindowsAuthClient();
@@ -346,7 +438,9 @@ namespace StaBackend.Services
                 {
                     var claim = new ClaimInfo
                     {
-                        ClaimNumber = item.TryGetProperty("claimNumber", out var cn) ? cn.GetInt32() : 0,
+                        ClaimNumber = item.TryGetProperty("claimNumber", out var cn)
+    ? cn.GetString() ?? ""
+    : "",
                         CreationDate = item.TryGetProperty("creationDate", out var cd) ? cd.GetString() ?? "" : "",
                         CustomerNo = item.TryGetProperty("customerNo", out var cno) ? cno.GetString() ?? "" : "",
                         VehicleNo = item.TryGetProperty("vehicleNo", out var vn) ? vn.GetString() ?? "" : "",
@@ -385,7 +479,7 @@ namespace StaBackend.Services
             }
         }
 
-        // Ajouter cette méthode pour récupérer les détails du rendez-vous
+
         private async Task<(string ServiceName, string AgencyName)> GetAppointmentDetails(string appointmentRef)
         {
             try
@@ -438,7 +532,7 @@ namespace StaBackend.Services
                 vehicleNo = request.VehicleNo,
                 description = request.Description,
                 registrationNumber = request.RegistrationNumber,
-                status = "In Progress",
+                status = "Ouverte",
                 priority = MapPriorityToBc(request.Priority),
             });
 
@@ -470,7 +564,7 @@ namespace StaBackend.Services
                 return new CreateClaimResponse
                 {
                     Success = true,
-                    ClaimNumber = root.TryGetProperty("claimNumber", out var nr) ? nr.GetInt32() : 0,
+                    ClaimNumber = root.TryGetProperty("claimNumber", out var nr) ? nr.GetString() ?? "" : "",
                     CustomerNo = root.TryGetProperty("customerNo", out var cno) ? cno.GetString() ?? "" : "",
                     VehicleNo = root.TryGetProperty("vehicleNo", out var vno) ? vno.GetString() ?? "" : "",
                     Description = root.TryGetProperty("description", out var desc) ? desc.GetString() ?? "" : "",
@@ -519,10 +613,10 @@ namespace StaBackend.Services
 
         private static int ParseStatusFromBc(string s) => s.Replace("_x0020_", " ") switch
         {
-            "In Progress" => 0,
-            "Resolved" => 1,
+            "Ouverte" => 0,
+            "Résolue" => 1,
             "Closed" => 2,
-            "Cancelled" => 3,
+            "prise en charge" => 3,
             _ => 0
         };
 
@@ -536,11 +630,11 @@ namespace StaBackend.Services
 
         private static string MapStatusToBc(int status) => status switch
         {
-            0 => "In Progress",
-            1 => "Resolved",
+            0 => "Ouverte",
+            1 => "Résolue",
             2 => "Closed",
-            3 => "Cancelled",
-            _ => "In Progress"
+            3 => "prise en charge",
+            _ => "Ouverte"
         };
 
         private static string MapPriorityToBc(int priority) => priority switch
@@ -891,6 +985,7 @@ namespace StaBackend.Services
                 RegistrationNumber = v.RegistrationNumber,
             }).FirstOrDefault();
         }
+
         public async Task<List<AppointmentDto>> GetCustomerAppointmentsAsync(string customerNumber)
         {
             var client = CreateWindowsAuthClient();
@@ -994,7 +1089,14 @@ namespace StaBackend.Services
                 assignedPontId = availablePont.Code;
                 Console.WriteLine($"✅ Pont assigné = {assignedPontId}");
             }
-
+            var startTime = new DateTime(
+                dto.Date.Year,
+                dto.Date.Month,
+                dto.Date.Day,
+                dto.StartTime,
+                0,
+                0
+            );
 
             var appointment = new AppointmentDto
             {
@@ -1002,8 +1104,10 @@ namespace StaBackend.Services
                 ServiceCode = dto.ServiceCode,
                 ServiceDescription = dto.ServiceDescription,
                 Date = dto.Date,
-                StartTime = new DateTime(dto.Date.Year, dto.Date.Month, dto.Date.Day, dto.StartTime, 0, 0),
-                EndTime = new DateTime(dto.Date.Year, dto.Date.Month, dto.Date.Day, dto.EndTime + 1, 0, 0),
+
+                StartTime = startTime,
+                EndTime = startTime.AddHours(1),
+
                 Status = "Pending",
                 AppointmentNo = "RDV-" + DateTime.Now.Ticks.ToString()[..12],
                 NumVehicle = dto.VehicleNumber,
@@ -1154,69 +1258,6 @@ namespace StaBackend.Services
                 _ => ""
             };
         }
-        public async Task<List<ServiceDto>> GetServicesByAgencyAsync(string agencyCode)
-        {
-            var client = CreateWindowsAuthClient();
-
-
-            var agencyServiceUrl = $"{ODataBase}/AgencyServiceAPI";
-            var response = await client.GetAsync(agencyServiceUrl);
-            var content = await response.Content.ReadAsStringAsync();
-            Console.WriteLine($"AgencyService JSON = {content}");
-            var bcAgencyServices = JsonSerializer.Deserialize<BcAgencyServiceResponse>(
-                content,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-            if (bcAgencyServices?.value == null)
-                return new List<ServiceDto>();
-
-            var agencyServiceCodes = bcAgencyServices.value
-                .Where(a =>
-                    !string.IsNullOrWhiteSpace(a.agencyCode) &&
-                    !string.IsNullOrWhiteSpace(a.serviceCode) &&
-                    a.agencyCode.Trim().Equals(agencyCode.Trim(), StringComparison.OrdinalIgnoreCase) &&
-                    a.Disponible == true)
-                .Select(a => a.serviceCode?.Trim())
-                .ToList();
-
-            if (!agencyServiceCodes.Any())
-                return new List<ServiceDto>();
-
-            //  Récupérer les détails depuis ServicesAPI
-            var servicesUrl = $"{ODataBase}/ServicesAPI";
-            var servicesResponse = await client.GetAsync(servicesUrl);
-            var servicesContent = await servicesResponse.Content.ReadAsStringAsync();
-
-            Console.WriteLine($"SERVICES JSON = {servicesContent}");
-
-            var bcServices = JsonSerializer.Deserialize<BcServicesResponse>(
-                servicesContent,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-            if (bcServices?.value == null)
-                return new List<ServiceDto>();
-            Console.WriteLine($"SERVICES URL = {servicesUrl}");
-            Console.WriteLine($"SERVICES STATUS = {servicesResponse.StatusCode}");
-            Console.WriteLine($"SERVICES JSON = {servicesContent}");
-            Console.WriteLine($"agencyServiceCodes = {string.Join(", ", agencyServiceCodes)}");
-
-
-            return bcServices.value
-                .Where(s => agencyServiceCodes.Any(code =>
-                    s.Libelle?.Trim().ToUpper() == code.Trim().ToUpper() ||
-                    s.Description?.Trim().ToUpper() == code.Trim().ToUpper() ||
-                    s.ServiceCode?.Trim().ToUpper() == code.Trim().ToUpper()
-                ))
-                .Select(s => new ServiceDto
-                {
-                    Code = s.ServiceCode?.Trim(),
-                    Name = s.Libelle?.Trim() ?? s.Description?.Trim() ?? s.ServiceCode,
-                    Description = s.Description?.Trim() ?? "",
-                    Type = GetServiceType(s.Type),
-                    Duration = "1h"
-                })
-                .ToList();
-        }
 
 
         private class BcAppointmentRaw
@@ -1238,7 +1279,67 @@ namespace StaBackend.Services
         {
             public List<BcAppointmentRaw> value { get; set; }
         }
+        public class BcNonworkingDayRaw
+        {
+            public string AgencyCode { get; set; } = "";
+            public string Date { get; set; } = "";
+            public string? Description { get; set; }
+        }
 
+        public class BcNonworkingDayRawResponse
+        {
+            public List<BcNonworkingDayRaw>? value { get; set; }
+        }
+        public async Task<List<NonworkingDayDto>> GetAgencyNonworkingDaysAsync(
+    string agencyCode,
+    DateTime from,
+    DateTime to)
+        {
+            var client = CreateWindowsAuthClient();
+
+            var fromStr = from.ToString("yyyy-MM-dd");
+            var toStr = to.ToString("yyyy-MM-dd");
+
+            var filter =
+                $"AgencyCode eq '{agencyCode}' and Date ge {fromStr} and Date le {toStr}";
+
+            var url =
+                $"{ApiBase}/AgencyNonworkingDays?$filter={Uri.EscapeDataString(filter)}";
+
+            Console.WriteLine($"[NONWORKING] URL = {url}");
+
+            var response = await client.GetAsync(url);
+            var json = await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine($"[NONWORKING] STATUS = {response.StatusCode}");
+            Console.WriteLine($"[NONWORKING] BODY = {json}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine(
+                    $"[NONWORKING] BC ERROR = {response.StatusCode} - {json}"
+                );
+
+                return new List<NonworkingDayDto>();
+            }
+
+            var data = JsonSerializer.Deserialize<BcNonworkingDayRawResponse>(
+                json,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+            if (data?.value == null)
+                return new List<NonworkingDayDto>();
+
+            return data.value.Select(raw => new NonworkingDayDto
+            {
+                AgencyCode = raw.AgencyCode,
+                Date = DateTime.Parse(raw.Date),
+                Description = raw.Description
+            }).ToList();
+        }
         public async Task<List<AppointmentDto>> GetAppointmentsAsync(string agencyCode, string serviceCode)
         {
             var client = CreateWindowsAuthClient();
@@ -1274,6 +1375,312 @@ namespace StaBackend.Services
                     PontId = raw.PontId,
                 };
             }).ToList();
+        }
+        private static string NormalizeServiceType(
+            string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return string.Empty;
+            }
+
+            string normalized =
+                value.Trim()
+                    .ToLowerInvariant()
+                    .Normalize(
+                        System.Text
+                            .NormalizationForm.FormD
+                    );
+
+            var charactersWithoutAccents =
+                normalized.Where(character =>
+                    System.Globalization
+                        .CharUnicodeInfo
+                        .GetUnicodeCategory(character) !=
+                    System.Globalization
+                        .UnicodeCategory
+                        .NonSpacingMark
+                );
+
+            normalized =
+                new string(
+                    charactersWithoutAccents.ToArray()
+                )
+                .Normalize(
+                    System.Text
+                        .NormalizationForm.FormC
+                );
+
+            normalized =
+                normalized
+                    .Replace("_", " ")
+                    .Replace("-", " ");
+
+            while (normalized.Contains("  "))
+            {
+                normalized =
+                    normalized.Replace("  ", " ");
+            }
+
+            return normalized.Trim();
+        }
+        public async Task<List<BCAgencyService>> GetAgenciesByServiceCodeAsync(
+     string serviceCode)
+        {
+            if (string.IsNullOrWhiteSpace(serviceCode))
+                return new List<BCAgencyService>();
+
+            using var client = CreateWindowsAuthClient();
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            // 1. Récupérer les relations Agence-Service
+            var agencyServiceUrl =
+                $"{ODataBase}/AgencyServiceAPI";
+
+            var response =
+                await client.GetAsync(agencyServiceUrl);
+
+            var content =
+                await response.Content.ReadAsStringAsync();
+
+            Console.WriteLine(
+                $"[AGENCY SERVICE] STATUS = {response.StatusCode}"
+            );
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine(content);
+                return new List<BCAgencyService>();
+            }
+
+            var agencyServices =
+                JsonSerializer.Deserialize<BcAgencyServiceResponse>(
+                    content,
+                    jsonOptions
+                );
+
+            if (agencyServices?.value == null)
+                return new List<BCAgencyService>();
+
+            // 2. Garder les agences proposant le service détecté
+            var matchingRelations = agencyServices.value
+                .Where(x =>
+                    x.Disponible &&
+                    !string.IsNullOrWhiteSpace(x.ServiceCode) &&
+                    x.ServiceCode.Trim().Equals(
+                        serviceCode.Trim(),
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                )
+                .GroupBy(
+                    x => x.AgencyCode,
+                    StringComparer.OrdinalIgnoreCase
+                )
+                .Select(g => g.First())
+                .ToList();
+
+            // 3. Récupérer les informations des agences
+            var agencies = await GetAgenciesAsync();
+
+            // 4. Ajouter le nom de l'agence
+            foreach (var relation in matchingRelations)
+            {
+                var agency = agencies.FirstOrDefault(a =>
+                    a.Code.Equals(
+                        relation.AgencyCode,
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                );
+
+                if (agency != null)
+                {
+                    relation.AgencyName = agency.Name;
+                }
+            }
+
+            Console.WriteLine(
+                $"Service {serviceCode} -> " +
+                $"{matchingRelations.Count} agence(s)"
+            );
+
+            foreach (var agency in matchingRelations)
+            {
+                Console.WriteLine(
+                    $"Agence : {agency.AgencyCode} | {agency.AgencyName}"
+                );
+            }
+
+            return matchingRelations;
+        }
+
+        public async Task<List<BCAgencyService>> GetAgenciesByServiceAsync(string serviceType)
+        {
+            if (string.IsNullOrWhiteSpace(serviceType))
+            {
+                return new List<BCAgencyService>();
+            }
+
+            using var client = CreateWindowsAuthClient();
+
+            var jsonOptions = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+
+            /*
+             * 1. Récupérer tous les services Business Central.
+             */
+            var servicesUrl =
+                $"{ODataBase}/ServicesAPI";
+
+            var servicesResponse =
+                await client.GetAsync(servicesUrl);
+
+            var servicesContent =
+                await servicesResponse.Content
+                    .ReadAsStringAsync();
+
+            if (!servicesResponse.IsSuccessStatusCode)
+            {
+                Console.WriteLine(
+                    $"Erreur ServicesAPI " +
+                    $"{(int)servicesResponse.StatusCode} : " +
+                    servicesContent
+                );
+
+                return new List<BCAgencyService>();
+            }
+
+            var bcServices =
+                JsonSerializer.Deserialize<BcServicesResponse>(
+                    servicesContent,
+                    jsonOptions
+                );
+
+            if (bcServices?.value == null ||
+                bcServices.value.Count == 0)
+            {
+                return new List<BCAgencyService>();
+            }
+
+            /*
+             * 2. Trouver tous les services qui appartiennent
+             * au type détecté par l'IA.
+             *
+             * Exemple :
+             * Entretien périodique
+             *   -> SERV-001 Révision annuelle
+             *   -> SERV-002 Vidange
+             */
+            string normalizedRequestedType =
+                NormalizeServiceType(serviceType);
+
+            var matchingServiceCodes =
+                bcServices.value
+                    .Where(service =>
+                        NormalizeServiceType(
+                            service.Type
+                        ) == normalizedRequestedType)
+                    .Select(service =>
+                        service.ServiceCode?.Trim())
+                    .Where(serviceCode =>
+                        !string.IsNullOrWhiteSpace(
+                            serviceCode))
+                    .Select(serviceCode =>
+                        serviceCode!)
+                    .Distinct(
+                        StringComparer.OrdinalIgnoreCase)
+                    .ToHashSet(
+                        StringComparer.OrdinalIgnoreCase
+                    );
+
+            if (matchingServiceCodes.Count == 0)
+            {
+                Console.WriteLine(
+                    $"Aucun service BC trouvé pour le type : " +
+                    $"{serviceType}"
+                );
+
+                return new List<BCAgencyService>();
+            }
+
+            Console.WriteLine(
+                $"Type détecté : {serviceType}"
+            );
+
+            Console.WriteLine(
+                $"Services correspondants : " +
+                $"{string.Join(", ", matchingServiceCodes)}"
+            );
+
+            /*
+             * 3. Récupérer les relations ServiceAgence.
+             */
+            var agencyServiceUrl =
+                $"{ODataBase}/AgencyServiceAPI";
+
+            var agencyResponse =
+                await client.GetAsync(agencyServiceUrl);
+
+            var agencyContent =
+                await agencyResponse.Content
+                    .ReadAsStringAsync();
+
+            if (!agencyResponse.IsSuccessStatusCode)
+            {
+                Console.WriteLine(
+                    $"Erreur AgencyServiceAPI " +
+                    $"{(int)agencyResponse.StatusCode} : " +
+                    agencyContent
+                );
+
+                return new List<BCAgencyService>();
+            }
+
+            var agencyServices =
+                JsonSerializer.Deserialize<
+                    BcAgencyServiceResponse>(
+                    agencyContent,
+                    jsonOptions
+                );
+
+            if (agencyServices?.value == null ||
+                agencyServices.value.Count == 0)
+            {
+                return new List<BCAgencyService>();
+            }
+
+            /*
+             * 4. Garder uniquement :
+             * - Disponible = true
+             * - ServiceCode appartenant au type détecté
+             */
+            var result =
+                agencyServices.value
+                    .Where(agencyService =>
+                        agencyService.Disponible &&
+                        !string.IsNullOrWhiteSpace(
+                            agencyService.ServiceCode) &&
+                        matchingServiceCodes.Contains(
+                            agencyService.ServiceCode.Trim()))
+                    .GroupBy(
+                        agencyService =>
+                            agencyService.AgencyCode,
+                        StringComparer.OrdinalIgnoreCase
+                    )
+                    .Select(group =>
+                        group.First())
+                    .ToList();
+
+            Console.WriteLine(
+                $"Nombre d'agences trouvées : {result.Count}"
+            );
+
+            return result;
         }
         private async Task SaveAppointment(AppointmentDto appointment)
         {

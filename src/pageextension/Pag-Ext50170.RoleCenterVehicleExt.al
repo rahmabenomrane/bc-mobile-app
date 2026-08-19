@@ -9,7 +9,13 @@ pageextension 50170 RoleCenterVehicleExt extends "Service Advisor Role Center"
             {
                 Caption = 'STA Management';
                 Image = Administration;
-
+                action(Clients)
+                {
+                    Caption = 'Clients';
+                    RunObject = Page 50124;
+                    ApplicationArea = All;
+                    Image = Customer;
+                }
                 action(Vehicules)
                 {
                     Caption = 'Véhicules';

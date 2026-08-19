@@ -9,6 +9,7 @@ class RdvsList extends StatefulWidget {
   final String customerNumber;
   final bool showHistory;
 
+
   const RdvsList({
     super.key,
     required this.customerNumber,
@@ -101,7 +102,75 @@ class RdvsListState extends State<RdvsList> {
       ),
     );
   }
+  Future<void> _cancelAppointment(dynamic rdv) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        title: const Text(
+          "Annuler le rendez-vous",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: const Text(
+          "Êtes-vous sûr de vouloir annuler ce rendez-vous ?",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text(
+              "Retour",
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(context, true),
+            icon: const Icon(Icons.cancel_outlined, size: 18),
+            label: const Text("Annuler le RDV"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
 
+    if (confirmed != true) return;
+
+    try {
+      await AppointmentService.cancelAppointment(
+        rdv["appointmentNo"],
+      );
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Rendez-vous annulé avec succès"),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+
+      // Recharge directement la liste
+      await loadAppointments();
+    } catch (e) {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Erreur lors de l'annulation : $e"),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
@@ -321,6 +390,8 @@ class RdvsListState extends State<RdvsList> {
                                   statusIcon: _statusIcon,
                                   onReschedule:
                                   _rescheduleAppointment,
+                                  onCancel: _cancelAppointment,
+
                                 );
                               },
                             ),
@@ -403,6 +474,7 @@ class _RdvCard extends StatelessWidget {
   final Color Function(String) statusBgColor;
   final IconData Function(String) statusIcon;
   final void Function(dynamic) onReschedule;
+  final void Function(dynamic) onCancel;
 
   const _RdvCard({
     required this.rdv,
@@ -411,6 +483,7 @@ class _RdvCard extends StatelessWidget {
     required this.statusBgColor,
     required this.statusIcon,
     required this.onReschedule,
+    required this.onCancel,
   });
 
   @override
@@ -419,6 +492,14 @@ class _RdvCard extends StatelessWidget {
     final startTime = rdv["startTime"].toString();
     final date = startTime.split("T")[0];
     final time = startTime.split("T")[1].substring(0, 5);
+
+    final normalizedStatus = status.toLowerCase();
+
+    final bool isCancelled = normalizedStatus == "cancelled";
+
+    final bool canModify =
+        !showHistory &&
+            !isCancelled;
 
     return Container(
       decoration: BoxDecoration(
@@ -494,7 +575,7 @@ class _RdvCard extends StatelessWidget {
                             size: 13, color: statusColor(status)),
                         const SizedBox(width: 4),
                         Text(
-                          status,
+                          _translateStatus(status),
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
@@ -533,7 +614,6 @@ class _RdvCard extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            // Vehicle + button
             Row(
               children: [
                 Container(
@@ -561,24 +641,68 @@ class _RdvCard extends StatelessWidget {
                 ),
                 const Spacer(),
                 if (!showHistory)
-                  ElevatedButton.icon(
-                    onPressed: () => onReschedule(rdv),
-                    icon: const Icon(Icons.schedule_rounded, size: 16),
-                    label: const Text("Reporter",
-                        style: TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.w600)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.orange,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
-                      minimumSize: const Size(0, 34),
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-              ],
+                  if (canModify)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        OutlinedButton.icon(
+                          onPressed: () => onCancel(rdv),
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            size: 16,
+                          ),
+                          label: const Text(
+                            "Annuler",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: Colors.red,
+                            side: const BorderSide(color: Colors.red),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            minimumSize: const Size(0, 34),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+
+                        const SizedBox(width: 8),
+
+                        ElevatedButton.icon(
+                          onPressed: () => onReschedule(rdv),
+                          icon: const Icon(
+                            Icons.schedule_rounded,
+                            size: 16,
+                          ),
+                          label: const Text(
+                            "Reporter",
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
+                            ),
+                            minimumSize: const Size(0, 34),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ), ],
             ),
           ],
         ),
@@ -611,7 +735,21 @@ class _DetailPill extends StatelessWidget {
     );
   }
 }
+String _translateStatus(String status) {
+  switch (status.toLowerCase()) {
+    case "pending":
+      return "En attente";
 
+    case "confirmed":
+      return "Confirmé";
+
+    case "cancelled":
+      return "Annulé";
+
+    default:
+      return status;
+  }
+}
 class _EmptyState extends StatelessWidget {
   final bool showHistory;
   const _EmptyState({required this.showHistory});

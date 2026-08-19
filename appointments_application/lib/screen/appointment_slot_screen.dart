@@ -42,6 +42,7 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
   String? _customerNumber;
   List<AppointmentModel> _appointments = [];
   String? _selectedSlot;
+  List<DateTime> _nonworkingDays = [];
   String get agencyCode {
     return widget.selectedAgency?['code'] ??
         widget.existingAppointment?['agencyCode'] ??
@@ -100,6 +101,8 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
     loadCustomerNumber();
     checkRequiredData();
     _loadAppointments();
+    _loadNonworkingDays();
+
     if (widget.mode == "reschedule" && widget.existingAppointment != null) {
       final appt = widget.existingAppointment!;
       _selectedDay = DateTime.parse(
@@ -120,6 +123,20 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
       _appointments = data;
     });
   }
+
+
+  Future<void> _loadNonworkingDays() async {
+    final days = await AppointmentService.getNonworkingDays(agencyCode);
+    print("Agency: $agencyCode → Nonworking days reçus: $days");
+    if (mounted) {
+      setState(() => _nonworkingDays = days);
+    }
+  }
+
+  bool _isNonworkingDay(DateTime day) {
+    return _nonworkingDays.any((d) => isSameDay(d, day));
+  }
+
   bool get _canContinue =>
       _selectedDay != null && _selectedSlot != null;
 
@@ -170,25 +187,18 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
   }
 
   List<Map<String, dynamic>> getDaySlots(DateTime day) {
-    if (day.weekday == DateTime.saturday ||
-        day.weekday == DateTime.sunday) {
+    if (_isNonworkingDay(day)) {
       return [];
     }
 
-    final officeHours =
-        widget.selectedAgency?['OfficeHours'] ?? "9h-18h";
+    final officeHours = widget.selectedAgency?['OfficeHours'] ?? "9h-18h";
     final slots = generateSlots(day, officeHours);
 
     return slots.map((time) {
       final taken = isSlotTaken(day, time);
-
-      return {
-        "time": time,
-        "available": !taken,
-      };
+      return {"time": time, "available": !taken};
     }).toList();
   }
-
   List<AppointmentModel> _getEventsForDay(DateTime day) {
     return _appointments.where((a) {
       final d = DateTime.tryParse(a.StartTime);
@@ -335,7 +345,7 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
       firstDay: DateTime.now(),
       lastDay: DateTime.now().add(const Duration(days: 365)),
       focusedDay: _focusedDay,
-
+      enabledDayPredicate: (day) => !_isNonworkingDay(day),
       selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
 
       onDaySelected: (selectedDay, focusedDay) {
@@ -436,16 +446,27 @@ class _AppointmentSlotScreenState extends State<AppointmentSlotScreen> {
       ),
 
       calendarBuilders: CalendarBuilders(
-        // Marquer les weekends visuellement
         defaultBuilder: (context, day, focusedDay) {
-          if (day.weekday == DateTime.saturday ||
-              day.weekday == DateTime.sunday) {
+          final isNonworking = _isNonworkingDay(day); // ⬅️ AJOUT
+
+          if (isNonworking) {
             return Center(
-              child: Text(
-                '${day.day}',
-                style: GoogleFonts.dmSans(
-                  fontSize: 13,
-                  color: const Color(0xFFCCCCDD),
+              child: Container(
+                width: 32,
+                height: 32,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0F0F5),
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  '${day.day}',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 13,
+                    color: const Color(0xFFCCCCDD),
+                    decoration: TextDecoration.lineThrough,
+                    decorationColor: const Color(0xFFCCCCDD),
+                  ),
                 ),
               ),
             );

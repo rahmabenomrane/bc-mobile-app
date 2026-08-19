@@ -18,24 +18,39 @@ page 50132 "Customer Claim Card"
                 field("Claim No."; Rec."claim No.")
                 {
                     Editable = false;
+                    Caption = 'Numéro de réclamation';
                 }
 
                 field(Status; Rec.Status)
                 {
+                    Caption = 'Statut';
                 }
 
                 field(Priority; Rec.Priority)
                 {
                     Editable = false;
+                    Caption = 'Priorité';
                 }
 
                 field(CreationDate; Rec.creationDate)
                 {
                     Editable = false;
+                    Caption = 'Date de création';
                 }
             }
 
+            group(Description)
+            {
+                Caption = 'Description de la réclamation';
 
+                field(ClaimDescription; Rec.description)
+                {
+                    Caption = 'Description';
+                    MultiLine = true;
+                    ShowCaption = true;
+                    Editable = false;
+                }
+            }
             group(Customer)
             {
                 Caption = 'Informations client';
@@ -58,6 +73,12 @@ page 50132 "Customer Claim Card"
                 field(CustomerPhone; CustomerPhone)
                 {
                     Caption = 'Numéro de téléphone';
+                    Editable = false;
+                }
+
+                field(email; Rec.customeremail)
+                {
+                    Caption = 'Adresse e-mail';
                     Editable = false;
                 }
             }
@@ -92,18 +113,7 @@ page 50132 "Customer Claim Card"
 
 
 
-            group(Description)
-            {
-                Caption = 'Description du réclamation';
 
-                field(ClaimDescription; Rec.description)
-                {
-                    Caption = 'Description';
-                    MultiLine = true;
-                    ShowCaption = true;
-                    Editable = false;
-                }
-            }
         }
     }
 

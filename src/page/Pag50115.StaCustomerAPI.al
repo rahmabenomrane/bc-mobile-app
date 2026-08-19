@@ -58,6 +58,10 @@ page 50115 StaCustomerAPI
                 {
                     Caption = 'Civility';
                 }
+                field(password; PlainPassword)
+                {
+                    Caption = 'Password';
+                }
                 
             }
 

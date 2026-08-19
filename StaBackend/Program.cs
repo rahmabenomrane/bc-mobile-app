@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using StaBackend.Services;
 using StaBackend.Config;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // 1. Lire la configuration JWT
@@ -38,7 +39,7 @@ builder.Services.AddCors(options =>
                 )
                 .AllowAnyMethod()
                 .AllowAnyHeader()
-                .AllowCredentials(); 
+                .AllowCredentials();
         });
 
     // Pour la production
@@ -111,7 +112,17 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddControllers();
+// builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy =
+            System.Text.Json.JsonNamingPolicy.CamelCase;
+
+        options.JsonSerializerOptions.DictionaryKeyPolicy =
+            System.Text.Json.JsonNamingPolicy.CamelCase;
+    });
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -123,6 +134,16 @@ builder.Services.AddScoped<EmailService>();
 builder.Services.AddHttpClient();
 builder.Services.AddHostedService<ReminderJob>();
 
+builder.Services.AddHttpClient<
+    IAiDiagnosticService,
+    OllamaDiagnosticService>(client =>
+{
+    client.BaseAddress =
+        new Uri("http://localhost:11434");
+
+    client.Timeout =
+        TimeSpan.FromMinutes(9);
+});
 var app = builder.Build();
 
 
@@ -139,8 +160,13 @@ else
     // En production, utiliser la politique Production
     app.UseCors("Production");
 }
+var openAiKey =
+    builder.Configuration["OpenAI:ApiKey"];
 
-
+Console.WriteLine(
+    $"OpenAI API Key chargée : " +
+    $"{!string.IsNullOrEmpty(openAiKey)}"
+);
 app.UseAuthentication();
 app.UseAuthorization();
 

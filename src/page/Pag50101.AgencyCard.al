@@ -27,7 +27,7 @@ page 50101 "Agency Card"
 
             group(Contact)
             {
-                Caption = 'Contact Details';
+                Caption = 'Informations de contact';
                 field(Address; Rec.Address)
                 {
                     ApplicationArea = All;
@@ -58,6 +58,12 @@ page 50101 "Agency Card"
                 Caption = 'Détails supplémentaires';
                 field(Capacity; Rec.Capacity) { ApplicationArea = All; }
                 field("Office hours"; Rec."Office hours") { ApplicationArea = All; }
+                field("Base Calendar Code"; Rec."Base Calendar Code")
+                {
+                    ApplicationArea = All;
+                    Caption = 'Calendrier (jours travaillés/chômés)';
+                    ToolTip = 'Calendrier définissant les jours travaillés et chômés de cette agence.';
+                }
             }
 
             group(GPS)
@@ -115,6 +121,49 @@ page 50101 "Agency Card"
                 begin
                     Appointment.SetRange("Agency Code", Rec.Code);
                     Page.Run(Page::"STA rdv List", Appointment);
+                end;
+            }
+            action(RefreshCalendar)
+            {
+                Caption = 'Régénérer le calendrier (90 jours)';
+                Image = Refresh;
+                ApplicationArea = All;
+
+                trigger OnAction()
+                var
+                    CalendarSync: Codeunit "Agency Calendar Sync";
+                begin
+                    CalendarSync.GenerateNonworkingDays(Rec.Code, 90);
+                    Message('Calendrier régénéré pour les 90 prochains jours.');
+                end;
+            }
+            action(OpenCalendar)
+            {
+                Caption = 'Gérer le calendrier';
+                Image = Calendar;
+                ApplicationArea = All;
+                ToolTip = 'Définir les jours travaillés et les jours chômés de cette agence.';
+
+                trigger OnAction()
+                var
+                    BaseCalendar: Record "Base Calendar";
+                begin
+                    if Rec."Base Calendar Code" = '' then begin
+                        if not Confirm('Aucun calendrier associé à cette agence. Voulez-vous en créer un ?') then
+                            exit;
+
+                        BaseCalendar.Init();
+                        BaseCalendar.Code := Rec.Code;
+                        if BaseCalendar.Insert(true) then begin
+                            Rec."Base Calendar Code" := BaseCalendar.Code;
+                            Rec.Modify(true);
+                        end;
+                    end else begin
+                        if not BaseCalendar.Get(Rec."Base Calendar Code") then
+                            Error('Le calendrier %1 est introuvable.', Rec."Base Calendar Code");
+                    end;
+
+                    Page.Run(Page::"Base Calendar Card", BaseCalendar);
                 end;
             }
 

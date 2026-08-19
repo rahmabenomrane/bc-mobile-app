@@ -50,7 +50,42 @@ class AppointmentService {
 
     throw Exception(response.body);
   }
+  static Future<List<DateTime>> getNonworkingDays(
+      String agencyCode, {
+        DateTime? from,
+        DateTime? to,
+      }) async {
+    final start = from ?? DateTime.now();
+    final end = to ?? start.add(const Duration(days: 90));
 
+    final uri = Uri.parse(
+      "$baseUrl/Appointment/nonworking-days"
+          "?agencyCode=$agencyCode"
+          "&from=${_fmt(start)}"
+          "&to=${_fmt(end)}",
+    );
+
+    print("GET NONWORKING DAYS => $uri");
+
+    final resp = await http.get(uri);
+
+    print("STATUS NONWORKING = ${resp.statusCode}");
+    print("BODY NONWORKING = ${resp.body}");
+
+    if (resp.statusCode != 200) {
+      return [];
+    }
+
+    final List<dynamic> data = jsonDecode(resp.body);
+
+    return data
+        .map((d) => DateTime.parse(d.toString()))
+        .toList();
+  }
+
+
+  static String _fmt(DateTime d) =>
+      "${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}";
   static Future<List<AppointmentModel>> getAppointments(
       String agencyCode,
       String serviceCode,

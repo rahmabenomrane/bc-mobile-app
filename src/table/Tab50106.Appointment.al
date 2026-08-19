@@ -32,9 +32,26 @@ table 50106 Appointment
             Caption = 'Service Description';
             TableRelation = Service.Description;
         }
-        field(5; "Date"; Date)
+
+        field(5; Date; Date)
         {
-            Caption = 'Date';
+            trigger OnValidate()
+            var
+                Agency: Record Agency;
+                BaseCalendar: Record "Base Calendar";
+                CustCalendarChange: Record "Customized Calendar Change";
+                CalendarMgt: Codeunit "Calendar Management";
+            begin
+                if "Agency Code" = '' then exit;
+                if not Agency.Get("Agency Code") then exit;
+                if Agency."Base Calendar Code" = '' then exit;
+                if not BaseCalendar.Get(Agency."Base Calendar Code") then exit;
+
+                CalendarMgt.SetSource(BaseCalendar, CustCalendarChange);
+
+                if CalendarMgt.IsNonworkingDay(Date, CustCalendarChange) then
+                    Error('Le %1 est un jour chômé pour l''agence %2. Merci de choisir une autre date.', Date, Agency.Code);
+            end;
         }
 
         field(6; "StartTime"; Time)
@@ -55,7 +72,12 @@ table 50106 Appointment
         field(8; "NumVehicle"; Code[20])
         {
             Caption = 'Vehicle No.';
-            TableRelation = StaVehicle."NumVehicle";
+            TableRelation = StaVehicle.NumVehicle;
+        }
+        field(13; "registrationNumber"; Code[20])
+        {
+            Caption = 'Immatriculation';
+            TableRelation = StaVehicle.RegistrationNumber;
         }
         field(10; "CarLift Code"; Code[20])
         {
