@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("8d89e76f-cf02-47e4-bced-762064842dba")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("StaBackend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3a54f2d2529b7e9f252fbb0f422ae8712c4eadc8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8d60dc8a40663402320e5e95b62fdd5a2ba47cb0")]
 [assembly: System.Reflection.AssemblyProductAttribute("StaBackend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("StaBackend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

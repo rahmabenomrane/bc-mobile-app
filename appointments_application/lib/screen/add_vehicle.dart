@@ -140,15 +140,15 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
 
                   const SizedBox(height: 30),
 
-                  Text(
-                    "Nouveau véhicule",
-                    style: TextStyle(color: Palette.secondPageTitleColor),
-                  ),
+                  // Text(
+                  //   "Nouveau véhicule",
+                  //   style: TextStyle(color: Palette.secondPageTitleColor),
+                  // ),
 
                   const SizedBox(height: 5),
 
                   Text(
-                    "Ajouter une voiture",
+                    "Ajouter un véhicule",
                     style: TextStyle(
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
@@ -159,22 +159,22 @@ class _AddVehicleScreenState extends State<AddVehicleScreen> {
                   const SizedBox(height: 16),
 
                   // Badge client (lecture seule, pour confirmation visuelle)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      "Client n° ${widget.customerNumber}",
-                      style: TextStyle(
-                        color: Palette.secondPageTitleColor.withOpacity(0.85),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
+                  // Container(
+                  //   padding: const EdgeInsets.symmetric(
+                  //       horizontal: 12, vertical: 6),
+                  //   decoration: BoxDecoration(
+                  //     color: Colors.white.withOpacity(0.2),
+                  //     borderRadius: BorderRadius.circular(12),
+                  //   ),
+                  //   child: Text(
+                  //     "Client n° ${widget.customerNumber}",
+                  //     style: TextStyle(
+                  //       color: Palette.secondPageTitleColor.withOpacity(0.85),
+                  //       fontSize: 12,
+                  //       fontWeight: FontWeight.w500,
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),

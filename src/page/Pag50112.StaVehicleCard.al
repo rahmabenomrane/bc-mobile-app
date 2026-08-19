@@ -4,7 +4,7 @@ page 50112 StaVehicleCard
     ApplicationArea = All;
     UsageCategory = Administration;
     SourceTable = StaVehicle;
-    Caption = 'Vehicle Card';
+    Caption = 'Carte de véhicule';
 
     layout
     {
@@ -12,13 +12,14 @@ page 50112 StaVehicleCard
         {
             group("General")
             {
-                Caption = 'General Information';
+                Caption = 'Informations générales';
 
                 field("Vehicle No."; Rec."NumVehicle")
                 {
                     ApplicationArea = All;
                     Importance = Promoted;
                     ToolTip = 'Unique vehicle number.';
+                    Editable = false;
 
                 }
 
@@ -32,7 +33,7 @@ page 50112 StaVehicleCard
 
             group("Vehicle Details")
             {
-                Caption = 'Vehicle Details';
+                Caption = 'Détails du véhicule';
 
                 field("Make Code"; Rec."Make Code")
                 {
@@ -50,10 +51,12 @@ page 50112 StaVehicleCard
                 }
                 field("Registration Number"; Rec."RegistrationNumber")
                 {
+                    Caption = 'Numéro d''immatriculation';
                     ApplicationArea = All;
                 }
                 field("Kilométrage"; Rec."Mileage")
                 {
+                    Caption = 'Kilométrage';
                     ApplicationArea = All;
                 }
             }
@@ -79,7 +82,7 @@ page 50112 StaVehicleCard
         {
             action(DeleteVehicle)
             {
-                Caption = 'Delete Vehicle';
+                Caption = 'Supprimer Véhicule';
                 Image = Delete;
 
                 trigger OnAction()

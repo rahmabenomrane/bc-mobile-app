@@ -225,7 +225,19 @@ public class AppointmentController : ControllerBase
     </html>
 ", "text/html");
     }
+    [HttpGet("nonworking-days")]
+    public async Task<IActionResult> GetNonworkingDays(
+        [FromQuery] string agencyCode,
+        [FromQuery] DateTime? from = null,
+        [FromQuery] DateTime? to = null)
+    {
+        var start = from ?? DateTime.Today;
+        var end = to ?? start.AddDays(90);
 
+        var days = await _bcService.GetAgencyNonworkingDaysAsync(agencyCode, start, end);
+
+        return Ok(days.Select(d => d.Date.ToString("yyyy-MM-dd")));
+    }
     [HttpPost("cancel/{appointmentNo}")]
     public async Task<IActionResult> Cancel(string appointmentNo)
     {

@@ -44,22 +44,22 @@ page 50111 StaVehicleList
                 field("Customer No."; Rec."NumCustomer")
                 {
                     ApplicationArea = All;
-                    Caption = 'Customer No.', Locked = true;
+                    Caption = 'Client Num', Locked = true;
                 }
                 field("Mileage"; Rec."Mileage")
                 {
                     ApplicationArea = All;
-                    Caption = 'Mileage';
+                    Caption = 'Kilométrage';
                 }
                 field("Name"; CustomerName)
                 {
                     ApplicationArea = All;
-                    Caption = 'Customer Name';
+                    Caption = 'Client';
                 }
                 field("Registration No."; Rec."RegistrationNumber")
                 {
                     ApplicationArea = All;
-                    Caption = 'Registration No.', Locked = true;
+                    Caption = 'Immatriculation', Locked = true;
                 }
             }
         }
@@ -118,7 +118,7 @@ page 50111 StaVehicleList
             }
             action(OpenVehicleCard)
             {
-                Caption = 'Ouvrir une fiche';
+                Caption = 'Finaliser la création du véhicule';
                 Image = New;
                 ApplicationArea = All;
 

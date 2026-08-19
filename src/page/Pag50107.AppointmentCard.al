@@ -1,11 +1,9 @@
 page 50107 "Appointment Card"
 {
-
     PageType = Card;
     SourceTable = Appointment;
     Caption = 'Rendez-vous';
     ApplicationArea = All;
-
 
     layout
     {
@@ -13,95 +11,106 @@ page 50107 "Appointment Card"
         {
             group(General)
             {
-                Caption = 'General Informations';
+                Caption = 'Informations générales';
 
                 field("Appointment No."; Rec."Appointment No.")
                 {
                     ApplicationArea = All;
                     Importance = Promoted;
-                    //Editable = false;
+                    Caption = 'N° rendez-vous';
                 }
 
                 field("Status"; Rec."Status")
                 {
                     ApplicationArea = All;
                     Importance = Promoted;
+                    Caption = 'Statut';
                 }
             }
 
             group("Appointment Details")
             {
-                Caption = 'Appointment Details';
+                Caption = 'Détails du rendez-vous';
 
-                // field("Agency Code"; Rec."Agency Code")
-                // {
-                //     ApplicationArea = All;
-                // }
                 field("Agency Name"; AgencyName)
                 {
                     ApplicationArea = All;
+                    Caption = 'Agence';
                     TableRelation = Agency.Name;
-                    // Editable = false;
                 }
 
                 field("Agency Address"; AgencyAddress)
                 {
                     ApplicationArea = All;
-                    // Editable = false;
+                    Caption = 'Adresse de l''agence';
                 }
 
-                field("Service"; Rec."Service Code")
+                field("Service"; ServiceDescription)
                 {
                     ApplicationArea = All;
+                    Caption = 'Service';
+                    Editable = false;
                 }
 
-                field("vehicle registration Number"; Rec."NumVehicle")
+                field("vehicle registration Number"; registrationNumber)
                 {
                     ApplicationArea = All;
+                    Caption = 'N° d''immatriculation';
 
                     trigger OnValidate()
                     begin
                         LoadVehicleInformations();
                     end;
                 }
+
                 field("Brand"; MakeCode)
                 {
                     ApplicationArea = All;
+                    Caption = 'Marque';
                 }
+
                 field("Model"; ModelCode)
                 {
                     ApplicationArea = All;
+                    Caption = 'Modèle';
                 }
+
                 field("Client"; ClientName)
                 {
                     ApplicationArea = All;
+                    Caption = 'Client';
                     Editable = false;
                 }
+
                 field("Client Phone"; ClientPhone)
                 {
                     ApplicationArea = All;
+                    Caption = 'Téléphone du client';
                     Editable = false;
                 }
             }
 
             group("Schedule")
             {
-                Caption = 'Schedule';
+                Caption = 'Planification';
 
                 field("Date"; Rec."Date")
                 {
                     ApplicationArea = All;
+                    Caption = 'Date';
                 }
 
                 field("StartTime"; Rec."StartTime")
                 {
                     ApplicationArea = All;
+                    Caption = 'Heure de début';
                 }
+
                 field("EndTime"; Rec."EndTime")
                 {
                     ApplicationArea = All;
+                    Caption = 'Heure de fin';
                 }
-
             }
         }
     }
@@ -110,23 +119,9 @@ page 50107 "Appointment Card"
     {
         area(Processing)
         {
-            // action(Complete)
-            // {
-            //     Caption = 'Complete';
-            //     Image = Approve;
-            //     ApplicationArea = All;
-
-            //     trigger OnAction()
-            //     begin
-            //         Rec.Status := Rec.Status::confirmed;
-            //         Rec.Modify();
-            //     end;
-            // }
-
-
             action(Cancel)
             {
-                Caption = 'Cancel';
+                Caption = 'Annuler';
                 Image = Cancel;
                 ApplicationArea = All;
 
@@ -136,13 +131,12 @@ page 50107 "Appointment Card"
                     Rec.Modify();
                 end;
             }
-
         }
-
     }
+
     trigger OnAfterGetCurrRecord()
     begin
-        //AGENCE
+        // AGENCE
         if AgencyRec.Get(Rec."Agency Code") then begin
             AgencyName := AgencyRec.Name;
             AgencyAddress := AgencyRec.Address;
@@ -152,41 +146,55 @@ page 50107 "Appointment Card"
             AgencyAddress := '';
         end;
 
+        // SERVICE
+        if ServiceRec.Get(Rec."Service Code") then
+            ServiceDescription := ServiceRec.Description
+        else
+            ServiceDescription := '';
+
         LoadVehicleInformations();
     end;
 
     local procedure LoadVehicleInformations()
     begin
-        // VEHICLE
+        // VEHICULE
         if VehicleRec.Get(Rec.NumVehicle) then begin
 
             MakeCode := VehicleRec."Make Code";
             ModelCode := VehicleRec."Model Code";
-
+            registrationNumber := VehicleRec.RegistrationNumber;
             // CLIENT
             if ClientRec.Get(VehicleRec.NumCustomer) then begin
                 ClientName := ClientRec.Name;
                 ClientPhone := ClientRec.Phone;
-            end else begin
+            end
+            else begin
                 ClientName := '';
                 ClientPhone := '';
             end;
 
-        end else begin
+        end
+        else begin
             MakeCode := '';
             ModelCode := '';
             ClientName := '';
             ClientPhone := '';
+            registrationNumber := '';
         end;
     end;
 
     var
         AgencyRec: Record Agency;
         VehicleRec: Record StaVehicle;
+
+        ServiceRec: Record Service;
+        ServiceDescription: Text[100];
         ModelCode: Text[50];
         AgencyName: Text[100];
         AgencyAddress: Text[150];
         MakeCode: Text[50];
+        registrationNumber: Text[20];
+
         ClientRec: Record StaCustomer;
         ClientName: Text[100];
         ClientPhone: Text[20];
