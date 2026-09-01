@@ -34,11 +34,7 @@ page 50106 "STA rdv List"
                     Caption = 'Heure de début';
                     ApplicationArea = All;
                 }
-                field("Status"; Rec."Status")
-                {
-                    ApplicationArea = All;
-                    StyleExpr = StatusStyle;
-                }
+
                 field("Client"; ClientName)
                 {
                     ApplicationArea = All;

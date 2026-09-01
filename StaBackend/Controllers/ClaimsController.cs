@@ -16,9 +16,72 @@ public class ClaimsController : ControllerBase
         _logger = logger;
     }
 
+    // GET /api/claims/{claimNo}/messages
+    [HttpGet("{claimNo}/messages")]
+    public async Task<IActionResult> GetClaimMessages(string claimNo)
+    {
+        try
+        {
+            var messages = await _bc.GetClaimMessagesAsync(claimNo);
 
+            return Ok(messages);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "[GET CLAIM MESSAGES] Erreur pour la réclamation {ClaimNo}",
+                claimNo
+            );
+
+            return StatusCode(
+                500,
+                new { message = "Erreur lors de la récupération des échanges." }
+            );
+        }
+    }
+
+
+    // POST /api/claims/{claimNo}/messages
+    [HttpPost("{claimNo}/messages")]
+    public async Task<IActionResult> SendClaimMessage(
+        string claimNo,
+        [FromBody] ClaimMessageRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.Message))
+        {
+            return BadRequest(
+                new { message = "Le message est obligatoire." }
+            );
+        }
+
+        try
+        {
+            var result = await _bc.CreateClaimMessageAsync(
+                claimNo,
+                CurrentCustomerNo,
+                request.Message
+            );
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(
+                ex,
+                "[SEND CLAIM MESSAGE] Erreur pour la réclamation {ClaimNo}",
+                claimNo
+            );
+
+            return StatusCode(
+                500,
+                new { message = "Erreur lors de l'envoi du message." }
+            );
+        }
+    }
     private string CurrentCustomerNo =>
         User.Claims.FirstOrDefault(c => c.Type == "CustomerNumber")?.Value ?? string.Empty;
+
     // // GET /api/claims
     [HttpGet]
     public async Task<IActionResult> GetClaims()
@@ -88,4 +151,8 @@ public class ClaimsController : ControllerBase
 public class UpdateClaimStatusRequest
 {
     public int Status { get; set; }
+}
+public class ClaimMessageRequest
+{
+    public string Message { get; set; } = string.Empty;
 }

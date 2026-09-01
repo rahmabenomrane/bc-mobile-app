@@ -339,27 +339,56 @@ class _CreateClaimScreenState extends State<CreateClaimScreen> {
     if (_loadingRdv) return const Center(child: Padding(padding: EdgeInsets.symmetric(vertical: 16), child: CircularProgressIndicator()));
     if (_rdvError != null) return _ErrorRetry(message: 'Impossible de charger les rendez-vous.', onRetry: _loadAppointments);
 
-    // Filtre par numVehicle du véhicule sélectionné
     final filtered = _appointments
-        .where((rdv) => rdv.numVehicle == _selectedVehicle!.numVehicle)
+        .where(
+          (rdv) =>
+      rdv.numVehicle ==
+          _selectedVehicle!.numVehicle,
+    )
         .toList();
 
     if (filtered.isEmpty) {
       return _EmptyBox(
-        label: 'Aucun rendez-vous trouvé pour ${_selectedVehicle!.fullName}.',
+        label:
+        'Aucun rendez-vous trouvé pour ${_selectedVehicle!.fullName}.',
       );
     }
 
-    return Column(children: filtered.map((rdv) => _RdvCard(
-      appointment: rdv,
-      isSelected: _selectedAppointment?.appointmentNo == rdv.appointmentNo,
-      onTap: () => setState(() {
-        _selectedAppointment =
-        _selectedAppointment?.appointmentNo == rdv.appointmentNo ? null : rdv;
-      }),
-    )).toList());
-  }
+// Trier du plus récent au plus ancien
+    filtered.sort((a, b) {
+      try {
+        final dateA = DateTime.parse(
+          '${a.date}T${a.StartTime}',
+        );
 
+        final dateB = DateTime.parse(
+          '${b.date}T${b.StartTime}',
+        );
+
+        return dateB.compareTo(dateA);
+      } catch (_) {
+        return 0;
+      }
+    });
+
+// Garder uniquement le dernier RDV
+    final lastAppointment = filtered.first;
+
+    return _RdvCard(
+      appointment: lastAppointment,
+      isSelected:
+      _selectedAppointment?.appointmentNo ==
+          lastAppointment.appointmentNo,
+      onTap: () {
+        setState(() {
+          _selectedAppointment =
+          _selectedAppointment?.appointmentNo ==
+              lastAppointment.appointmentNo
+              ? null
+              : lastAppointment;
+        });
+      },
+    );}
   InputDecoration _inputDeco(String hint) => InputDecoration(
     hintText: hint,
     hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),

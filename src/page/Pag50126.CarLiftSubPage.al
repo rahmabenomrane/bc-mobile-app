@@ -27,6 +27,7 @@ page 50126 "CarLift SubPage"
                 field("Daily Capacity"; Rec."Daily Capacity")
                 {
                     ApplicationArea = All;
+                    Caption='Capacité quotidienne (h)';
                 }
 
                 field(Active; Rec.Active)

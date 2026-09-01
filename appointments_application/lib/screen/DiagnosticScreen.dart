@@ -258,8 +258,7 @@ class _DiagnosticScreenState extends State<DiagnosticScreen> {
               ),
               child: const Text(
                 'Bonjour ! Décrivez le problème de votre véhicule et ajoutez '
-                    'une photo si possible. Je vais identifier le service adapté '
-                    'et vous proposer les agences qui le prennent en charge.',
+                    'une photo si possible. Je vais identifier le service adapté .',
                 style: TextStyle(
                   fontSize: 14,
                   height: 1.45,
@@ -418,9 +417,9 @@ class _DiagnosticScreenState extends State<DiagnosticScreen> {
       result['questionsSupplementaires'],
     );
 
-    final List<Map<String, dynamic>> agencies = _readMapList(
-      result['agencesRecommandees'],
-    );
+    // final List<Map<String, dynamic>> agencies = _readMapList(
+    //   result['agencesRecommandees'],
+    // );
 
     return Align(
       alignment: Alignment.centerLeft,
@@ -484,10 +483,10 @@ class _DiagnosticScreenState extends State<DiagnosticScreen> {
                   //   const SizedBox(height: 18),
                   //   _buildQuestionsCard(questions),
                   // ],
-                  if (agencies.isNotEmpty) ...[
-                    const Divider(height: 34),
-                    _buildRecommendedAgencies(agencies, service),
-                  ],
+                  // if (agencies.isNotEmpty) ...[
+                  //   const Divider(height: 34),
+                  //   _buildRecommendedAgencies(agencies, service),
+                  // ],
                   const SizedBox(height: 16),
                   Text(
                     'Ce résultat est un pré-diagnostic indicatif et ne '

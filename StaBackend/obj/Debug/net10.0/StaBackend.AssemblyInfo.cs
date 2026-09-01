@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("StaBackend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8d60dc8a40663402320e5e95b62fdd5a2ba47cb0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a8f09f8bcfbd373b4c6261cfe90d763fd6c226a8")]
 [assembly: System.Reflection.AssemblyProductAttribute("StaBackend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("StaBackend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

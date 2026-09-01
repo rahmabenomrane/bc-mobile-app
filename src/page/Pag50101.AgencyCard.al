@@ -56,8 +56,48 @@ page 50101 "Agency Card"
             group(Details)
             {
                 Caption = 'Détails supplémentaires';
-                field(Capacity; Rec.Capacity) { ApplicationArea = All; }
-                field("Office hours"; Rec."Office hours") { ApplicationArea = All; }
+
+                field(Capacity; Rec.Capacity)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Capacité quotidienne totale (h)';
+
+                    trigger OnValidate()
+                    begin
+                        CalculateLiftCapacity();
+
+                        if Rec.Capacity < UsedCapacity then
+                            Error(
+                                'La capacité de l''agence ne peut pas être inférieure à la capacité déjà affectée aux ponts (%1 h).',
+                                UsedCapacity
+                            );
+
+                        CalculateLiftCapacity();
+                        CurrPage.Update(false);
+                    end;
+                }
+
+                field(UsedCapacity; UsedCapacity)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Capacité utilisée (h)';
+                    Editable = false;
+                    Style = Strong;
+                }
+
+                field(RemainingCapacity; RemainingCapacity)
+                {
+                    ApplicationArea = All;
+                    Caption = 'Capacité restante (h)';
+                    Editable = false;
+                    Style = Favorable;
+                }
+
+                field("Office hours"; Rec."Office hours")
+                {
+                    ApplicationArea = All;
+                }
+
                 field("Base Calendar Code"; Rec."Base Calendar Code")
                 {
                     ApplicationArea = All;
@@ -186,13 +226,41 @@ page 50101 "Agency Card"
         }
     }
 
+
+    var
+
+        UsedCapacity: Integer;
+        RemainingCapacity: Integer;
+
+    local procedure CalculateLiftCapacity()
+    var
+        CarLiftRec: Record CarLift;
+    begin
+        UsedCapacity := 0;
+
+        CarLiftRec.Reset();
+        CarLiftRec.SetRange("Agency Code", Rec.Code);
+        CarLiftRec.SetRange(Active, true);
+
+        if CarLiftRec.FindSet() then
+            repeat
+                UsedCapacity += CarLiftRec."Daily Capacity";
+            until CarLiftRec.Next() = 0;
+
+        RemainingCapacity := Rec.Capacity - UsedCapacity;
+
+        if RemainingCapacity < 0 then
+            RemainingCapacity := 0;
+    end;
+
     trigger OnAfterGetCurrRecord()
     begin
         CurrPage.AgencyServices.Page.SetAgency(Rec.Code);
-
+        CalculateLiftCapacity();
         CurrPage.AgencyMap.Page.SetCoordinates(
             Rec.Latitude,
             Rec.Longitude);
     end;
+
 
 }
