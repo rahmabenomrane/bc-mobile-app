@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
+import '../models/ClaimMessageModel.dart';
 import '../models/claim_model.dart';
 import '../models/Appontment_model.dart';
 
@@ -9,7 +10,6 @@ class ClaimService {
   static const _storage = FlutterSecureStorage();
   static const String _baseUrl = "http://127.0.0.1:5032";
 
-  // Récupérer toutes les réclamations
   static Future<List<ClaimModel>> fetchClaims() async {
     try {
       final token = await _storage.read(key: "token");
@@ -138,7 +138,138 @@ class ClaimService {
       rethrow;
     }
   }
+// ======================================================
+// RÉCUPÉRER LES MESSAGES D'UNE RÉCLAMATION
+// ======================================================
 
+  static Future<List<ClaimMessageModel>> fetchClaimMessages(
+      String claimNo,
+      ) async {
+    try {
+      final token = await _storage.read(key: "token");
+
+      if (token == null) {
+        throw Exception("Session expirée");
+      }
+
+      print('=== FETCH CLAIM MESSAGES ===');
+      print('Claim: $claimNo');
+
+      final response = await http.get(
+        Uri.parse(
+          "$_baseUrl/api/claims/$claimNo/messages",
+        ),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      print('Messages Status: ${response.statusCode}');
+      print('Messages Body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+
+        if (decoded is! List) {
+          return [];
+        }
+
+        final messages = decoded
+            .map(
+              (item) => ClaimMessageModel.fromJson(
+            item as Map<String, dynamic>,
+          ),
+        )
+            .toList();
+
+        // ancien -> récent
+        messages.sort((a, b) {
+          final dateA =
+              a.messageDateTime ?? DateTime(2000);
+          final dateB =
+              b.messageDateTime ?? DateTime(2000);
+
+          return dateA.compareTo(dateB);
+        });
+
+        return messages;
+      }
+
+      if (response.statusCode == 401) {
+        throw Exception("Session expirée");
+      }
+
+      throw Exception(
+        "Erreur ${response.statusCode}",
+      );
+    } catch (e) {
+      print('Error fetching claim messages: $e');
+      rethrow;
+    }
+  }
+
+
+// ======================================================
+// ENVOYER UNE RÉPONSE DU CLIENT
+// ======================================================
+
+  static Future<void> sendClaimMessage({
+    required String claimNo,
+    required String message,
+  }) async {
+    try {
+      final token = await _storage.read(key: "token");
+
+      if (token == null) {
+        throw Exception("Session expirée");
+      }
+
+      final cleanMessage = message.trim();
+
+      if (cleanMessage.isEmpty) {
+        throw Exception("Le message est vide");
+      }
+
+      final body = jsonEncode({
+        'message': cleanMessage,
+      });
+
+      print('=== SEND CLAIM MESSAGE ===');
+      print('Claim: $claimNo');
+      print('Body: $body');
+
+      final response = await http.post(
+        Uri.parse(
+          "$_baseUrl/api/claims/$claimNo/messages",
+        ),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: body,
+      );
+
+      print('Send Message Status: ${response.statusCode}');
+      print('Send Message Body: ${response.body}');
+
+      if (response.statusCode == 200 ||
+          response.statusCode == 201) {
+        return;
+      }
+
+      if (response.statusCode == 401) {
+        throw Exception("Session expirée");
+      }
+
+      throw Exception(
+        "Erreur ${response.statusCode}: ${response.body}",
+      );
+    } catch (e) {
+      print('Error sending claim message: $e');
+      rethrow;
+    }
+  }
   // Récupérer tous les rendez-vous du client
   static Future<List<AppointmentModel>> _fetchAllAppointments(String customerNumber) async {
     try {

@@ -173,6 +173,41 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Table CarLift - Field Description - Property Caption</note>
         </trans-unit>
+        <trans-unit id="Table 3178917883 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Claim Message</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table ClaimMessage - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 3178917883 - Field 2682141055 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Claim No.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table ClaimMessage - Field Claim No. - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 3178917883 - Field 883711285 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Entry No.</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table ClaimMessage - Field Entry No. - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 3178917883 - Field 3080618677 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Message</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table ClaimMessage - Field Message - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 3178917883 - Field 981144198 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Date et heure</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table ClaimMessage - Field MessageDateTime - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 3178917883 - Field 2646275136 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Nom de l'expéditeur</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table ClaimMessage - Field SenderName - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Table 3178917883 - Field 1537060045 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Expéditeur</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Table ClaimMessage - Field SenderType - Property Caption</note>
+        </trans-unit>
         <trans-unit id="Table 2795553130 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Customer Claim</source>
           <note from="Developer" annotates="general" priority="2"></note>
@@ -498,6 +533,21 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page Agency Card - Control Base Calendar Code - Property Caption</note>
         </trans-unit>
+        <trans-unit id="Page 2542778461 - Control 3676636176 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Capacité quotidienne totale (h)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Agency Card - Control Capacity - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2542778461 - Control 3470773908 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Capacité restante (h)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Agency Card - Control RemainingCapacity - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 2542778461 - Control 3384169261 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Capacité utilisée (h)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Agency Card - Control UsedCapacity - Property Caption</note>
+        </trans-unit>
         <trans-unit id="Page 2542778461 - Control 2445482498 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Informations générales</source>
           <note from="Developer" annotates="general" priority="2"></note>
@@ -818,6 +868,11 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page AppointmentAPI - Control Status - Property Caption</note>
         </trans-unit>
+        <trans-unit id="Page 3858180660 - Control 1046178079 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Capacité quotidienne (h)</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page CarLift SubPage - Control Daily Capacity - Property Caption</note>
+        </trans-unit>
         <trans-unit id="Page 2563306001 - Control 641765680 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Active</source>
           <note from="Developer" annotates="general" priority="2"></note>
@@ -843,10 +898,40 @@
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page CarLiftAPI - Control description - Property Caption</note>
         </trans-unit>
+        <trans-unit id="Page 3046156688 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Échanges avec le client</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Claim Message ListPart - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 3046156688 - Control 3080618677 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Message</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Claim Message ListPart - Control Message - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 3046156688 - Control 981144198 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Date et heure</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Claim Message ListPart - Control MessageDateTime - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 3046156688 - Control 2646275136 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Nom</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Claim Message ListPart - Control SenderName - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 3046156688 - Control 1537060045 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Expéditeur</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Claim Message ListPart - Control SenderType - Property Caption</note>
+        </trans-unit>
         <trans-unit id="Page 1497276006 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Réclamation du client</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page Customer Claim Card - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Page 1497276006 - Control 696248230 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Communication avec le client</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Page Customer Claim Card - Control ClaimMessages - Property Caption</note>
         </trans-unit>
         <trans-unit id="Page 1497276006 - Control 1994964448 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Informations client</source>
@@ -1022,11 +1107,6 @@
           <source>Adresse</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Page CustomerList - Control Address - Property Caption</note>
-        </trans-unit>
-        <trans-unit id="Page 363045002 - Control 1040639375 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
-          <source>Statut client BC</source>
-          <note from="Developer" annotates="general" priority="2"></note>
-          <note from="Xliff Generator" annotates="general" priority="3">Page CustomerList - Control BCStatus - Property Caption</note>
         </trans-unit>
         <trans-unit id="Page 363045002 - Control 2030721143 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Civilité</source>
@@ -1317,6 +1397,16 @@
           <source>Pending</source>
           <note from="Developer" annotates="general" priority="2"></note>
           <note from="Xliff Generator" annotates="general" priority="3">Enum Appointment Status - EnumValue Pending - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 3542333062 - EnumValue 972110707 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Agent</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum Claim Message Sender - EnumValue Agent - Property Caption</note>
+        </trans-unit>
+        <trans-unit id="Enum 3542333062 - EnumValue 1169754739 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
+          <source>Client</source>
+          <note from="Developer" annotates="general" priority="2"></note>
+          <note from="Xliff Generator" annotates="general" priority="3">Enum Claim Message Sender - EnumValue Client - Property Caption</note>
         </trans-unit>
         <trans-unit id="Enum 2560465946 - Property 2879900210" size-unit="char" translate="yes" xml:space="preserve">
           <source>Claim Status</source>

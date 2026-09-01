@@ -48,14 +48,6 @@ page 50124 CustomerList
                     ApplicationArea = All;
                     Caption = 'Civilité';
                 }
-
-                field(BCStatus; BCStatusText)
-                {
-                    ApplicationArea = All;
-                    Caption = 'Statut client BC';
-                    Editable = false;
-                    StyleExpr = BCStatusStyle;
-                }
             }
         }
     }
@@ -159,11 +151,9 @@ page 50124 CustomerList
             exit;
         end;
 
-        // Important : repartir d'un nouvel enregistrement
         Clear(Customer);
         Customer.Init();
 
-        // Préremplissage depuis StaCustomer
         if Rec.Name <> '' then
             Customer.Validate(Name, Rec.Name);
 

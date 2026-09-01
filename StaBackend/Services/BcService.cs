@@ -116,6 +116,177 @@ namespace StaBackend.Services
                 return new LoginResponse { Success = false, Error = ex.Message };
             }
         }
+        public async Task<List<ClaimMessageInfo>> GetClaimMessagesAsync(string claimNo)
+        {
+            var client = CreateWindowsAuthClient();
+
+            var url =
+                $"http://localhost:7048/BC260/api/STA/Mobile/v1.0/companies(16be2528-96e4-f011-8d1f-00155d141f04)/claimMessages" +
+                $"?$filter=claimNo eq '{claimNo}'";
+
+            Console.WriteLine($"[GET CLAIM MESSAGES] GET → {url}");
+
+            try
+            {
+                var response = await client.GetAsync(url);
+                var content = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine($"[GET CLAIM MESSAGES] Status: {response.StatusCode}");
+                Console.WriteLine($"[GET CLAIM MESSAGES] Body: {content}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception(
+                        $"Business Central error: {response.StatusCode} - {content}"
+                    );
+                }
+
+                var doc = JsonDocument.Parse(content);
+
+                if (!doc.RootElement.TryGetProperty("value", out var values))
+                    return new List<ClaimMessageInfo>();
+
+                var result = new List<ClaimMessageInfo>();
+
+                foreach (var item in values.EnumerateArray())
+                {
+                    var message = new ClaimMessageInfo
+                    {
+                        EntryNo = item.TryGetProperty("entryNo", out var entryNo)
+                            ? entryNo.GetInt32()
+                            : 0,
+
+                        ClaimNo = item.TryGetProperty("claimNo", out var claim)
+                            ? claim.GetString() ?? ""
+                            : "",
+
+                        Message = item.TryGetProperty("message", out var msg)
+                            ? msg.GetString() ?? ""
+                            : "",
+
+                        SenderType = item.TryGetProperty("senderType", out var senderType)
+                            ? senderType.GetString() ?? ""
+                            : "",
+
+                        SenderName = item.TryGetProperty("senderName", out var senderName)
+                            ? senderName.GetString() ?? ""
+                            : "",
+
+                        MessageDateTime =
+                            item.TryGetProperty("messageDateTime", out var date)
+                            && date.ValueKind != JsonValueKind.Null
+                            && DateTime.TryParse(date.GetString(), out var parsedDate)
+                                ? parsedDate
+                                : null
+                    };
+
+                    result.Add(message);
+                }
+
+                return result
+                    .OrderBy(x => x.MessageDateTime)
+                    .ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[GET CLAIM MESSAGES] ERROR: {ex.Message}");
+                throw;
+            }
+        }
+        public async Task<ClaimMessageInfo> CreateClaimMessageAsync(
+    string claimNo,
+    string customerNo,
+    string message)
+        {
+            var client = CreateWindowsAuthClient();
+
+            var url =
+                $"http://localhost:7048/BC260/api/STA/Mobile/v1.0/companies(16be2528-96e4-f011-8d1f-00155d141f04)/claimMessages";
+
+            Console.WriteLine($"[CREATE CLAIM MESSAGE] POST → {url}");
+
+            var body = new
+            {
+                claimNo = claimNo,
+                message = message,
+
+                // Le message vient du mobile client
+                senderType = "Client",
+
+                // Tu peux mettre le numéro client ici
+                senderName = customerNo,
+
+                messageDateTime = DateTime.UtcNow
+            };
+
+            var json = JsonSerializer.Serialize(body);
+
+            Console.WriteLine($"[CREATE CLAIM MESSAGE] Body: {json}");
+
+            var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                url
+            );
+
+            request.Content = new StringContent(
+                json,
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            try
+            {
+                var response = await client.SendAsync(request);
+                var content = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine($"[CREATE CLAIM MESSAGE] Status: {response.StatusCode}");
+                Console.WriteLine($"[CREATE CLAIM MESSAGE] Response: {content}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new Exception(
+                        $"Business Central error: {response.StatusCode} - {content}"
+                    );
+                }
+
+                var item = JsonDocument.Parse(content).RootElement;
+
+                return new ClaimMessageInfo
+                {
+                    EntryNo = item.TryGetProperty("entryNo", out var entryNo)
+                        ? entryNo.GetInt32()
+                        : 0,
+
+                    ClaimNo = item.TryGetProperty("claimNo", out var claim)
+                        ? claim.GetString() ?? claimNo
+                        : claimNo,
+
+                    Message = item.TryGetProperty("message", out var msg)
+                        ? msg.GetString() ?? message
+                        : message,
+
+                    SenderType = item.TryGetProperty("senderType", out var senderType)
+                        ? senderType.GetString() ?? "Client"
+                        : "Client",
+
+                    SenderName = item.TryGetProperty("senderName", out var senderName)
+                        ? senderName.GetString() ?? customerNo
+                        : customerNo,
+
+                    MessageDateTime =
+                        item.TryGetProperty("messageDateTime", out var date)
+                        && date.ValueKind != JsonValueKind.Null
+                        && DateTime.TryParse(date.GetString(), out var parsedDate)
+                            ? parsedDate
+                            : DateTime.UtcNow
+                };
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CREATE CLAIM MESSAGE] ERROR: {ex.Message}");
+                throw;
+            }
+        }
         public async Task<List<ServiceDto>> GetServicesByAgencyAsync(string agencyCode)
         {
             var client = CreateWindowsAuthClient();

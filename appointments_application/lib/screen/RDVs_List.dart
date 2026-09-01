@@ -216,9 +216,7 @@ class RdvsListState extends State<RdvsList> {
                         GestureDetector(
                           onTap: () {
                             if (widget.onNavigate != null) {
-                              widget.onNavigate!(0);
-                            } else {
-                              Get.back();
+                              widget.onNavigate!(0); // index 0 = HomePage
                             }
                           },
                           child: Container(
@@ -385,9 +383,6 @@ class RdvsListState extends State<RdvsList> {
                                 return _RdvCard(
                                   rdv: filteredRdvs[index],
                                   showHistory: widget.showHistory,
-                                  statusColor: _statusColor,
-                                  statusBgColor: _statusBgColor,
-                                  statusIcon: _statusIcon,
                                   onReschedule:
                                   _rescheduleAppointment,
                                   onCancel: _cancelAppointment,
@@ -470,18 +465,12 @@ class _InfoChip extends StatelessWidget {
 class _RdvCard extends StatelessWidget {
   final dynamic rdv;
   final bool showHistory;
-  final Color Function(String) statusColor;
-  final Color Function(String) statusBgColor;
-  final IconData Function(String) statusIcon;
   final void Function(dynamic) onReschedule;
   final void Function(dynamic) onCancel;
 
   const _RdvCard({
     required this.rdv,
     required this.showHistory,
-    required this.statusColor,
-    required this.statusBgColor,
-    required this.statusIcon,
     required this.onReschedule,
     required this.onCancel,
   });
@@ -560,31 +549,7 @@ class _RdvCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (!showHistory)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 9, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: statusBgColor(status),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(statusIcon(status),
-                            size: 13, color: statusColor(status)),
-                        const SizedBox(width: 4),
-                        Text(
-                          _translateStatus(status),
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w700,
-                            color: statusColor(status),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+
               ],
             ),
 
@@ -593,7 +558,9 @@ class _RdvCard extends StatelessWidget {
             const SizedBox(height: 12),
 
             // Detail row
-            Row(
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 _DetailPill(
                     icon: Icons.calendar_today_rounded,
@@ -614,95 +581,82 @@ class _RdvCard extends StatelessWidget {
 
             const SizedBox(height: 10),
 
-            Row(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 5),
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.directions_car_rounded,
-                          size: 14, color: Palette.setsColor),
+                      Icon(
+                        Icons.directions_car_rounded,
+                        size: 14,
+                        color: Palette.setsColor,
+                      ),
                       const SizedBox(width: 5),
-                      Text(
-                        rdv["registrationNumber"] ?? "",
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Palette.circuitsColor,
+                      Flexible(
+                        child: Text(
+                          rdv["registrationNumber"] ?? "",
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Palette.circuitsColor,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
-                const Spacer(),
-                if (!showHistory)
-                  if (canModify)
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        OutlinedButton.icon(
-                          onPressed: () => onCancel(rdv),
-                          icon: const Icon(
-                            Icons.close_rounded,
-                            size: 16,
-                          ),
-                          label: const Text(
-                            "Annuler",
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red,
-                            side: const BorderSide(color: Colors.red),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            minimumSize: const Size(0, 34),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
+
+                if (!showHistory && canModify) ...[
+                  const SizedBox(height: 10),
+
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      OutlinedButton.icon(
+                        onPressed: () => onCancel(rdv),
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          size: 16,
+                        ),
+                        label: const Text(
+                          "Annuler",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
+                      ),
 
-                        const SizedBox(width: 8),
-
-                        ElevatedButton.icon(
-                          onPressed: () => onReschedule(rdv),
-                          icon: const Icon(
-                            Icons.schedule_rounded,
-                            size: 16,
-                          ),
-                          label: const Text(
-                            "Reporter",
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            minimumSize: const Size(0, 34),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
+                      ElevatedButton.icon(
+                        onPressed: () => onReschedule(rdv),
+                        icon: const Icon(
+                          Icons.schedule_rounded,
+                          size: 16,
+                        ),
+                        label: const Text(
+                          "Reporter",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                      ],
-                    ), ],
+                      ),
+                    ],
+                  ),
+                ],
+              ],
             ),
           ],
         ),
@@ -735,21 +689,7 @@ class _DetailPill extends StatelessWidget {
     );
   }
 }
-String _translateStatus(String status) {
-  switch (status.toLowerCase()) {
-    case "pending":
-      return "En attente";
 
-    case "confirmed":
-      return "Confirmé";
-
-    case "cancelled":
-      return "Annulé";
-
-    default:
-      return status;
-  }
-}
 class _EmptyState extends StatelessWidget {
   final bool showHistory;
   const _EmptyState({required this.showHistory});

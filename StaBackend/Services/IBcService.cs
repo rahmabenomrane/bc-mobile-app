@@ -34,9 +34,16 @@ namespace StaBackend.Services
         Task<List<ServiceDto>> GetServicesByAgencyAsync(string agencyCode);
         Task<VehicleDto?> GetVehicleByNumAsync(string numVehicle);
         Task<List<BCAgencyService>> GetAgenciesByServiceAsync(string serviceType);
-        Task<List<BCAgencyService>> GetAgenciesByServiceCodeAsync(
-    string serviceCode
+        Task<List<BCAgencyService>> GetAgenciesByServiceCodeAsync( string serviceCode);
+        Task<List<ClaimMessageInfo>> GetClaimMessagesAsync(
+    string claimNo
 );
+
+        Task<ClaimMessageInfo> CreateClaimMessageAsync(
+            string claimNo,
+            string customerNo,
+            string message
+        );
         Task<List<BCServiceModel>> GetAllServicesAsync();
         Task<UpdateProfileResponse> ChangePasswordAsync(string customerNumber, string currentPassword, string newPassword);
     }

@@ -5,12 +5,10 @@ page 50132 "Customer Claim Card"
     Caption = 'Réclamation du client';
     ApplicationArea = All;
 
-
     layout
     {
         area(Content)
         {
-
             group(General)
             {
                 Caption = 'Informations générales';
@@ -51,10 +49,10 @@ page 50132 "Customer Claim Card"
                     Editable = false;
                 }
             }
+
             group(Customer)
             {
                 Caption = 'Informations client';
-
 
                 field(CustomerNo; Rec.customerNo)
                 {
@@ -62,13 +60,11 @@ page 50132 "Customer Claim Card"
                     Editable = false;
                 }
 
-
                 field(CustomerName; CustomerName)
                 {
                     Caption = 'Nom du client';
                     Editable = false;
                 }
-
 
                 field(CustomerPhone; CustomerPhone)
                 {
@@ -83,12 +79,9 @@ page 50132 "Customer Claim Card"
                 }
             }
 
-
-
             group(Vehicle)
             {
                 Caption = 'Informations véhicule';
-
 
                 field(VehicleNo; Rec.vehicleNo)
                 {
@@ -96,13 +89,11 @@ page 50132 "Customer Claim Card"
                     Editable = false;
                 }
 
-
                 field(Immatriculation; Rec.registrationNumber)
                 {
                     Caption = 'Immatriculation';
                     Editable = false;
                 }
-
 
                 field(VehicleModel; VehicleModel)
                 {
@@ -111,19 +102,21 @@ page 50132 "Customer Claim Card"
                 }
             }
 
+            part(ClaimMessages; "Claim Message ListPart")
+            {
+                Caption = 'Communication avec le client';
+                ApplicationArea = All;
 
-
-
+                SubPageLink =
+                "Claim No." = field("claim No.");
+            }
         }
     }
-
-
 
     var
         CustomerName: Text[100];
         CustomerPhone: Text[30];
         VehicleModel: Text[100];
-
 
     trigger OnAfterGetRecord()
     var
@@ -131,33 +124,25 @@ page 50132 "Customer Claim Card"
         Vehicle: Record StaVehicle;
         Model: Record Model;
     begin
-
         Clear(CustomerName);
         Clear(CustomerPhone);
         Clear(VehicleModel);
-
-
         // Récupération client
         if Customer.Get(Rec.customerNo) then begin
-
             CustomerName := Customer.Name;
             CustomerPhone := Customer.Phone;
-
         end;
-
-
 
         // Récupération véhicule
         if Vehicle.Get(Rec.vehicleNo) then begin
-
-            if Model.Get(Vehicle."Make Code",
-                         Vehicle."Model Code") then begin
-
+            if Model.Get(
+                Vehicle."Make Code",
+                Vehicle."Model Code"
+            ) then begin
                 VehicleModel := Model."Commercial Name";
-
             end;
-
         end;
 
+        CurrPage.ClaimMessages.Page.SetClaimNo(Rec."claim No.");
     end;
 }

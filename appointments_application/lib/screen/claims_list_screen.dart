@@ -3,6 +3,7 @@ import '../Service/claim_service.dart';
 import '../models/claim_model.dart';
 import 'AppFooter.dart';
 import 'create_claim_screen.dart';
+import 'claim_conversation_screen.dart';
 
 class ClaimsListScreen extends StatefulWidget {
   const ClaimsListScreen({super.key, this.onNavigate});
@@ -22,36 +23,57 @@ class _ClaimsListScreenState extends State<ClaimsListScreen> with WidgetsBinding
     super.initState();
     loadClaims();
   }
-  bool _firstLoad = true;
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    if (_firstLoad) {
-      _firstLoad = false;
-      loadClaims();
-    }
-  }
   Future<void> loadClaims() async {
     setState(() {
       _loading = true;
       _error = null;
     });
+
     try {
       final claims = await ClaimService.fetchClaims();
-      setState(() => _claims = claims);
+
+      // 1. Ne pas afficher les réclamations fermées
+      final activeClaims = claims.where((claim) {
+        final status = claim.statusLabel.trim().toLowerCase();
+
+        return status != 'fermée' &&
+            status != 'fermé' &&
+            status != 'closed';
+      }).toList();
+
+      // 2. Trier de la plus récente à la plus ancienne
+      activeClaims.sort((a, b) {
+        final dateA = DateTime.tryParse(a.creationDate);
+        final dateB = DateTime.tryParse(b.creationDate);
+
+        if (dateA == null || dateB == null) {
+          return 0;
+        }
+
+        return dateB.compareTo(dateA);
+      });
+
+      if (mounted) {
+        setState(() {
+          _claims = activeClaims;
+        });
+      }
     } catch (e) {
-      if (e.toString().contains('401') || e.toString().contains('Session expirée')) {
+      if (e.toString().contains('401') ||
+          e.toString().contains('Session expirée')) {
         _showSessionExpiredDialog();
       } else {
-        setState(() => _error = e.toString());
+        if (mounted) {
+          setState(() => _error = e.toString());
+        }
       }
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
-
   void _showSessionExpiredDialog() {
     showDialog(
       context: context,
@@ -423,7 +445,10 @@ class ClaimCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: pColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -458,9 +483,49 @@ class ClaimCard extends StatelessWidget {
                 ),
               ],
             ),
+
+
+            const SizedBox(height: 12),
+
+            Divider(
+              height: 1,
+              color: Colors.grey.shade200,
+            ),
+
+            const SizedBox(height: 6),
+
+            SizedBox(
+              width: double.infinity,
+              child: TextButton.icon(
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ClaimConversationScreen(
+                        claim: claim,
+                      ),
+                    ),
+                  );
+                },
+                icon: const Icon(
+                  Icons.forum_outlined,
+                  size: 19,
+                ),
+                label: const Text(
+                  'Voir les échanges',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                style: TextButton.styleFrom(
+                  foregroundColor: const Color(0xFFA32D2D),
+                ),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 }
+

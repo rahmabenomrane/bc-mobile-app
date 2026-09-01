@@ -75,18 +75,22 @@ class _MainScreenState extends State<MainScreen> {
       extendBody: true,
       body: Stack(
         children: [
-          // Contenu principal
           _showNextRdvs
               ? RdvsList(
             customerNumber: widget.customerNumber,
             showHistory: false,
+            onNavigate: (index) {
+              setState(() {
+                _showNextRdvs = false;
+                _currentIndex = index;
+              });
+            },
           )
               : IndexedStack(
             index: _currentIndex,
             children: pages,
           ),
 
-          // Bouton chatbot flottant (toujours visible)
           const ChatbotFloatingButton(),
         ],
       ),
